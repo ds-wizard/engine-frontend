@@ -7,6 +7,7 @@ module Wizard.Data.AppState exposing
     , getClientUrlRoot
     , getPlugin
     , getPluginSettings
+    , getPluginUser
     , getPluginUserSettings
     , getPlugins
     , getPluginsByConnector
@@ -21,6 +22,7 @@ module Wizard.Data.AppState exposing
     , toGuideLinkConfig
     , toServerInfo
     , userHasPerm
+    , userPermissions
     )
 
 import Browser.Navigation as Navigation exposing (Key)
@@ -33,6 +35,7 @@ import Common.Utils.Theme exposing (Theme)
 import Dict
 import Gettext
 import Json.Decode as D exposing (Error(..))
+import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
@@ -174,6 +177,11 @@ userHasPerm perm appState =
     Maybe.unwrap False (UserConfig.hasPerm perm) appState.config.user
 
 
+userPermissions : AppState -> List RolePermission
+userPermissions appState =
+    Maybe.unwrap [] (.permissions << .role) appState.config.user
+
+
 getClientUrlRoot : AppState -> String
 getClientUrlRoot appState =
     String.replace "/wizard" "" appState.clientUrl
@@ -291,6 +299,12 @@ getPlugin appState pluginUuid =
     List.find ((==) pluginUuid << .uuid) appState.plugins
 
 
+getPluginSettings : AppState -> Uuid -> String
+getPluginSettings appState pluginUuid =
+    Dict.get (Uuid.toString pluginUuid) appState.config.pluginSettings
+        |> Maybe.withDefault ""
+
+
 getPluginUserSettings : AppState -> Uuid -> String
 getPluginUserSettings appState pluginUuid =
     appState.config.user
@@ -299,7 +313,8 @@ getPluginUserSettings appState pluginUuid =
         |> Maybe.withDefault ""
 
 
-getPluginSettings : AppState -> Uuid -> String
-getPluginSettings appState pluginUuid =
-    Dict.get (Uuid.toString pluginUuid) appState.config.pluginSettings
+getPluginUser : AppState -> String
+getPluginUser appState =
+    appState.config.user
+        |> Maybe.map (E.encode 0 << UserConfig.encode)
         |> Maybe.withDefault ""

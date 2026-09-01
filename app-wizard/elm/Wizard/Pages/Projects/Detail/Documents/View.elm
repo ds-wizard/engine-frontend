@@ -11,6 +11,7 @@ import Common.Components.GuideLink as GuideLink
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipCustom)
 import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Common.Utils.Markdown as Markdown
 import Common.Utils.TimeDistance as TimeDistance
 import Common.Utils.TimeUtils as TimeUtils
@@ -170,7 +171,10 @@ listingDescription document =
     span []
         [ formatFragment
         , fileSizeFragment
-        , span [ class "fragment" ] [ text document.documentTemplate.name ]
+        , span [ class "fragment" ]
+            [ text document.documentTemplate.name
+            , Badge.light [ class "ms-1 border" ] [ text (DocumentTemplateUtils.getId document.documentTemplate) ]
+            ]
         , versionFragment
         ]
 

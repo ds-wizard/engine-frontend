@@ -23,7 +23,6 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , getTodos
     , getUnresolvedCommentCount
     , getWarnings
-    , hasReply
     , hasTodo
     , isCurrentVersion
     , isPathVisible
@@ -36,10 +35,9 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , subCommentCount
     , toProjectCommon
     , todoUuid
-    , todosLength
     , updateContent
     , updateWithQuestionnaireData
-    , warningsLength
+    , updateWithShareData
     )
 
 import Common.Utils.Bool as Bool
@@ -94,7 +92,6 @@ type alias ProjectQuestionnaire =
     , sharing : ProjectSharing
     , permissions : List Permission
     , labels : Dict String (List String)
-    , migrationUuid : Maybe Uuid
     , unresolvedCommentCounts : Dict String (Dict String Int)
     , resolvedCommentCounts : Dict String (Dict String Int)
     , selectedQuestionTagUuids : List String
@@ -117,7 +114,6 @@ decoder =
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
-        |> D.required "migrationUuid" (D.maybe Uuid.decoder)
         |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
@@ -133,7 +129,6 @@ toProjectCommon questionnaire =
     , permissions = questionnaire.permissions
     , sharing = questionnaire.sharing
     , visibility = questionnaire.visibility
-    , migrationUuid = questionnaire.migrationUuid
     , knowledgeModelPackage = questionnaire.knowledgeModelPackage
     , fileCount = List.length questionnaire.files
     }
@@ -252,7 +247,6 @@ createQuestionnaireDetail kmPackage km =
     , resolvedCommentCounts = Dict.empty
     , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
     , labels = Dict.empty
-    , migrationUuid = Nothing
     , selectedQuestionTagUuids = []
     , files = []
     , locale = Nothing
@@ -270,6 +264,15 @@ updateWithQuestionnaireData data detail =
         , labels = data.labels
         , unresolvedCommentCounts = data.unresolvedCommentCounts
         , resolvedCommentCounts = data.resolvedCommentCounts
+    }
+
+
+updateWithShareData : { a | permissions : List Permission, sharing : ProjectSharing, visibility : ProjectVisibility } -> ProjectQuestionnaire -> ProjectQuestionnaire
+updateWithShareData data detail =
+    { detail
+        | permissions = data.permissions
+        , sharing = data.sharing
+        , visibility = data.visibility
     }
 
 
@@ -318,11 +321,6 @@ getResolvedCommentCount path questionnaire =
     Dict.get path questionnaire.resolvedCommentCounts
         |> Maybe.unwrap [] Dict.values
         |> List.sum
-
-
-todosLength : ProjectQuestionnaire -> Int
-todosLength =
-    List.length << getTodos
 
 
 getTodos : ProjectQuestionnaire -> List ProjectTodo
@@ -608,11 +606,6 @@ type alias QuestionnaireWarning =
     }
 
 
-warningsLength : ProjectQuestionnaire -> Int
-warningsLength =
-    List.length << getWarnings
-
-
 getWarnings : ProjectQuestionnaire -> List QuestionnaireWarning
 getWarnings questionnaire =
     let
@@ -796,11 +789,6 @@ pathToString =
 todoUuid : String
 todoUuid =
     "615b9028-5e3f-414f-b245-12d2ae2eeb20"
-
-
-hasReply : String -> ProjectQuestionnaire -> Bool
-hasReply path questionnaire =
-    Maybe.unwrap False (not << ReplyValue.isEmpty) (getReplyValue questionnaire path)
 
 
 lastVisibleEvent : List ProjectEvent -> Maybe ProjectEvent

@@ -11,21 +11,18 @@ import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
-import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
-import String.Format as String
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Components.ActionResultView as ActionResultView
 import Wizard.Components.DetailNavigation as DetailNavigation
-import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.PluginView as PluginView
-import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.Session as Session
@@ -99,24 +96,6 @@ viewError appState =
 viewProject : ProjectDetailRoute -> AppState -> Model -> ProjectCommon -> Html Msg
 viewProject route appState model questionnaire =
     let
-        ( migrationWarning, migrationWarningEnabled ) =
-            case questionnaire.migrationUuid of
-                Just migrationUuid ->
-                    let
-                        warningLink =
-                            linkTo (Wizard.Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
-
-                        warningContent =
-                            gettext "There is an ongoing %s. Finish it before you can continue editing this project." appState.locale
-                                |> flip String.formatHtml [ warningLink ]
-                    in
-                    ( div [ class "Projects__Detail__Warning" ] [ div [] warningContent ]
-                    , True
-                    )
-
-                Nothing ->
-                    ( Html.nothing, False )
-
         navigation =
             if AppState.isFullscreen appState then
                 Html.nothing
@@ -136,11 +115,8 @@ viewProject route appState model questionnaire =
             }
     in
     div
-        [ class "Projects__Detail col-full flex-column"
-        , classList [ ( "Projects__Detail--Warning", migrationWarningEnabled ) ]
-        ]
-        [ migrationWarning
-        , navigation
+        [ class "Projects__Detail col-full flex-column" ]
+        [ navigation
         , viewProjectContent appState route model questionnaire
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
         , Html.map QuestionnaireVersionViewModalMsg <| ProjectVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
@@ -425,13 +401,9 @@ viewProjectContent appState route model projectCommon =
         ProjectDetailRoute.Questionnaire _ _ ->
             let
                 viewContent qm =
-                    let
-                        isMigrating =
-                            ProjectUtils.isMigrating qm.questionnaire
-                    in
-                    Questionnaire2.view appState
+                    Questionnaire.view appState
                         { wrapMsg = QuestionnaireMsg
-                        , readonly = not isEditable || isMigrating
+                        , readonly = not isEditable
                         , toolbarEnabled = True
                         , actionsEnabled = True
                         , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)

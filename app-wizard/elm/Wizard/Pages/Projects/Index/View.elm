@@ -4,9 +4,9 @@ import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.Models.Pagination as Pagination
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
-import Common.Components.FormResult as FormResult
+import Common.Components.FontAwesome exposing (faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
 import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilter
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
@@ -26,7 +26,8 @@ import Version
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Project exposing (Project)
-import Wizard.Api.Models.Project.ProjectState exposing (ProjectState(..))
+import Wizard.Api.Models.Project.DocumentTemplateProjectState as DocumentTemplateProjectState
+import Wizard.Api.Models.Project.KnowledgeModelProjectState as KnowledgeModelProjectState
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.Msgs as ListingMsgs
@@ -43,7 +44,7 @@ import Wizard.Pages.Projects.Common.ProjectDescriptor as ProjectDescriptor
 import Wizard.Pages.Projects.Common.View exposing (visibilityIcon)
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUserGroupsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
@@ -59,13 +60,32 @@ view appState model =
             else
                 ActionResult.Success Pagination.empty
 
+        userGroupFilterUserGroupsActionResult =
+            if Features.projectsFilterUserGroups appState then
+                model.userGroupFilterUserGroups
+
+            else
+                ActionResult.Success Pagination.empty
+
+        userGroupFilterSelectedUserGroupsActionResult =
+            if Features.projectsFilterUserGroups appState && PaginationQueryFilter.isFilterActive indexRouteUserGroupsFilterId model.questionnaires.filters then
+                model.userGroupFilterSelectedUserGroups
+
+            else
+                ActionResult.Success Pagination.empty
+
         actionResult =
-            ActionResult.combine3 model.projectTagsFilterTags model.userFilterUsers userFilterSelectedUsersActionResult
+            [ ActionResult.map (always True) model.projectTagsFilterTags
+            , ActionResult.map (always True) model.userFilterUsers
+            , ActionResult.map (always True) userFilterSelectedUsersActionResult
+            , ActionResult.map (always True) userGroupFilterUserGroupsActionResult
+            , ActionResult.map (always True) userGroupFilterSelectedUserGroupsActionResult
+            ]
+                |> ActionResult.all
 
         content _ =
             div [ listClass "Questionnaires__Index" ]
                 [ Page.header (gettext "Projects" appState.locale) []
-                , FormResult.view model.deletingMigration
                 , Listing.view appState (listingConfig appState model) model.questionnaires
                 , Html.map DeleteQuestionnaireModalMsg <| DeleteProjectModal.view appState model.deleteModalModel
                 , Html.map CloneQuestionnaireModalMsg <| CloneProjectModal.view appState model.cloneModalModel
@@ -109,12 +129,16 @@ listingConfig appState model =
         usersFilter =
             listingUsersFilter appState model
 
+        userGroupsFilter =
+            listingUserGroupsFilter appState model
+
         listingFilters =
             []
                 |> List.insertIf templateFilter (Features.projectTemplatesCreate appState)
                 |> List.insertIf tagsFilter (Features.projectTagging appState && tagsFilterVisible)
                 |> List.insertIf kmsFilter True
                 |> List.insertIf usersFilter True
+                |> List.insertIf userGroupsFilter (Features.projectsFilterUserGroups appState)
     in
     { title = listingTitle appState
     , description = listingDescription appState
@@ -509,6 +533,137 @@ listingUsersFilter appState model =
         }
 
 
+listingUserGroupsFilter : AppState -> Model -> Listing.Filter Msg
+listingUserGroupsFilter appState model =
+    let
+        filterMsg =
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteUserGroupsFilterId)
+
+        updateUserGroupMsg userGroupUuids =
+            if List.isEmpty userGroupUuids then
+                filterMsg (PaginationQueryFilter.removeFilter indexRouteUserGroupsFilterId model.questionnaires.filters)
+
+            else
+                filterMsg (PaginationQueryFilter.insertValue indexRouteUserGroupsFilterId (String.join "," (List.unique userGroupUuids)) model.questionnaires.filters)
+
+        filtersWithOp op =
+            PaginationQueryFilter.insertOp indexRouteUserGroupsFilterId op model.questionnaires.filters
+
+        removeUserGroupMsg userGroup =
+            List.filter ((/=) (Uuid.toString userGroup.uuid)) selectedUserGroupUuids
+                |> updateUserGroupMsg
+                |> ListingMsg
+
+        addUserGroupMsg userGroup =
+            ListingFilterAddSelectedUserGroup userGroup
+                (updateUserGroupMsg (Uuid.toString userGroup.uuid :: selectedUserGroupUuids))
+
+        viewUserGroupItem updateMsg icon userGroup =
+            Dropdown.buttonItem
+                [ onClick (updateMsg userGroup)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_user-groups_option"
+                ]
+                [ icon
+                , text userGroup.name
+                ]
+
+        selectedUserGroupItem =
+            viewUserGroupItem removeUserGroupMsg faListingFilterMultiSelected
+
+        foundSelectedUserGroups =
+            ActionResult.unwrap [] .items model.userGroupFilterSelectedUserGroups
+                |> List.sortBy .name
+
+        selectedUserGroupUuids =
+            model.questionnaires.filters
+                |> PaginationQueryFilter.getValue indexRouteUserGroupsFilterId
+                |> Maybe.unwrap [] (String.split ",")
+
+        selectedUserGroups =
+            selectedUserGroupUuids
+                |> List.filterMap (\a -> List.find (\ug -> Uuid.toString ug.uuid == a) foundSelectedUserGroups)
+                |> List.sortBy .name
+
+        filterUserGroups =
+            List.filter (not << flip List.member selectedUserGroupUuids << Uuid.toString << .uuid)
+
+        foundUserGroups =
+            model.userGroupFilterUserGroups
+                |> ActionResult.unwrap [] (List.sortBy .name << filterUserGroups << .items)
+
+        badge =
+            filterBadge selectedUserGroups
+
+        filterOperator =
+            Maybe.withDefault FilterOperator.OR <| PaginationQueryFilter.getOp indexRouteUserGroupsFilterId model.questionnaires.filters
+
+        searchInputItem =
+            [ Dropdown.customItem <|
+                div [ class "dropdown-item-search" ]
+                    [ input
+                        [ type_ "text"
+                        , class "form-control"
+                        , placeholder (gettext "Search user groups..." appState.locale)
+                        , onClickStopPropagation (UserGroupsFilterInput model.userGroupFilterSearchValue)
+                        , onInput UserGroupsFilterInput
+                        , value model.userGroupFilterSearchValue
+                        ]
+                        []
+                    ]
+            , Dropdown.divider
+            , Dropdown.customItem <|
+                div [ class "dropdown-item-operator" ]
+                    [ a
+                        [ classList [ ( "active", filterOperator == FilterOperator.OR ) ]
+                        , dataCy "filter_user-groups_operator_OR"
+                        , onClickStopPropagation (ListingMsg (filterMsg (filtersWithOp FilterOperator.OR)))
+                        ]
+                        [ text (gettext "OR" appState.locale) ]
+                    , a
+                        [ classList [ ( "active", filterOperator == FilterOperator.AND ) ]
+                        , dataCy "filter_user-groups_operator_AND"
+                        , onClickStopPropagation (ListingMsg (filterMsg (filtersWithOp FilterOperator.AND)))
+                        ]
+                        [ text (gettext "AND" appState.locale) ]
+                    ]
+            , Dropdown.divider
+            ]
+
+        selectedUserGroupsItems =
+            List.map selectedUserGroupItem selectedUserGroups
+
+        foundUserGroupsItems =
+            if not (List.isEmpty foundUserGroups) then
+                let
+                    addUserGroupItem =
+                        viewUserGroupItem addUserGroupMsg faListingFilterMultiNotSelected
+                in
+                List.map addUserGroupItem foundUserGroups
+
+            else if not (String.isEmpty model.userGroupFilterSearchValue) || List.isEmpty selectedUserGroups then
+                [ Dropdown.customItem <|
+                    div [ class "dropdown-item-empty" ]
+                        [ text (gettext "No user groups found" appState.locale) ]
+                ]
+
+            else
+                []
+
+        label =
+            case List.head selectedUserGroups of
+                Just selectedUserGroup ->
+                    selectedUserGroup.name
+
+                Nothing ->
+                    gettext "User Groups" appState.locale
+    in
+    Listing.CustomFilter indexRouteUserGroupsFilterId
+        { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
+        , items = searchInputItem ++ selectedUserGroupsItems ++ foundUserGroupsItems
+        }
+
+
 filterBadge : List a -> Html msg
 filterBadge items =
     case List.length items of
@@ -524,19 +679,12 @@ filterBadge items =
 
 listingTitle : AppState -> Project -> Html Msg
 listingTitle appState project =
-    let
-        linkRoute =
-            if project.state == Migrating then
-                Routes.projectsMigration
-
-            else
-                Routes.projectsDetail
-    in
     span []
-        [ linkTo (linkRoute project.uuid) [] [ text project.name ]
+        [ linkTo (Routes.projectsDetail project.uuid) [] [ text project.name ]
         , templateBadge appState project
         , visibilityIcon appState project
-        , stateBadge appState project
+        , knowledgeModelStateBadge appState project
+        , documentTemplateStateBadge appState project
         ]
 
 
@@ -549,7 +697,7 @@ listingDescription appState project =
                     Html.nothing
 
                 perm :: [] ->
-                    span [ class "fragment" ]
+                    span [ class "fragment d-flex" ]
                         [ MemberIcon.view perm.member
                         , text <| Member.visibleName perm.member
                         ]
@@ -570,7 +718,7 @@ listingDescription appState project =
                             else
                                 Html.nothing
                     in
-                    span [ class "fragment" ] (users ++ [ extraUsers ])
+                    span [ class "fragment d-flex" ] (users ++ [ extraUsers ])
 
         kmRoute =
             Routes.knowledgeModelsDetail project.knowledgeModelPackage.uuid
@@ -598,9 +746,6 @@ listingActions appState project =
                 , dataCy = "open"
                 }
 
-        openProjectVisible =
-            Features.projectOpen project
-
         createProjectFromTemplate =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
@@ -627,44 +772,17 @@ listingActions appState project =
                 , dataCy = "clone"
                 }
 
-        cloneVisible =
-            Features.projectClone project
-
         createMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faQuestionnaireListCreateMigration
-                , label = gettext "Create migration" appState.locale
+                , label = gettext "Migrate" appState.locale
                 , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute project.uuid)
                 , dataCy = "create-migration"
                 }
 
         createMigrationVisible =
             Features.projectCreateMigration appState project
-
-        continueMigration =
-            ListingDropdown.dropdownAction
-                { extraClass = Nothing
-                , icon = faQuestionnaireListCreateMigration
-                , label = gettext "Continue migration" appState.locale
-                , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute project.uuid)
-                , dataCy = "continue-migration"
-                }
-
-        continueMigrationVisible =
-            Features.projectContinueMigration appState project
-
-        cancelMigration =
-            ListingDropdown.dropdownAction
-                { extraClass = Just "text-danger"
-                , icon = faCancel
-                , label = gettext "Cancel migration" appState.locale
-                , msg = ListingActionMsg (DeleteQuestionnaireMigration project.uuid)
-                , dataCy = "cancel-migration"
-                }
-
-        cancelMigrationVisible =
-            Features.projectCancelMigration appState project
 
         delete =
             ListingDropdown.dropdownAction
@@ -684,11 +802,9 @@ listingActions appState project =
             Features.projectDelete appState project
 
         groups =
-            [ [ ( openProject, openProjectVisible ) ]
+            [ [ ( openProject, True ) ]
             , [ ( createProjectFromTemplate, createProjectFromTemplateVisible ) ]
-            , [ ( clone, cloneVisible )
-              , ( continueMigration, continueMigrationVisible )
-              , ( cancelMigration, cancelMigrationVisible )
+            , [ ( clone, True )
               , ( createMigration, createMigrationVisible )
               ]
             , [ ( delete, deleteVisible ) ]
@@ -697,22 +813,33 @@ listingActions appState project =
     ListingDropdown.itemsFromGroups groups
 
 
-stateBadge : AppState -> Project -> Html msg
-stateBadge appState project =
-    case project.state of
-        Migrating ->
-            linkTo (Routes.projectsMigration project.uuid)
-                [ class Badge.infoClass, dataCy "badge_project_migrating" ]
-                [ faQuestionnaireListCreateMigration
-                , text (gettext "migrating" appState.locale)
-                ]
+knowledgeModelStateBadge : AppState -> Project -> Html msg
+knowledgeModelStateBadge appState project =
+    case project.knowledgeModelState of
+        KnowledgeModelProjectState.Outdated ->
+            linkTo (Routes.projectsDetailSettings project.uuid)
+                (class Badge.warningClass
+                    :: dataCy "badge_project_knowledge-model-update-available"
+                    :: tooltip (gettext "Knowledge model update available" appState.locale)
+                )
+                [ text (gettext "Outdated KM" appState.locale) ]
 
-        Outdated ->
-            linkTo (Routes.projectsCreateMigration project.uuid)
-                [ class Badge.warningClass, dataCy "badge_project_update-available" ]
-                [ text (gettext "update available" appState.locale) ]
+        KnowledgeModelProjectState.UpToDate ->
+            Html.nothing
 
-        Default ->
+
+documentTemplateStateBadge : AppState -> Project -> Html msg
+documentTemplateStateBadge appState project =
+    case project.documentTemplateState of
+        Just DocumentTemplateProjectState.Outdated ->
+            linkTo (Routes.projectsDetailSettings project.uuid)
+                (class Badge.warningClass
+                    :: dataCy "badge_project_document-template-update-available"
+                    :: tooltip (gettext "Document template update available" appState.locale)
+                )
+                [ text (gettext "Outdated DT" appState.locale) ]
+
+        _ ->
             Html.nothing
 
 

@@ -8,6 +8,7 @@ module Wizard.Api.Models.Member exposing
     , toQuestionnaireEditFormMemberType
     , toUserGroupSuggestion
     , toUserSuggestion
+    , userGroupMember
     , userMember
     , visibleName
     )
@@ -28,6 +29,11 @@ type Member
 userMember : UserSuggestion -> Member
 userMember =
     UserMember
+
+
+userGroupMember : UserGroupSuggestion -> Member
+userGroupMember =
+    UserGroupMember
 
 
 isUserMember : Member -> Bool

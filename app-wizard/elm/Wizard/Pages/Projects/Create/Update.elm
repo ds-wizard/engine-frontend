@@ -105,11 +105,17 @@ getProjectTemplates appState pqs =
         filters =
             PaginationQueryFilters.create
                 [ ( "isTemplate", Just (Bool.toString True) )
-                , ( "isMigrating", Just (Bool.toString False) )
                 ]
                 []
     in
     QuestionnaireApi.getList appState filters pqs
+
+
+projectTemplatesTypeHintsQueryString : PaginationQueryString -> PaginationQueryString
+projectTemplatesTypeHintsQueryString pqs =
+    pqs
+        |> PaginationQueryString.withSort (Just "name") PaginationQueryString.SortASC
+        |> PaginationQueryString.withSize (Just 50)
 
 
 tour : AppState -> Bool -> Bool -> TourConfig
@@ -338,7 +344,7 @@ update wrapMsg msg appState model =
 
                 cfg =
                     { wrapMsg = wrapMsg << ProjectTemplateTypeHintInputMsg
-                    , getTypeHints = getProjectTemplates appState
+                    , getTypeHints = getProjectTemplates appState << projectTemplatesTypeHintsQueryString
                     , getError = gettext "Unable to get project templates." appState.locale
                     , setReply = formMsg << Uuid.toString << .uuid
                     , clearReply = Just <| formMsg ""

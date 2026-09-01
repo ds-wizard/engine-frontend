@@ -4,6 +4,7 @@ import Browser.Navigation as Navigation
 import Common.Api.Models.BuildInfo as BuildInfo
 import Common.Components.NewsModal as NewsModal
 import Wizard.Api.Tokens as TokensApi
+import Wizard.Data.AppState as AppState
 import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
@@ -36,7 +37,7 @@ update msg model =
 
                 ( newsModalModel, newsModalCmd ) =
                     if Feature.newsModal newModel.appState then
-                        NewsModal.init newModel.appState.newsUrl BuildInfo.client.version
+                        NewsModal.init newModel.appState.newsUrl BuildInfo.client.version (AppState.userPermissions newModel.appState)
 
                     else
                         ( NewsModal.initialModel, Cmd.none )

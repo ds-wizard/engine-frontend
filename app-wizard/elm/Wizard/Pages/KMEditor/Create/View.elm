@@ -70,7 +70,7 @@ formView appState model =
                 Nothing ->
                     let
                         cfg =
-                            { viewItem = TypeHintInputItem.packageSuggestionWithVersion
+                            { viewItem = TypeHintInputItem.packageSuggestionWithId
                             , wrapMsg = KnowledgeModelPackageTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = True

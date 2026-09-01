@@ -4,6 +4,7 @@ module Wizard.Api.Models.ProjectCommon exposing
     , dummy
     , encode
     , updateWithQuestionnaireData
+    , updateWithShareData
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -25,7 +26,6 @@ type alias ProjectCommon =
     , permissions : List Permission
     , sharing : ProjectSharing
     , visibility : ProjectVisibility
-    , migrationUuid : Maybe Uuid
     , knowledgeModelPackage : KnowledgeModelPackageSuggestion
     , fileCount : Int
     }
@@ -40,7 +40,6 @@ decoder =
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "visibility" ProjectVisibility.decoder
-        |> D.required "migrationUuid" (D.nullable Uuid.decoder)
         |> D.required "knowledgeModelPackage" KnowledgeModelPackageSuggestion.decoder
         |> D.required "fileCount" D.int
 
@@ -66,6 +65,15 @@ updateWithQuestionnaireData data project =
     }
 
 
+updateWithShareData : { a | permissions : List Permission, sharing : ProjectSharing, visibility : ProjectVisibility } -> ProjectCommon -> ProjectCommon
+updateWithShareData data project =
+    { project
+        | permissions = data.permissions
+        , sharing = data.sharing
+        , visibility = data.visibility
+    }
+
+
 dummy : ProjectCommon
 dummy =
     { uuid = Uuid.nil
@@ -74,7 +82,6 @@ dummy =
     , permissions = []
     , sharing = ProjectSharing.Restricted
     , visibility = ProjectVisibility.Private
-    , migrationUuid = Nothing
     , knowledgeModelPackage = KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage KnowledgeModelPackage.dummy
     , fileCount = 0
     }

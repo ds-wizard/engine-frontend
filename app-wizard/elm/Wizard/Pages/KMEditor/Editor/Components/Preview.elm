@@ -32,7 +32,7 @@ import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage
 import Wizard.Api.Models.ProjectCommon as ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
-import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Tag as Tag
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
@@ -41,7 +41,7 @@ import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposi
 type alias Model =
     { kmEditorUuid : Uuid
     , projectCommon : ProjectCommon
-    , questionnaireModel : Questionnaire2.Model
+    , questionnaireModel : Questionnaire.Model
     , tags : Set String
     }
 
@@ -59,11 +59,11 @@ initialModel appState kmEditorUuid kmPackageUuid =
     }
 
 
-initQuestionnaireModel : AppState -> ProjectQuestionnaire -> Questionnaire2.Model
+initQuestionnaireModel : AppState -> ProjectQuestionnaire -> Questionnaire.Model
 initQuestionnaireModel appState questionnaire =
     let
         ( questionnaireModel, _ ) =
-            Questionnaire2.initSimple appState questionnaire
+            Questionnaire.initSimple appState questionnaire
 
         viewSettings =
             questionnaireModel.viewSettings
@@ -76,13 +76,13 @@ setActiveChapterIfNot appState chapterUuid model =
     if model.questionnaireModel.chapterUuid == Uuid.toString Uuid.nil then
         let
             questionnaireReturnData =
-                Questionnaire2.update appState
+                Questionnaire.update appState
                     { wrapMsg = QuestionnaireMsg
                     , mbKmEditorUuid = Just model.kmEditorUuid
                     , mbSetFullScreenMsg = Nothing
                     , projectCommon = model.projectCommon
                     }
-                    (Questionnaire2.openChapterMsg chapterUuid)
+                    (Questionnaire.openChapterMsg chapterUuid)
                     model.questionnaireModel
         in
         { model | questionnaireModel = questionnaireReturnData.model }
@@ -96,13 +96,13 @@ setPhase appState mbPhaseUuid model =
     if Maybe.isNothing model.questionnaireModel.questionnaire.phaseUuid then
         let
             questionnaireReturnData =
-                Questionnaire2.update appState
+                Questionnaire.update appState
                     { wrapMsg = QuestionnaireMsg
                     , mbKmEditorUuid = Just model.kmEditorUuid
                     , mbSetFullScreenMsg = Nothing
                     , projectCommon = model.projectCommon
                     }
-                    (Questionnaire2.setPhaseMsg mbPhaseUuid)
+                    (Questionnaire.setPhaseMsg mbPhaseUuid)
                     model.questionnaireModel
         in
         { model | questionnaireModel = questionnaireReturnData.model }
@@ -153,13 +153,13 @@ generateReplies appState questionUuid knowledgeModel model =
             model.questionnaireModel
 
         questionnaireReturnData =
-            Questionnaire2.update appState
+            Questionnaire.update appState
                 { wrapMsg = QuestionnaireMsg
                 , mbKmEditorUuid = Just model.kmEditorUuid
                 , mbSetFullScreenMsg = Nothing
                 , projectCommon = model.projectCommon
                 }
-                (Questionnaire2.openChapterMsg (Maybe.withDefault (Uuid.toString Uuid.nil) mbChapterUuid))
+                (Questionnaire.openChapterMsg (Maybe.withDefault (Uuid.toString Uuid.nil) mbChapterUuid))
                 { questionnaireModel | questionnaire = questionnaireDetail }
     in
     ( newSeed
@@ -176,13 +176,13 @@ createQuestionnaireDetail kmPackageUuid km =
     ProjectQuestionnaire.createQuestionnaireDetail { kmPackage | uuid = kmPackageUuid } km
 
 
-questionnaireModelWithKnowledgeModel : KnowledgeModel -> Questionnaire2.Model -> Questionnaire2.Model
+questionnaireModelWithKnowledgeModel : KnowledgeModel -> Questionnaire.Model -> Questionnaire.Model
 questionnaireModelWithKnowledgeModel km questionnaireModel =
     let
         questionnaire =
             questionnaireModel.questionnaire
     in
-    Questionnaire2.virtualizeContent
+    Questionnaire.virtualizeContent
         { questionnaireModel
             | questionnaire = { questionnaire | knowledgeModel = km }
             , knowledgeModelParentMap = KnowledgeModel.createParentMap km
@@ -190,7 +190,7 @@ questionnaireModelWithKnowledgeModel km questionnaireModel =
 
 
 type Msg
-    = QuestionnaireMsg Questionnaire2.Msg
+    = QuestionnaireMsg Questionnaire.Msg
     | AddTag String
     | RemoveTag String
     | SelectAllTags
@@ -218,14 +218,14 @@ update msg appState editorContext model =
 
 scrollToQuestion : String -> Cmd Msg
 scrollToQuestion questionUuid =
-    Questionnaire2.dispatchScrollToQuestion QuestionnaireMsg questionUuid
+    Questionnaire.dispatchScrollToQuestion QuestionnaireMsg questionUuid
 
 
-handleQuestionnaireMsg : Questionnaire2.Msg -> AppState -> Model -> ( Seed, Model, Cmd Msg )
+handleQuestionnaireMsg : Questionnaire.Msg -> AppState -> Model -> ( Seed, Model, Cmd Msg )
 handleQuestionnaireMsg msg appState model =
     let
         questionnaireReturnData =
-            Questionnaire2.update appState
+            Questionnaire.update appState
                 { wrapMsg = QuestionnaireMsg
                 , mbKmEditorUuid = Just model.kmEditorUuid
                 , mbSetFullScreenMsg = Nothing
@@ -243,7 +243,7 @@ handleQuestionnaireMsg msg appState model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.map QuestionnaireMsg <|
-        Questionnaire2.subscriptions model.questionnaireModel
+        Questionnaire.subscriptions model.questionnaireModel
 
 
 type alias ViewConfig msg =
@@ -263,7 +263,7 @@ view appState { wrapMsg, saveRepliesMsg } model =
             model.questionnaireModel
 
         questionnaire =
-            Questionnaire2.view appState
+            Questionnaire.view appState
                 { wrapMsg = QuestionnaireMsg
                 , readonly = False
                 , toolbarEnabled = False

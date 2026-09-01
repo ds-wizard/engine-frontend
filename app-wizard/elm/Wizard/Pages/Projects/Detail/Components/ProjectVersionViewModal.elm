@@ -29,7 +29,7 @@ import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Api.Models.ProjectVersion as ProjectVersion exposing (ProjectVersion)
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.Questionnaire2 as Questionnaire
+import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Data.AppState exposing (AppState)
 

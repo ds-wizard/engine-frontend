@@ -1,9 +1,11 @@
 module Common.Components.DetailPage exposing
-    ( ContentConfig
+    ( ContentAttrsConfig
+    , ContentConfig
     , HeaderWithNavConfig
     , HeaderWithNavItemConfig
     , container
     , content
+    , contentAttrs
     , contentBodyNarrow
     , contentFull
     , header
@@ -98,6 +100,22 @@ type alias ContentConfig msg =
 
 content : ContentConfig msg -> Html msg
 content cfg =
+    contentAttrs
+        { body = cfg.body
+        , sidePanel = cfg.sidePanel
+        , bodyAttrs = []
+        }
+
+
+type alias ContentAttrsConfig msg =
+    { body : List (Html msg)
+    , sidePanel : List (Html msg)
+    , bodyAttrs : List (Html.Attribute msg)
+    }
+
+
+contentAttrs : ContentAttrsConfig msg -> Html msg
+contentAttrs cfg =
     let
         sidePanel =
             if List.isEmpty cfg.sidePanel then
@@ -107,7 +125,7 @@ content cfg =
                 div [ class "detail-content-side-panel" ] cfg.sidePanel
     in
     div [ class "detail-content", dataCy "detail-page_content" ]
-        [ div [ class "detail-content-body" ] cfg.body
+        [ div (class "detail-content-body" :: cfg.bodyAttrs) cfg.body
         , sidePanel
         ]
 

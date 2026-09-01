@@ -88,7 +88,6 @@ module Wizard.Routes exposing
     , projectsImport
     , projectsIndex
     , projectsIndexWithFilters
-    , projectsMigration
     , publicForgottenPassword
     , publicHome
     , publicLogin
@@ -143,10 +142,10 @@ import Wizard.Pages.DocumentTemplates.Routes
 import Wizard.Pages.Documents.Routes
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
+import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute
 import Wizard.Pages.KnowledgeModels.Routes
 import Wizard.Pages.Locales.Routes
 import Wizard.Pages.ProjectFiles.Routes
-import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
 import Wizard.Pages.Projects.Routes
 import Wizard.Pages.Public.Routes
@@ -716,7 +715,7 @@ projectsIndex appState =
                 Nothing ->
                     Nothing
     in
-    ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
+    ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing Nothing Nothing)
 
 
 projectsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
@@ -726,6 +725,8 @@ projectsIndexWithFilters filters pagination =
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteIsTemplateFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
             (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteUserGroupsFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteUserGroupsFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
             (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteKnowledgeModelPackagesFilterId filters)
@@ -736,16 +737,11 @@ projectsIndexWithFilters filters pagination =
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _) ->
+        ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _ _ _) ->
             True
 
         _ ->
             False
-
-
-projectsMigration : Uuid -> Route
-projectsMigration =
-    ProjectsRoute << Wizard.Pages.Projects.Routes.MigrationRoute
 
 
 projectsImport : Uuid -> String -> Route

@@ -18,8 +18,8 @@ import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
-import Wizard.Api.Models.ProjectMigration exposing (ProjectMigration)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.KMComparison as KMComparison
@@ -259,11 +259,11 @@ handleSelectPackage wrapMsg appState model kmPackage =
     )
 
 
-handlePostMigrationCompleted : AppState -> Model -> Result ApiError ProjectMigration -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostMigrationCompleted : AppState -> Model -> Result ApiError ProjectCommon -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePostMigrationCompleted appState model result =
     case result of
-        Ok migration ->
-            ( model, cmdNavigate appState <| Routes.projectsMigration migration.newProject.uuid )
+        Ok project ->
+            ( model, cmdNavigate appState <| Routes.projectsDetail project.uuid )
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult appState (gettext "Project migration could not be created." appState.locale) error }

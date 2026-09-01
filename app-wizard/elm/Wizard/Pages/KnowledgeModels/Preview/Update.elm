@@ -24,8 +24,8 @@ import Wizard.Api.Models.ProjectCommon as ProjectCommon
 import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent(..))
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.Questionnaire2 as Questionnaire2
-import Wizard.Components.Questionnaire2.QuestionnaireUpdateReturnData as QuestionnaireReturnData
+import Wizard.Components.Questionnaire as Questionnaire
+import Wizard.Components.Questionnaire.QuestionnaireUpdateReturnData as QuestionnaireReturnData
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KnowledgeModels.Preview.Models exposing (Model)
@@ -166,18 +166,18 @@ initQuestionnaireModel appState ( model, cmd ) =
                             ( ( appState.seed, Nothing, questionnaire ), Cmd.none )
 
                 ( questionnaireModel, _ ) =
-                    Questionnaire2.initSimple appState questionnaireWithReplies
+                    Questionnaire.initSimple appState questionnaireWithReplies
 
                 questionnaireReturnData =
                     case mbChapterUuid of
                         Just chapterUuid ->
-                            Questionnaire2.update appState
+                            Questionnaire.update appState
                                 { wrapMsg = QuestionnaireMsg
                                 , mbKmEditorUuid = Nothing
                                 , mbSetFullScreenMsg = Nothing
                                 , projectCommon = ProjectCommon.dummy
                                 }
-                                (Questionnaire2.openChapterMsg chapterUuid)
+                                (Questionnaire.openChapterMsg chapterUuid)
                                 questionnaireModel
 
                         Nothing ->
@@ -192,13 +192,13 @@ initQuestionnaireModel appState ( model, cmd ) =
             ( appState.seed, model, cmd )
 
 
-handleQuestionnaireMsg : Questionnaire2.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+handleQuestionnaireMsg : Questionnaire.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleQuestionnaireMsg msg wrapMsg appState model =
     case model.questionnaireModel of
         Success questionnaireModel ->
             let
                 questionnaireReturnData =
-                    Questionnaire2.update appState
+                    Questionnaire.update appState
                         { wrapMsg = QuestionnaireMsg
                         , mbKmEditorUuid = Nothing
                         , mbSetFullScreenMsg = Nothing

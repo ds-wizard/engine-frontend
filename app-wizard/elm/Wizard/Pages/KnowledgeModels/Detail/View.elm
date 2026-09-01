@@ -9,6 +9,7 @@ import Common.Components.Tooltip exposing (tooltip)
 import Common.Components.Undraw as Undraw
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, li, p, span, strong, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, href, target)
@@ -313,6 +314,7 @@ sidePanelKmInfo appState kmPackage =
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt kmPackage.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text kmPackage.license )
             , ( gettext "Language" appState.locale, "language", text kmPackage.language )
+            , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone kmPackage.createdAt )
             ]
 
         forkOfInfo =

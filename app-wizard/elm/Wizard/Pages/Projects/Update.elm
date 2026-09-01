@@ -15,7 +15,6 @@ import Wizard.Pages.Projects.DocumentDownload.Update
 import Wizard.Pages.Projects.FileDownload.Update
 import Wizard.Pages.Projects.Import.Update
 import Wizard.Pages.Projects.Index.Update
-import Wizard.Pages.Projects.Migration.Update
 import Wizard.Pages.Projects.Models exposing (Model)
 import Wizard.Pages.Projects.Msgs exposing (Msg(..))
 import Wizard.Pages.Projects.Routes exposing (Route(..))
@@ -37,13 +36,9 @@ fetchData route appState model =
             Cmd.map DetailMsg <|
                 Wizard.Pages.Projects.Detail.Update.fetchData appState uuid model.detailModel
 
-        IndexRoute _ _ _ _ _ _ _ _ ->
+        IndexRoute _ _ _ _ _ _ _ _ _ _ ->
             Cmd.map IndexMsg <|
                 Wizard.Pages.Projects.Index.Update.fetchData appState model.indexModel
-
-        MigrationRoute uuid ->
-            Cmd.map MigrationMsg <|
-                Wizard.Pages.Projects.Migration.Update.fetchData appState uuid
 
         ImportRoute uuid _ ->
             Cmd.map ImportMsg <|
@@ -109,13 +104,6 @@ update wrapMsg msg appState model =
                     Wizard.Pages.Projects.Index.Update.update (wrapMsg << IndexMsg) iMsg appState model.indexModel
             in
             ( appState.seed, { model | indexModel = indexModel }, cmd )
-
-        MigrationMsg mMsg ->
-            let
-                ( newSeed, migrationModel, cmd ) =
-                    Wizard.Pages.Projects.Migration.Update.update (wrapMsg << MigrationMsg) mMsg appState model.migrationModel
-            in
-            ( newSeed, { model | migrationModel = migrationModel }, cmd )
 
         ImportMsg iMsg ->
             let

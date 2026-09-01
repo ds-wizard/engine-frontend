@@ -1,7 +1,8 @@
 module Wizard.Components.KMComparison.SidePanel exposing (SidePanelProps, SidePanelState(..), viewSidePanel)
 
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faClose, fas)
+import Common.Components.FontAwesome exposing (faClose, faCopy, fas)
+import Common.Components.Tooltip exposing (tooltipLeft)
 import Common.Utils.ByteUnits as ByteUnits
 import Dict
 import Diff
@@ -9,7 +10,7 @@ import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, del, div, h5, ins, li, span, text, ul)
 import Html.Attributes exposing (class, classList)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onMouseOut)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import String.Extra as String
@@ -52,6 +53,9 @@ type alias SidePanelProps msg =
     , leftKm : KnowledgeModel
     , rightKm : KnowledgeModel
     , closeMsg : msg
+    , copyUuidMsg : String -> msg
+    , clearCopiedUuidMsg : msg
+    , copiedUuid : Maybe String
     }
 
 
@@ -73,62 +77,62 @@ viewSidePanelContent props sidePanel =
         SidePanelChapter chapterDiff ->
             sidePanelHeader props chapterDiff
                 :: h5 [] [ text (gettext "Chapter" props.locale) ]
-                :: sidePanelContent chapterDiff (chapterContentFields props) (chapterContentDiffFields props)
+                :: sidePanelContent props .uuid chapterDiff (chapterContentFields props) (chapterContentDiffFields props)
 
         SidePanelQuestion questionDiff ->
             sidePanelHeader props questionDiff
                 :: h5 [] [ text (gettext "Question" props.locale) ]
-                :: sidePanelContent questionDiff (questionContentFields props) (questionContentDiffFields props)
+                :: sidePanelContent props Question.getUuid questionDiff (questionContentFields props) (questionContentDiffFields props)
 
         SidePanelAnswer answerDiff ->
             sidePanelHeader props answerDiff
                 :: h5 [] [ text (gettext "Answer" props.locale) ]
-                :: sidePanelContent answerDiff (answerContentFields props) (answerContentDiffFields props)
+                :: sidePanelContent props .uuid answerDiff (answerContentFields props) (answerContentDiffFields props)
 
         SidePanelChoice choiceDiff ->
             sidePanelHeader props choiceDiff
                 :: h5 [] [ text (gettext "Choice" props.locale) ]
-                :: sidePanelContent choiceDiff (choiceContentFields props) (choiceContentDiffFields props)
+                :: sidePanelContent props .uuid choiceDiff (choiceContentFields props) (choiceContentDiffFields props)
 
         SidePanelReference referenceDiff ->
             sidePanelHeader props referenceDiff
                 :: h5 [] [ text (gettext "Reference" props.locale) ]
-                :: sidePanelContent referenceDiff (referenceContentFields props) (referenceContentDiffFields props)
+                :: sidePanelContent props Reference.getUuid referenceDiff (referenceContentFields props) (referenceContentDiffFields props)
 
         SidePanelExpert expertDiff ->
             sidePanelHeader props expertDiff
                 :: h5 [] [ text (gettext "Expert" props.locale) ]
-                :: sidePanelContent expertDiff (expertContentFields props) (expertContentDiffFields props)
+                :: sidePanelContent props .uuid expertDiff (expertContentFields props) (expertContentDiffFields props)
 
         SidePanelMetric metricDiff ->
             sidePanelHeader props metricDiff
                 :: h5 [] [ text (gettext "Metric" props.locale) ]
-                :: sidePanelContent metricDiff (metricContentFields props) (metricContentDiffFields props)
+                :: sidePanelContent props .uuid metricDiff (metricContentFields props) (metricContentDiffFields props)
 
         SidePanelPhase phaseDiff ->
             sidePanelHeader props phaseDiff
                 :: h5 [] [ text (gettext "Phase" props.locale) ]
-                :: sidePanelContent phaseDiff (phaseContentFields props) (phaseContentDiffFields props)
+                :: sidePanelContent props .uuid phaseDiff (phaseContentFields props) (phaseContentDiffFields props)
 
         SidePanelTag tagDiff ->
             sidePanelHeader props tagDiff
                 :: h5 [] [ text (gettext "Tag" props.locale) ]
-                :: sidePanelContent tagDiff (tagContentFields props) (tagContentDiffFields props)
+                :: sidePanelContent props .uuid tagDiff (tagContentFields props) (tagContentDiffFields props)
 
         SidePanelIntegration integrationDiff ->
             sidePanelHeader props integrationDiff
                 :: h5 [] [ text (gettext "Integration" props.locale) ]
-                :: sidePanelContent integrationDiff (integrationContentFields props) (integrationContentDiffFields props)
+                :: sidePanelContent props Integration.getUuid integrationDiff (integrationContentFields props) (integrationContentDiffFields props)
 
         SidePanelResourceCollection resourceCollectionDiff ->
             sidePanelHeader props resourceCollectionDiff
                 :: h5 [] [ text (gettext "Resource Collection" props.locale) ]
-                :: sidePanelContent resourceCollectionDiff (resourceCollectionContentFields props) (resourceCollectionContentDiffFields props)
+                :: sidePanelContent props .uuid resourceCollectionDiff (resourceCollectionContentFields props) (resourceCollectionContentDiffFields props)
 
         SidePanelResourcePage resourcePageDiff ->
             sidePanelHeader props resourcePageDiff
                 :: h5 [] [ text (gettext "Resource Page" props.locale) ]
-                :: sidePanelContent resourcePageDiff (resourcePageContentFields props) (resourcePageContentDiffFields props)
+                :: sidePanelContent props .uuid resourcePageDiff (resourcePageContentFields props) (resourcePageContentDiffFields props)
 
 
 sidePanelHeader : SidePanelProps msg -> Differ.DiffResult a -> Html msg
@@ -155,38 +159,27 @@ sidePanelBadge locale diff =
             Badge.secondary [] [ text (gettext "No Change" locale) ]
 
 
-sidePanelContent : Differ.DiffResult a -> (a -> ContentType -> List ( String, Html msg )) -> (a -> a -> List ( String, Html msg )) -> List (Html msg)
-sidePanelContent result getContentFields getContentDiffFields =
-    case result of
-        Differ.Added item ->
-            viewAdd (getContentFields item)
+sidePanelContent : SidePanelProps msg -> (a -> String) -> Differ.DiffResult a -> (a -> ContentType -> List ( String, Html msg )) -> (a -> a -> List ( String, Html msg )) -> List (Html msg)
+sidePanelContent props getUuid result getContentFields getContentDiffFields =
+    let
+        uuidField item =
+            ( gettext "UUID" props.locale, viewUuid props (getUuid item) )
 
-        Differ.Removed item ->
-            viewRemoved (getContentFields item)
+        fields =
+            case result of
+                Differ.Added item ->
+                    uuidField item :: getContentFields item AddedContentType
 
-        Differ.NoChange _ item ->
-            viewDefault (getContentFields item)
+                Differ.Removed item ->
+                    uuidField item :: getContentFields item RemovedContentType
 
-        Differ.Changed leftItem rightItem ->
-            viewDefault (always (getContentDiffFields leftItem rightItem))
+                Differ.NoChange _ item ->
+                    uuidField item :: getContentFields item DefaultContentType
 
-
-viewAdd : (ContentType -> List ( String, Html msg )) -> List (Html msg)
-viewAdd getFields =
-    getFields AddedContentType
-        |> List.indexedMap (\i ( key, value ) -> viewRow i key value)
-
-
-viewRemoved : (ContentType -> List ( String, Html msg )) -> List (Html msg)
-viewRemoved getFields =
-    getFields RemovedContentType
-        |> List.indexedMap (\i ( key, value ) -> viewRow i key value)
-
-
-viewDefault : (ContentType -> List ( String, Html msg )) -> List (Html msg)
-viewDefault getFields =
-    getFields DefaultContentType
-        |> List.indexedMap (\i ( key, value ) -> viewRow i key value)
+                Differ.Changed leftItem rightItem ->
+                    uuidField rightItem :: getContentDiffFields leftItem rightItem
+    in
+    List.indexedMap (\i ( key, value ) -> viewRow i key value) fields
 
 
 viewRow : Int -> String -> Html msg -> Html msg
@@ -197,6 +190,29 @@ viewRow index key value =
         ]
         [ div [ class "badge px-0 text-muted" ] [ text key ]
         , div [ class "text-break" ] [ value ]
+        ]
+
+
+viewUuid : SidePanelProps msg -> String -> Html msg
+viewUuid props uuid =
+    let
+        copyTooltip =
+            if props.copiedUuid == Just uuid then
+                gettext "Copied!" props.locale
+
+            else
+                gettext "Click to copy" props.locale
+    in
+    div [ class "d-flex justify-content-between align-items-center gap-2" ]
+        [ span [] [ text uuid ]
+        , a
+            ([ class "p-1 link-secondary text-decoration-none"
+             , onClick (props.copyUuidMsg uuid)
+             , onMouseOut props.clearCopiedUuidMsg
+             ]
+                ++ tooltipLeft copyTooltip
+            )
+            [ faCopy ]
         ]
 
 

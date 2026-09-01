@@ -8,8 +8,7 @@ import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent
-import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData as SetReplyData
+import Wizard.Api.Models.ProjectCommon as ProjectCommon
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.Importer as Importer
@@ -80,18 +79,8 @@ update wrapMsg msg appState model =
                         ( newSeed, importResult ) =
                             Importer.convertToQuestionnaireEvents appState questionnaire (Ok data)
 
-                        updateQuestionnaire event qm =
-                            case event of
-                                ProjectEvent.SetReply setReplyData ->
-                                    qm
-                                        |> Questionnaire.addEvent event
-                                        |> Questionnaire.setReply setReplyData.path (SetReplyData.toReply setReplyData)
-
-                                _ ->
-                                    qm
-
                         newQuestionnaireModel =
-                            List.foldl updateQuestionnaire questionnaireModel importResult.questionnaireEvents
+                            List.foldl Questionnaire.applyProjectEvent questionnaireModel importResult.questionnaireEvents
 
                         newModel =
                             { model
@@ -108,19 +97,19 @@ update wrapMsg msg appState model =
             case model.questionnaireModel of
                 Success questionnaireModel ->
                     let
-                        ( newSeed, newQuestionnaireModel, questionnaireCmd ) =
-                            Questionnaire.update questionnaireMsg
-                                (wrapMsg << QuestionnaireMsg)
-                                Nothing
-                                appState
-                                { events = []
-                                , kmEditorUuid = Nothing
+                        updateReturnData =
+                            Questionnaire.update appState
+                                { wrapMsg = wrapMsg << QuestionnaireMsg
+                                , mbKmEditorUuid = Nothing
+                                , mbSetFullScreenMsg = Nothing
+                                , projectCommon = ProjectCommon.dummy
                                 }
+                                questionnaireMsg
                                 questionnaireModel
                     in
-                    ( newSeed
-                    , { model | questionnaireModel = Success newQuestionnaireModel }
-                    , questionnaireCmd
+                    ( updateReturnData.seed
+                    , { model | questionnaireModel = Success updateReturnData.model }
+                    , updateReturnData.cmd
                     )
 
                 _ ->

@@ -7,7 +7,7 @@ import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltipLeft)
 import Dict
 import Gettext exposing (gettext)
-import Html exposing (Html, div, input, label, p, span, text)
+import Html exposing (Html, div, hr, input, label, p, span, text)
 import Html.Attributes exposing (checked, class, disabled, type_)
 import Html.Events exposing (onCheck)
 import Html.Extra as Html
@@ -46,7 +46,11 @@ view appState model =
 
 formView : AppState -> Model -> Html Msg
 formView appState model =
-    div [] (List.map (viewPlugin appState model) (List.sortBy (String.toLower << .name) appState.pluginMetadata))
+    appState.pluginMetadata
+        |> List.sortBy (String.toLower << .name)
+        |> List.map (viewPlugin appState model)
+        |> List.intersperse (hr [] [])
+        |> div []
 
 
 viewPlugin : AppState -> Model -> PluginMetadata -> Html Msg
@@ -103,7 +107,7 @@ viewPlugin appState model pluginMetadata =
         versionBadge =
             Badge.light [ class "ms-2" ] [ text (Version.toString pluginMetadata.version) ]
     in
-    div [ class "form-check border-top pt-3 mb-3 d-flex justify-content-between" ]
+    div [ class "form-check my-0 py-0 d-flex justify-content-between" ]
         [ div []
             [ label [ class "form-check-label form-check-toggle" ]
                 [ input

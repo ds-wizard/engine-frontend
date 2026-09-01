@@ -3,6 +3,7 @@ module Wizard.Pages.Projects.Routes exposing
     , indexRouteIsTemplateFilterId
     , indexRouteKnowledgeModelPackagesFilterId
     , indexRouteProjectTagsFilterId
+    , indexRouteUserGroupsFilterId
     , indexRouteUsersFilterId
     )
 
@@ -16,8 +17,7 @@ type Route
     = CreateRoute (Maybe Uuid) (Maybe Uuid)
     | CreateMigrationRoute Uuid
     | DetailRoute Uuid ProjectDetailRoute
-    | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator)
-    | MigrationRoute Uuid
+    | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator)
     | ImportRoute Uuid String
     | DocumentDownloadRoute Uuid Uuid
     | FileDownloadRoute Uuid Uuid
@@ -26,6 +26,11 @@ type Route
 indexRouteUsersFilterId : String
 indexRouteUsersFilterId =
     "userUuids"
+
+
+indexRouteUserGroupsFilterId : String
+indexRouteUserGroupsFilterId =
+    "userGroupUuids"
 
 
 indexRouteIsTemplateFilterId : String

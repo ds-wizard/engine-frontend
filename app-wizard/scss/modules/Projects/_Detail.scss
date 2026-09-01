@@ -18,7 +18,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
     .public--app & {
         height: calc(100vh - #{$public-header-height});
 
-        .questionnaire, .questionnaire2 {
+        .questionnaire {
             height: $public-content-height;
         }
 
@@ -27,7 +27,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                 height: $public-content-with-warning-height !important;
             }
 
-            .questionnaire, .questionnaire2 {
+            .questionnaire {
                 height: $public-content-with-warning-height !important;
             }
         }
@@ -36,7 +36,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
     .app-fullscreen & {
         height: 100vh;
 
-        .questionnaire, .questionnaire2 {
+        .questionnaire {
             height: 100vh;
         }
     }
@@ -46,7 +46,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
             height: $content-with-warning-height !important;
         }
 
-        .questionnaire, .questionnaire2 {
+        .questionnaire {
             height: $content-with-warning-height !important;
         }
     }
@@ -207,8 +207,13 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
         }
     }
 
-    .questionnaire, .questionnaire2 {
+    .questionnaire {
         height: $content-height;
+    }
+
+    .ShareModal__PublicLink.visible {
+        // the row also contains the copy link button, so it needs more space
+        max-height: 6rem;
     }
 
     .ShareModal__Users {
@@ -226,13 +231,16 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-left: 0.5rem;
-            padding: 0.25rem 1rem 0.25rem 0.5rem;
-            border-top-left-radius: 5rem;
-            border-bottom-left-radius: 5rem;
+            margin-left: $spacer-3;
+            margin-right: $spacer-3;
+            padding: $spacer-2;
 
             &:hover {
-                background: $gray-200;
+                background: $gray-200 !important;
+            }
+
+            &:not(:first-child) {
+                margin-top: $spacer-1;
             }
 
             & > div {
@@ -246,6 +254,10 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
 
             .fas, .far, .fab{
                 margin-left: 0.5rem;
+            }
+
+            &-name {
+                font-weight: 500;
             }
         }
 

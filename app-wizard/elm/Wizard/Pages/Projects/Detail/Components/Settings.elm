@@ -47,6 +47,8 @@ import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSu
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.Project.DocumentTemplateProjectState as DocumentTemplateProjectState
+import Wizard.Api.Models.Project.KnowledgeModelProjectState as KnowledgeModelProjectState
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.FormActions as FormActions
@@ -345,12 +347,15 @@ formView appState settings model =
 
                 templateFlash =
                     if selectedTemplateUuid == questionnaireTemplateUuid then
-                        case ( settings.documentTemplateState, settings.documentTemplatePhase ) of
-                            ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
+                        case ( settings.documentTemplateSupportState, settings.documentTemplatePhase, settings.documentTemplateState ) of
+                            ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _, _ ) ->
                                 Flash.error (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
 
-                            ( _, Just DocumentTemplatePhase.Deprecated ) ->
+                            ( _, Just DocumentTemplatePhase.Deprecated, _ ) ->
                                 Flash.warning (gettext "This document template is now deprecated." appState.locale)
+
+                            ( _, _, Just DocumentTemplateProjectState.Outdated ) ->
+                                Flash.warning (gettext "A newer version of this document template is available." appState.locale)
 
                             _ ->
                                 Html.nothing
@@ -438,6 +443,7 @@ formView appState settings model =
     Form.initDynamic appState (FormMsg Form.Submit) model.savingQuestionnaire
         |> Form.setFormView formContent
         |> Form.setFormChanged (tagsChanged || formChanged)
+        |> Form.setNoPaddingBottom
         |> Form.viewDynamic
 
 
@@ -558,24 +564,27 @@ knowledgeModel appState settings =
                     , Tag.viewList { showDescription = True } settings.knowledgeModelTags
                     ]
 
-        deprecatedWarning =
+        knowledgeModelFlash =
             if settings.knowledgeModelPackage.phase == KnowledgeModelPackagePhase.Deprecated then
                 Flash.warning (gettext "This knowledge model is now deprecated." appState.locale)
+
+            else if settings.knowledgeModelState == KnowledgeModelProjectState.Outdated then
+                Flash.warning (gettext "A newer version of this knowledge model is available." appState.locale)
 
             else
                 Html.nothing
     in
     div []
         [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
-        , deprecatedWarning
+        , knowledgeModelFlash
         , linkTo (Routes.knowledgeModelsDetail settings.knowledgeModelPackage.uuid)
             [ class "package-link mb-2" ]
-            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage settings.knowledgeModelPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithId (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage settings.knowledgeModelPackage) ]
         , tagList
         , div [ class "mt-3" ]
             [ linkTo (Routes.projectsCreateMigration settings.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]
-                [ text (gettext "Create migration" appState.locale) ]
+                [ text (gettext "Migrate project" appState.locale) ]
             ]
         , p [ class "text-muted form-text mt-1 mb-0" ]
             [ text (gettext "Project migration lets you move your project to a newer or different version of the knowledge model, and update which questions are included by changing question tags." appState.locale) ]
