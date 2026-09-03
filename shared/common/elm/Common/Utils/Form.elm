@@ -1,6 +1,7 @@
 module Common.Utils.Form exposing
     ( containsChanges
     , errorToString
+    , fieldErrorToString
     , isValid
     , moveListItem
     , reset
@@ -36,11 +37,20 @@ errorToString locale labelText error =
         InvalidFloat ->
             gettext "This is not a valid number." locale
 
+        InvalidInt ->
+            gettext "This is not a valid number." locale
+
         SmallerFloatThan n ->
             String.format (gettext "This should not be less than %s." locale) [ String.fromFloat n ]
 
         GreaterFloatThan n ->
             String.format (gettext "This should not be more than %s." locale) [ String.fromFloat n ]
+
+        SmallerIntThan n ->
+            String.format (gettext "This should not be less than %s." locale) [ String.fromInt n ]
+
+        GreaterIntThan n ->
+            String.format (gettext "This should not be more than %s." locale) [ String.fromInt n ]
 
         CustomError err ->
             case err of
@@ -58,6 +68,26 @@ errorToString locale labelText error =
 
         _ ->
             gettext "Invalid value." locale
+
+
+{-| Message for a field's live error, if it has one.
+
+`errorToString` alone cannot tell an empty field from one holding something
+invalid - elm-form reports `InvalidInt` for both an empty and a non-numeric
+number field - so the empty case is decided from the raw value instead.
+
+-}
+fieldErrorToString : Gettext.Locale -> String -> Form.FieldState FormError String -> Maybe String
+fieldErrorToString locale labelText field =
+    let
+        toString error =
+            if Maybe.unwrap True String.isEmpty field.value then
+                String.format (gettext "%s cannot be empty." locale) [ labelText ]
+
+            else
+                errorToString locale labelText error
+    in
+    Maybe.map toString field.liveError
 
 
 setFormErrors : { b | locale : Gettext.Locale } -> ApiError -> Form FormError a -> Form FormError a

@@ -103,6 +103,7 @@ type alias DropzoneConfig msg =
     , buttonText : String
     , dropzoneText : String
     , fileIcon : Maybe (Html msg)
+    , invalid : Bool
     }
 
 
@@ -120,7 +121,10 @@ viewDropzone : DropzoneConfig msg -> StateData -> Html msg
 viewDropzone cfg state =
     div
         [ class "dropzone rounded-3"
-        , classList [ ( "active", state.hover ) ]
+        , classList
+            [ ( "active", state.hover )
+            , ( "is-invalid", cfg.invalid )
+            ]
         , alwaysPreventDefaultOn "dragenter" (cfg.wrapMsg DragEnter)
         , alwaysPreventDefaultOn "dragover" (cfg.wrapMsg DragEnter)
         , alwaysPreventDefaultOn "dragleave" (cfg.wrapMsg DragLeave)

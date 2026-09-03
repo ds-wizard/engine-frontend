@@ -16,7 +16,6 @@ import Common.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuest
 import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryString as PaginationQueryString
@@ -51,7 +50,6 @@ import Wizard.Api.Models.Project.DocumentTemplateProjectState as DocumentTemplat
 import Wizard.Api.Models.Project.KnowledgeModelProjectState as KnowledgeModelProjectState
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
@@ -417,17 +415,9 @@ formView appState settings model =
         formChanged =
             not <| Set.isEmpty <| Set.remove (lastProjectTagFieldName model.form) <| Form.getChangedFields model.form
 
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.savingQuestionnaire
-            , formChanged = tagsChanged || formChanged
-            , wide = False
-            }
-
         formContent =
             div []
-                ([ FormResult.errorOnlyView model.savingQuestionnaire
-                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
+                ([ Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
                  , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" <| gettext "Description" appState.locale
                  , Html.map FormMsg <| projectTagsInput
                  , languageInput
@@ -436,8 +426,6 @@ formView appState settings model =
                  , Html.map FormMsg <| formatInput
                  ]
                     ++ isTemplateInput
-                    ++ [ FormActions.viewDynamic formActionsConfig appState
-                       ]
                 )
     in
     Form.initDynamic appState (FormMsg Form.Submit) model.savingQuestionnaire

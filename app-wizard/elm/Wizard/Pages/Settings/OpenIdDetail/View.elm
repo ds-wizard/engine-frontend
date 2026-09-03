@@ -4,7 +4,6 @@ import Common.Components.FontAwesome exposing (faDelete, fas)
 import Common.Components.Form as Form
 import Common.Components.FormExtra as FromExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -81,8 +80,7 @@ viewOpenId appState model openId =
 
         formContent =
             div []
-                [ FormResult.errorOnlyView model.savingOpenId
-                , mapFormMsg <| FormGroup.input appState.locale model.form "name" (gettext "Name" appState.locale)
+                [ mapFormMsg <| FormGroup.input appState.locale model.form "name" (gettext "Name" appState.locale)
                 , div [ class "card bg-light mb-3" ]
                     [ div [ class "card-body" ]
                         [ FormGroup.plainGroup

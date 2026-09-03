@@ -98,10 +98,6 @@ registrySignupModal appState model =
                 button [ class "btn btn-primary", onClick <| ToggleRegistrySignup False ]
                     [ text (gettext "Done" appState.locale) ]
 
-            else if not (List.isEmpty (Form.getErrors model.registrySignupForm)) then
-                button [ class "btn btn-primary", disabled True ]
-                    [ text (gettext "Sign Up" appState.locale) ]
-
             else
                 ActionButton.button
                     { label = gettext "Sign Up" appState.locale

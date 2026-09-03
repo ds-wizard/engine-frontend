@@ -11,7 +11,6 @@ module Wizard.Pages.Users.Edit.Components.PluginSettings exposing
 import ActionResult exposing (ActionResult)
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Form as Form
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Ports.Window as Window
@@ -153,7 +152,5 @@ pluginSettingsView appState model plugin userSettingsConnector pluginSettings =
     div []
         [ Page.header (String.format (gettext "%s Settings" appState.locale) [ plugin.name ]) []
         , div [ class "row" ]
-            [ FormResult.errorOnlyView model.savingPluginSettings
-            , form
-            ]
+            [ form ]
         ]

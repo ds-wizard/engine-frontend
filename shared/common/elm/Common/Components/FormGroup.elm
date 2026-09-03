@@ -8,6 +8,7 @@ module Common.Components.FormGroup exposing
     , formGroupCustom
     , formatRadioGroup
     , getErrors
+    , getErrorsForFields
     , hours
     , htmlOrMarkdownEditor
     , htmlRadioGroup
@@ -198,6 +199,9 @@ secret locale form fieldName labelText =
 fileSize : Gettext.Locale -> Form FormError o -> String -> String -> Html Form.Msg
 fileSize locale form fieldName labelText =
     let
+        ( _, errorClass ) =
+            getErrors locale (Form.getFieldAsString fieldName form) labelText
+
         inputFn field attributes =
             let
                 value =
@@ -205,7 +209,7 @@ fileSize locale form fieldName labelText =
                         |> Maybe.andThen String.toInt
                         |> Maybe.withDefault 0
             in
-            div [ class "input-group" ]
+            div [ class ("input-group " ++ errorClass) ]
                 [ Input.textInput field
                     (attributes
                         ++ [ class "form-control"
@@ -223,6 +227,9 @@ fileSize locale form fieldName labelText =
 hours : Gettext.Locale -> Form FormError o -> String -> String -> Html Form.Msg
 hours locale form fieldName labelText =
     let
+        ( _, errorClass ) =
+            getErrors locale (Form.getFieldAsString fieldName form) labelText
+
         inputFn field attributes =
             let
                 value =
@@ -233,7 +240,7 @@ hours locale form fieldName labelText =
                 hoursToDays =
                     String.fromFloat (toFloat (round (10 * toFloat value / 24)) / 10)
             in
-            div [ class "input-group" ]
+            div [ class ("input-group " ++ errorClass) ]
                 [ Input.textInput field
                     (attributes
                         ++ [ class "form-control"
@@ -756,6 +763,20 @@ readOnlyInput valueText labelText =
         ]
 
 
+{-| Get Html and form group error class for a group of fields rendered as a
+single control, such as the three inputs of a version. The first error found is
+reported against the label of the whole group.
+-}
+getErrorsForFields : Gettext.Locale -> List (Form.FieldState FormError String) -> String -> ( Html msg, String )
+getErrorsForFields locale fields labelText =
+    case List.head (List.filterMap (Form.fieldErrorToString locale labelText) fields) of
+        Just message ->
+            ( p [ class "invalid-feedback" ] [ text message ], "is-invalid" )
+
+        Nothing ->
+            ( Html.nothing, "" )
+
+
 {-| Get Html and form group error class for a given field. If the field
 contains no errors, the returned Html and error class are empty.
 -}
@@ -792,13 +813,8 @@ version locale cfg form =
         patchField =
             Form.getFieldAsString cfg.patchField form
 
-        errorClass =
-            case ( majorField.liveError, minorField.liveError, patchField.liveError ) of
-                ( Nothing, Nothing, Nothing ) ->
-                    ""
-
-                _ ->
-                    " is-invalid"
+        ( error, errorClass ) =
+            getErrorsForFields locale [ majorField, minorField, patchField ] cfg.label
 
         suggestions =
             case cfg.setVersionMsg of
@@ -831,13 +847,14 @@ version locale cfg form =
     in
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text cfg.label ]
-        , div [ class "version-inputs" ]
-            [ Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-major", id "version-major" ]
+        , div [ class <| "version-inputs " ++ errorClass ]
+            [ Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text majorField [ class <| "form-control " ++ errorClass, Html.Attributes.min "0", name "version-major", id "version-major" ]
             , text "."
-            , Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text minorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-minor", id "version-minor" ]
+            , Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text minorField [ class <| "form-control " ++ errorClass, Html.Attributes.min "0", name "version-minor", id "version-minor" ]
             , text "."
-            , Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-patch", id "version-patch" ]
+            , Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text patchField [ class <| "form-control " ++ errorClass, Html.Attributes.min "0", name "version-patch", id "version-patch" ]
             ]
+        , error
         , suggestions
         , FormExtra.text <| gettext "The version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes, and number X indicates a major change." locale
         ]
