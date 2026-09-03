@@ -69,7 +69,7 @@ listingConfig appState roles =
     , filters =
         [ Listing.SimpleFilter indexRouteRoleFilterId
             { name = gettext "Role" appState.locale
-            , options = List.map Role.toFormOption roles
+            , options = List.map (Role.toFormOption appState.locale) roles
             }
         ]
     , toRoute = Routes.usersIndexWithFilters
@@ -103,7 +103,7 @@ listingTitleBadge appState user =
 
 roleBadge : AppState -> User -> Html msg
 roleBadge appState user =
-    Badge.light [] [ text <| gettext user.role.name appState.locale ]
+    Badge.light [] [ text <| Role.localizedName appState.locale user.role ]
 
 
 listingDescription : User -> Html Msg

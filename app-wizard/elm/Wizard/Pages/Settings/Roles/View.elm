@@ -1,6 +1,6 @@
 module Wizard.Pages.Settings.Roles.View exposing (view)
 
-import Common.Api.Models.Role exposing (Role)
+import Common.Api.Models.Role as Role exposing (Role)
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faDelete)
 import Common.Components.Modal as Modal
@@ -35,7 +35,7 @@ viewRoles appState model roles =
                 [ text (gettext "Create" appState.locale) ]
             ]
         , div [ class "card-list" ]
-            (List.map (viewRole appState) (List.sortBy .name roles))
+            (List.map (viewRole appState) (List.sortBy (Role.localizedName appState.locale) roles))
         , viewDeleteModal appState model
         ]
 
@@ -85,7 +85,7 @@ viewRole appState role =
         , href (Routing.toUrl (Routes.settingsRoleDetail role.uuid))
         ]
         [ div [ class "card-body py-2 d-flex align-items-center" ]
-            [ text role.name
+            [ text (Role.localizedName appState.locale role)
             , badge (class "ms-2 rounded-pill" :: tooltip (gettext "Users using this role" appState.locale)) [ text (String.fromInt role.usersCount) ]
             , defaultRoleBadge
             , span (class "ms-auto" :: tooltipLeft deleteTooltip)
@@ -113,7 +113,7 @@ viewDeleteModal appState model =
                     , [ p []
                             (String.formatHtml
                                 (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                                [ strong [] [ text role.name ] ]
+                                [ strong [] [ text (Role.localizedName appState.locale role) ] ]
                             )
                       ]
                     )
