@@ -245,9 +245,7 @@ userFormView appState model roles isCurrent =
             else
                 let
                     roleOptions =
-                        roles
-                            |> List.map (Role.toFormOption appState.locale)
-                            |> List.sortBy Tuple.second
+                        Role.toFormOptions appState.locale roles
                 in
                 FormGroup.select appState.locale roleOptions model.userForm "role" <| gettext "Role" appState.locale
 

@@ -1,4 +1,4 @@
-module Common.Api.Models.Role exposing (Role, decoder, localizedName, toFormOption)
+module Common.Api.Models.Role exposing (Role, decoder, localizedName, toFormOptions)
 
 import Common.Api.Models.RolePermission as RolePermission exposing (RolePermission)
 import Gettext exposing (Locale, gettext)
@@ -39,6 +39,10 @@ localizedName locale role =
     gettext role.name locale
 
 
-toFormOption : Locale -> Role -> ( String, String )
-toFormOption locale role =
-    ( Uuid.toString role.uuid, localizedName locale role )
+{-| Form options for role selects, sorted alphabetically by the localized role name.
+-}
+toFormOptions : Locale -> List Role -> List ( String, String )
+toFormOptions locale roles =
+    roles
+        |> List.map (\role -> ( Uuid.toString role.uuid, localizedName locale role ))
+        |> List.sortBy (String.toLower << Tuple.second)

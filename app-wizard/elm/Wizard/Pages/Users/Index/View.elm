@@ -69,7 +69,7 @@ listingConfig appState roles =
     , filters =
         [ Listing.SimpleFilter indexRouteRoleFilterId
             { name = gettext "Role" appState.locale
-            , options = List.map (Role.toFormOption appState.locale) roles
+            , options = Role.toFormOptions appState.locale roles
             }
         ]
     , toRoute = Routes.usersIndexWithFilters

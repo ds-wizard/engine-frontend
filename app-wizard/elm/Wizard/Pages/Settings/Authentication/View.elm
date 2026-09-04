@@ -77,7 +77,7 @@ formView roles appState form =
             ]
 
         roleOptions =
-            List.map (Role.toFormOption appState.locale) roles
+            Role.toFormOptions appState.locale roles
     in
     div [ class "Authentication" ]
         ([ FormGroup.select appState.locale roleOptions form "defaultRoleUuid" (gettext "Default role" appState.locale)

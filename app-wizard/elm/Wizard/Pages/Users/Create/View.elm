@@ -41,7 +41,7 @@ formView : AppState -> List Role -> Form FormError UserCreateForm -> Html Form.M
 formView appState roles form =
     let
         roleOptions =
-            roles |> List.map (Role.toFormOption appState.locale) |> List.sortBy Tuple.second
+            Role.toFormOptions appState.locale roles
     in
     div []
         [ FormGroup.input appState.locale form "email" <| gettext "Email" appState.locale
