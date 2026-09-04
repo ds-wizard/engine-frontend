@@ -1,17 +1,20 @@
 module Wizard.Pages.KMEditor.Publish.View exposing (view)
 
+import ActionResult
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.ShortcutUtils as Shortcut
 import Flip exposing (flip)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, text)
-import Html.Attributes exposing (href, target)
+import Html.Attributes exposing (class, href, target)
 import Html.Attributes.Extensions exposing (dataCy)
+import Shortcut
 import String.Format as String
 import Version exposing (Version)
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
@@ -32,9 +35,18 @@ view appState model =
 
 contentView : AppState -> Model -> KnowledgeModelEditorDetail -> Html Msg
 contentView appState model kmEditor =
+    let
+        shortcuts =
+            if ActionResult.isLoading model.publishingKnowledgeModelEditor then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac (FormMsg Form.Submit) ]
+    in
     div [ wideDetailClass "KMEditor__Publish" ]
         [ Page.header (gettext "Publish new version" appState.locale) []
-        , div []
+        , Shortcut.shortcutElement shortcuts
+            [ class "d-block" ]
             [ FormResult.view model.publishingKnowledgeModelEditor
             , formView appState model.form kmEditor
             , Html.map PublishLocaleSelectionMsg (PublishLocaleSelection.view appState model.localeSelection)

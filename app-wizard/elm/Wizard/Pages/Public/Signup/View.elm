@@ -49,7 +49,7 @@ signupForm appState model =
             , link = Just ( Routes.PublicRoute (LoginRoute Nothing), gettext "I already have an account" appState.locale )
             }
     in
-    publicForm formConfig
+    publicForm appState formConfig
 
 
 formView : AppState -> Form FormError SignupForm -> Html Form.Msg

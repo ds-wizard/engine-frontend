@@ -26,12 +26,14 @@ import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.ShortcutUtils as Shortcut
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
+import Shortcut
 import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Roles as RolesApi
@@ -232,17 +234,27 @@ userFormView appState model roles isCurrent =
 
             else
                 FormGroup.toggle model.userForm "active" <| gettext "Active" appState.locale
+
+        shortcuts =
+            if ActionResult.isLoading model.savingUser then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac Form.Submit ]
     in
-    Html.form [ onSubmit Form.Submit, class "col-8" ]
-        [ FormResult.view model.savingUser
-        , FormGroup.input appState.locale model.userForm "email" <| gettext "Email" appState.locale
-        , FormGroup.input appState.locale model.userForm "firstName" <| gettext "First name" appState.locale
-        , FormGroup.input appState.locale model.userForm "lastName" <| gettext "Last name" appState.locale
-        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState.locale model.userForm "affiliation" <| gettext "Affiliation" appState.locale
-        , roleSelect
-        , activeToggle
-        , div [ class "mt-5" ]
-            [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block col-8" ]
+        [ Html.form [ onSubmit Form.Submit ]
+            [ FormResult.view model.savingUser
+            , FormGroup.input appState.locale model.userForm "email" <| gettext "Email" appState.locale
+            , FormGroup.input appState.locale model.userForm "firstName" <| gettext "First name" appState.locale
+            , FormGroup.input appState.locale model.userForm "lastName" <| gettext "Last name" appState.locale
+            , FormGroup.inputWithTypehints appState.config.organization.affiliations appState.locale model.userForm "affiliation" <| gettext "Affiliation" appState.locale
+            , roleSelect
+            , activeToggle
+            , div [ class "mt-5" ]
+                [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+            ]
         ]
 
 

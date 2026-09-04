@@ -16,11 +16,13 @@ import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.ShortcutUtils as Shortcut
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form, input, label, text)
 import Html.Attributes exposing (checked, class, classList, name, type_)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
+import Shortcut
 import Uuid exposing (Uuid)
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Api.Models.LocaleSuggestion exposing (LocaleSuggestion)
@@ -131,14 +133,25 @@ view appState model =
 
 viewLanguageSelection : AppState -> Model -> ( UserLocale, List LocaleSuggestion ) -> Html Msg
 viewLanguageSelection appState model ( _, locales ) =
+    let
+        shortcuts =
+            if ActionResult.isLoading model.savingLocale then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac SaveLocale ]
+    in
     div []
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.profileLanguage) (gettext "Language" appState.locale)
         , div [ class "row" ]
-            [ form [ class "col-8", onSubmit SaveLocale ]
-                [ FormResult.errorOnlyView model.savingLocale
-                , languageFormView appState model locales
-                , div [ class "mt-5" ]
-                    [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingLocale) ]
+            [ Shortcut.shortcutElement shortcuts
+                [ class "d-block col-8" ]
+                [ form [ onSubmit SaveLocale ]
+                    [ FormResult.errorOnlyView model.savingLocale
+                    , languageFormView appState model locales
+                    , div [ class "mt-5" ]
+                        [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingLocale) ]
+                    ]
                 ]
             ]
         ]

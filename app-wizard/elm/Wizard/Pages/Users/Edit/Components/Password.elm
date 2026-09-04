@@ -18,11 +18,13 @@ import Common.Ports.Dom as Dom
 import Common.Ports.FormUtils as FormUtils
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.ShortcutUtils as Shortcut
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
+import Shortcut
 import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Common.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)
@@ -108,12 +110,23 @@ putUserPasswordCompleted cfg appState model result =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Html.form [ onSubmit (PasswordFormMsg Form.Submit), detailClass "" ]
-        [ Page.header (gettext "Password" appState.locale) []
-        , FormResult.view model.savingPassword
-        , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
-        , div [ class "mt-5" ]
-            [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingPassword) ]
+    let
+        shortcuts =
+            if ActionResult.isLoading model.savingPassword then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac (PasswordFormMsg Form.Submit) ]
+    in
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block", detailClass "" ]
+        [ Html.form [ onSubmit (PasswordFormMsg Form.Submit) ]
+            [ Page.header (gettext "Password" appState.locale) []
+            , FormResult.view model.savingPassword
+            , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
+            , div [ class "mt-5" ]
+                [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingPassword) ]
+            ]
         ]
 
 

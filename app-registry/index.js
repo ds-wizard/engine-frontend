@@ -3,6 +3,9 @@ const axiosRetry = require('axios-retry').default
 
 const program = require('./elm/Registry.elm')
 
+require('../shared/common/js/components/shortcut-element')
+
+const {createNavigatorData} = require('../shared/common/js/navigator')
 const registerCopyPorts = require('../shared/common/js/ports/copy')
 const registerSessionPorts = require('./js/ports/session')
 
@@ -41,6 +44,7 @@ function loadApp(config) {
             apiUrl: apiUrl(),
             appTitle: appTitle(),
             config: config,
+            navigator: createNavigatorData(),
             session: JSON.parse(localStorage.getItem('session')),
         }
     })

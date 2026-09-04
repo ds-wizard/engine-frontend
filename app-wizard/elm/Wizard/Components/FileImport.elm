@@ -15,6 +15,7 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (faError, faImportFile, faSpinner, faSuccess, faWarning)
 import Common.Components.Tooltip exposing (tooltipLeft)
+import Common.Utils.ShortcutUtils as Shortcut
 import Dict exposing (Dict)
 import File exposing (File)
 import File.Select as Select
@@ -26,6 +27,7 @@ import Html.Events exposing (onClick)
 import Html.Events.Extensions exposing (alwaysPreventDefaultOn, alwaysPreventDefaultOnWithDecoder)
 import Html.Extra as Html
 import Json.Decode as D
+import Shortcut
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes exposing (Route)
@@ -253,8 +255,16 @@ filesView cfg appState model files =
                         [ text (gettext "Cancel" appState.locale) ]
                     , ActionButton.button <| ActionButton.ButtonConfig (gettext "Import" appState.locale) combinedResult Upload False
                     ]
+
+        shortcuts =
+            if ActionResult.isSuccess combinedResult || ActionResult.isLoading combinedResult then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac Upload ]
     in
-    div [ class "rounded-3" ]
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block rounded-3" ]
         [ globalResult
         , div [] (List.map fileView files)
         , controls

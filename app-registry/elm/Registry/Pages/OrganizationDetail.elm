@@ -128,7 +128,7 @@ view appState model =
 
 viewOrganizationForm : AppState -> Model -> Organization -> Html Msg
 viewOrganizationForm appState model _ =
-    FormWrapper.view
+    FormWrapper.view appState
         { title = gettext "Edit Organization" appState.locale
         , submitMsg = FormMsg Form.Submit
         , content =

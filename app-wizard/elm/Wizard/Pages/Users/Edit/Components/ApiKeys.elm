@@ -18,6 +18,7 @@ import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setApiKey, setApiKeys)
+import Common.Utils.ShortcutUtils as Shortcut
 import Common.Utils.TimeUtils as TimeUtils
 import Form exposing (Form)
 import Gettext exposing (gettext)
@@ -25,6 +26,7 @@ import Html exposing (Html, a, button, div, form, h3, hr, strong, table, tbody, 
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
+import Shortcut
 import String.Format as String
 import Wizard.Api.ApiKeys as ApiKeysApi
 import Wizard.Components.CopyableCodeBlock as CopyableCodeBlock
@@ -215,13 +217,24 @@ viewApiKeyForm appState model =
                 ]
 
         _ ->
-            form [ onSubmit (FormMsg Form.Submit) ]
-                [ FormResult.errorOnlyView model.apiKey
-                , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" (gettext "API Key Name" appState.locale)
-                , FormExtra.textAfter (gettext "Give the API key a name to identify it, such as the name of the application using it or the purpose of the key." appState.locale)
-                , Html.map FormMsg <| FormGroup.date appState.locale model.form "expiresAt" (gettext "Expiration" appState.locale)
-                , FormExtra.textAfter (gettext "The date when the API key will no longer be valid." appState.locale)
-                , ActionButton.submit { label = gettext "Create" appState.locale, result = model.apiKey }
+            let
+                shortcuts =
+                    if ActionResult.isLoading model.apiKey then
+                        []
+
+                    else
+                        [ Shortcut.submitShortcut appState.navigator.isMac (FormMsg Form.Submit) ]
+            in
+            Shortcut.shortcutElement shortcuts
+                [ class "d-block" ]
+                [ form [ onSubmit (FormMsg Form.Submit) ]
+                    [ FormResult.errorOnlyView model.apiKey
+                    , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" (gettext "API Key Name" appState.locale)
+                    , FormExtra.textAfter (gettext "Give the API key a name to identify it, such as the name of the application using it or the purpose of the key." appState.locale)
+                    , Html.map FormMsg <| FormGroup.date appState.locale model.form "expiresAt" (gettext "Expiration" appState.locale)
+                    , FormExtra.textAfter (gettext "The date when the API key will no longer be valid." appState.locale)
+                    , ActionButton.submit { label = gettext "Create" appState.locale, result = model.apiKey }
+                    ]
                 ]
 
 

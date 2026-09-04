@@ -123,7 +123,7 @@ viewSignupForm appState model =
                 , p [ class "invalid-feedback", classList [ ( "d-block", hasError ) ] ] [ text (gettext "You have to read Privacy and Terms of Service first." appState.locale) ]
                 ]
     in
-    FormWrapper.view
+    FormWrapper.view appState
         { title = gettext "Sign up" appState.locale
         , submitMsg = FormMsg Form.Submit
         , content =

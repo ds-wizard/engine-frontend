@@ -1,10 +1,12 @@
 module Wizard.Pages.Public.Login.View exposing (view)
 
+import ActionResult
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (fa, fas)
 import Common.Components.FormResult as FormResult
 import Common.Components.Tooltip exposing (tooltipLeft)
 import Common.Utils.MarkdownOrHtml as MarkdownOrHtml
+import Common.Utils.ShortcutUtils as Shortcut
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, input, p, span, text)
 import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeholder, type_)
@@ -13,6 +15,7 @@ import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Extra as Html
 import Html.Keyed
 import Maybe.Extra as Maybe
+import Shortcut
 import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Components.Announcements as Announcements
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton
@@ -115,7 +118,8 @@ loginFormView appState model =
                         [ text (gettext "Or connect with" appState.locale) ]
                         :: externalLoginButtons
         in
-        div []
+        Shortcut.shortcutElement (loginShortcuts appState model)
+            [ class "d-block" ]
             [ form [ onSubmit DoLogin, class "card bg-light" ]
                 [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
                 , div [ class "card-body" ]
@@ -143,7 +147,19 @@ loginFormView appState model =
 
 codeFormView : AppState -> Model -> Html Msg
 codeFormView appState model =
-    div []
+    let
+        codeValid =
+            Maybe.isJust (String.toInt model.code)
+
+        shortcuts =
+            if codeValid then
+                loginShortcuts appState model
+
+            else
+                []
+    in
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block" ]
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]
@@ -166,9 +182,18 @@ codeFormView appState model =
                     [ ActionButton.submitWithAttrs
                         { label = gettext "Verify" appState.locale
                         , result = model.loggingIn
-                        , attrs = [ class "w-100", disabled (Maybe.isNothing (String.toInt model.code)) ]
+                        , attrs = [ class "w-100", disabled (not codeValid) ]
                         }
                     ]
                 ]
             ]
         ]
+
+
+loginShortcuts : AppState -> Model -> List (Shortcut.Shortcut Msg)
+loginShortcuts appState model =
+    if ActionResult.isLoading model.loggingIn then
+        []
+
+    else
+        [ Shortcut.submitShortcut appState.navigator.isMac DoLogin ]

@@ -4,12 +4,14 @@ import ActionResult exposing (ActionResult(..))
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (faSuccess)
 import Common.Components.FormResult as FormResult
+import Common.Utils.ShortcutUtils as Shortcut
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onInput, onSubmit)
 import Html.Extra as Html
+import Shortcut
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
@@ -38,7 +40,16 @@ view appState model =
 
 viewForm : AppState -> Model -> Html Msg
 viewForm appState model =
-    div []
+    let
+        shortcuts =
+            if ActionResult.isLoading model.locale then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac Submit ]
+    in
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block" ]
         [ FormResult.errorOnlyView model.locale
         , div [ class "px-4 py-5 bg-light rounded-3" ]
             [ Html.form [ onSubmit Submit, class "input-group" ]

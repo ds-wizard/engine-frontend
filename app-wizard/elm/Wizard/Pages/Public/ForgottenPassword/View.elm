@@ -43,7 +43,7 @@ forgottenPasswordForm appState model =
             , link = Nothing
             }
     in
-    publicForm formConfig
+    publicForm appState formConfig
 
 
 formView : AppState -> Form FormError ForgottenPasswordForm -> Html Form.Msg
