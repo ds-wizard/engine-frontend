@@ -30,7 +30,7 @@ init : AppState -> Form FormError UserCreateForm
 init appState =
     let
         fields =
-            [ ( "role", Field.string (Uuid.toString appState.config.authentication.defaultRoleUuid) ) ]
+            [ ( "roleUuid", Field.string (Uuid.toString appState.config.authentication.defaultRoleUuid) ) ]
     in
     Form.initial fields (validation appState)
 
