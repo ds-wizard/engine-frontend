@@ -55,23 +55,12 @@ module.exports = {
                 ]
             },
             {
-                test: /\.html$/,
-                exclude: /node_modules/,
-                loader: 'file-loader',
-                options: {
-                    name: '[name].[ext]'
-                }
-            },
-            {
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
-                loader: 'elm-webpack-loader',
-                options: process.env.NODE_ENV === 'production' ? {
-                    verbose: true,
-                    optimize: true,
-                    pathToElm: 'node_modules/.bin/elm'
-                } : {
-                    verbose: true
+                loader: require.resolve('./scripts/elm-loader.js'),
+                options: {
+                    pathToElm: 'node_modules/.bin/elm',
+                    optimize: process.env.NODE_ENV === 'production'
                 }
             },
             {
