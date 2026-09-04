@@ -1,5 +1,6 @@
 module Wizard.Pages.Users.Edit.View exposing (view)
 
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
@@ -30,6 +31,11 @@ import Wizard.Utils.HtmlAttributesUtils exposing (settingsClass)
 
 view : AppState -> UserEditRoute -> Model -> Html Msg
 view appState subroute model =
+    Page.actionResultView appState (always (userView appState subroute model)) model.user
+
+
+userView : AppState -> UserEditRoute -> Model -> Html Msg
+userView appState subroute model =
     let
         content =
             case subroute of

@@ -4,6 +4,7 @@ module Wizard.Pages.Users.Edit.Components.Profile exposing
     , UpdateConfig
     , fetchData
     , initialModel
+    , setUser
     , update
     , view
     )
@@ -59,26 +60,26 @@ initialModel uuidOrCurrent =
 
 
 type Msg
-    = GetUserCompleted (Result ApiError User)
-    | GetRolesCompleted (Result ApiError (Pagination Role))
+    = GetRolesCompleted (Result ApiError (Pagination Role))
     | EditFormMsg Form.Msg
     | PutUserCompleted (Result ApiError User)
 
 
 fetchData : AppState -> UuidOrCurrent -> Cmd Msg
 fetchData appState uuidOrCurrent =
-    let
-        rolesCmd =
-            if UuidOrCurrent.isCurrent uuidOrCurrent then
-                Cmd.none
+    if UuidOrCurrent.isCurrent uuidOrCurrent then
+        Cmd.none
 
-            else
-                RolesApi.getRoles appState GetRolesCompleted
-    in
-    Cmd.batch
-        [ UsersApi.getUser appState uuidOrCurrent GetUserCompleted
-        , rolesCmd
-        ]
+    else
+        RolesApi.getRoles appState GetRolesCompleted
+
+
+setUser : User -> Model -> Model
+setUser user model =
+    { model
+        | user = ActionResult.Success user
+        , userForm = UserEditForm.init user
+    }
 
 
 type alias UpdateConfig msg =
@@ -92,9 +93,6 @@ update cfg appState msg model =
     case msg of
         EditFormMsg formMsg ->
             handleUserForm cfg appState formMsg model
-
-        GetUserCompleted result ->
-            getUserCompleted cfg appState model result
 
         GetRolesCompleted result ->
             getRolesCompleted cfg appState model result
@@ -123,27 +121,6 @@ handleUserForm cfg appState formMsg model =
                     Form.update UserEditForm.validation formMsg model.userForm
             in
             ( { model | userForm = userForm }, FormUtils.scrollToInvalidField formMsg )
-
-
-getUserCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError User -> ( Model, Cmd msg )
-getUserCompleted cfg appState model result =
-    let
-        newModel =
-            case result of
-                Ok user ->
-                    let
-                        userForm =
-                            UserEditForm.init user
-                    in
-                    { model | userForm = userForm, user = ActionResult.Success user }
-
-                Err error ->
-                    { model | user = ApiError.toActionResult appState (gettext "Unable to get the user." appState.locale) error }
-
-        cmd =
-            RequestHelpers.getResultCmd cfg.logoutMsg result
-    in
-    ( newModel, cmd )
 
 
 getRolesCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError (Pagination Role) -> ( Model, Cmd msg )
