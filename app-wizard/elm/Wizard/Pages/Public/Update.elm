@@ -20,9 +20,9 @@ fetchData route appState =
         OpenIdCallback _ _ _ _ _ ->
             Cmd.map OpenIdCallbackMsg Wizard.Pages.Public.OpenIdCallback.Update.fetchData
 
-        LoginRoute _ ->
+        LoginRoute mbOriginalUrl ->
             Cmd.map LoginMsg <|
-                Wizard.Pages.Public.Login.Update.fetchData appState
+                Wizard.Pages.Public.Login.Update.fetchData appState mbOriginalUrl
 
         LogoutSuccessful ->
             Wizard.Pages.Public.LogoutSuccessful.Update.fetchData appState

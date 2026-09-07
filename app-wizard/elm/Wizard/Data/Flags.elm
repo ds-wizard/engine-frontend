@@ -5,13 +5,13 @@ module Wizard.Data.Flags exposing
     )
 
 import Common.Data.Navigator as Navigator exposing (Navigator)
+import Common.Data.Session as Session exposing (Session)
 import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Gettext
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extensions as D
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
-import Wizard.Data.Session as Session exposing (Session)
 import Wizard.Plugins.Plugin as Plugin exposing (Plugin)
 import Wizard.Plugins.PluginMetadata as PluginMetadata exposing (PluginMetadata)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -20,6 +20,7 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 type alias Flags =
     { session : Maybe Session
     , seed : Int
+    , apiUrlBase : String
     , apiUrl : String
     , clientUrl : String
     , webSocketThrottleDelay : Maybe Float
@@ -44,6 +45,7 @@ decoder =
     D.succeed Flags
         |> D.required "session" (D.nullable Session.decoder)
         |> D.required "seed" D.int
+        |> D.required "apiUrlBase" D.string
         |> D.required "apiUrl" D.string
         |> D.required "clientUrl" D.string
         |> D.optional "webSocketThrottleDelay" (D.maybe D.float) Nothing
@@ -66,6 +68,7 @@ default : Flags
 default =
     { session = Nothing
     , seed = 0
+    , apiUrlBase = ""
     , apiUrl = ""
     , clientUrl = ""
     , webSocketThrottleDelay = Nothing

@@ -1,4 +1,4 @@
-module Wizard.Data.Session exposing
+module Common.Data.Session exposing
     ( Session
     , decoder
     , encode
@@ -7,6 +7,7 @@ module Wizard.Data.Session exposing
     , expired
     , expiresSoon
     , init
+    , isValid
     , setFullscreen
     , setRightPanelCollapsed
     , setSidebarCollapsed
@@ -25,40 +26,23 @@ type alias Session =
     , sidebarCollapsed : Bool
     , rightPanelCollapsed : Bool
     , fullscreen : Bool
-    , apiUrl : String
-    , v9 : Bool
+    , apiUrlBase : String
+    , v10 : Bool
     }
 
 
+{-| The API URL base is the part all the apps share, each of them appends its own `/<app>-api` to
+it. It is kept in the session so that the next load knows where to bootstrap from.
+-}
 init : String -> Session
-init apiUrl =
+init apiUrlBase =
     { token = Token.empty
     , sidebarCollapsed = False
     , rightPanelCollapsed = True
     , fullscreen = False
-    , apiUrl = apiUrl
-    , v9 = True
+    , apiUrlBase = apiUrlBase
+    , v10 = True
     }
-
-
-setToken : Session -> Token -> Session
-setToken session token =
-    { session | token = token }
-
-
-setSidebarCollapsed : Session -> Bool -> Session
-setSidebarCollapsed session collapsed =
-    { session | sidebarCollapsed = collapsed }
-
-
-setRightPanelCollapsed : Session -> Bool -> Session
-setRightPanelCollapsed session collapsed =
-    { session | rightPanelCollapsed = collapsed }
-
-
-setFullscreen : Session -> Bool -> Session
-setFullscreen session fullscreen =
-    { session | fullscreen = fullscreen }
 
 
 decoder : Decoder Session
@@ -68,8 +52,8 @@ decoder =
         |> D.optional "sidebarCollapsed" D.bool False
         |> D.optional "rightPanelCollapsed" D.bool True
         |> D.optional "fullscreen" D.bool False
-        |> D.required "apiUrl" D.string
-        |> D.required "v9" D.bool
+        |> D.optional "apiUrlBase" D.string ""
+        |> D.required "v10" D.bool
 
 
 encode : Session -> E.Value
@@ -79,14 +63,24 @@ encode session =
         , ( "sidebarCollapsed", E.bool session.sidebarCollapsed )
         , ( "rightPanelCollapsed", E.bool session.rightPanelCollapsed )
         , ( "fullscreen", E.bool session.fullscreen )
-        , ( "apiUrl", E.string session.apiUrl )
-        , ( "v9", E.bool session.v9 )
+        , ( "apiUrlBase", E.string session.apiUrlBase )
+        , ( "v10", E.bool session.v10 )
         ]
 
 
 exists : Session -> Bool
 exists session =
     session.token.token /= ""
+
+
+isValid : Time.Posix -> Session -> Bool
+isValid currentTime session =
+    exists session && not (expired currentTime session)
+
+
+expired : Time.Posix -> Session -> Bool
+expired currentTimePosix session =
+    Time.posixToMillis session.token.expiresAt < Time.posixToMillis currentTimePosix
 
 
 expiresSoon : Time.Posix -> Session -> Bool
@@ -101,18 +95,6 @@ expiresSoon currentTimePosix session =
     expiration - currentTime < expiresSoonTimeMillis
 
 
-expired : Time.Posix -> Session -> Bool
-expired currentTimePosix session =
-    let
-        expiration =
-            Time.posixToMillis session.token.expiresAt
-
-        currentTime =
-            Time.posixToMillis currentTimePosix
-    in
-    expiration < currentTime
-
-
 expiresSoonTimeMillis : Int
 expiresSoonTimeMillis =
     expirationWarningMins * 60 * 1000
@@ -121,3 +103,23 @@ expiresSoonTimeMillis =
 expirationWarningMins : Int
 expirationWarningMins =
     10
+
+
+setToken : Token -> Session -> Session
+setToken token session =
+    { session | token = token }
+
+
+setSidebarCollapsed : Bool -> Session -> Session
+setSidebarCollapsed sidebarCollapsed session =
+    { session | sidebarCollapsed = sidebarCollapsed }
+
+
+setRightPanelCollapsed : Bool -> Session -> Session
+setRightPanelCollapsed rightPanelCollapsed session =
+    { session | rightPanelCollapsed = rightPanelCollapsed }
+
+
+setFullscreen : Bool -> Session -> Session
+setFullscreen fullscreen session =
+    { session | fullscreen = fullscreen }

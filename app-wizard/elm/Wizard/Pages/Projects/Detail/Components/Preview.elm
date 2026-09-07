@@ -17,6 +17,7 @@ import Common.Api.ServerError as ServerError
 import Common.Components.FontAwesome exposing (faArrowRight, faDownload)
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
+import Common.Data.Session as Session
 import Common.Utils.ContentType as ContentType
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, iframe, p, pre, text)
@@ -32,7 +33,6 @@ import Wizard.Api.Models.ProjectPreview exposing (ProjectPreview)
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Utils.ProjectUtils as ProjectUtils
 

@@ -25,14 +25,13 @@ const registerFormUtilsPorts = require('../shared/common/js/ports/form-utils')
 const registerImportPorts = require('./js/ports/import')
 const registerLocalePorts = require('../shared/common/js/ports/locale')
 const registerLocalStoragePorts = require('../shared/common/js/ports/local-storage')
-const registerSessionPorts = require('./js/ports/session')
+const {getSession, clearSession, registerSessionPorts, sessionApiUrl, toApiUrlBase} = require('../shared/common/js/ports/session')
 const registerThemePorts = require('../shared/common/js/ports/theme')
 const registerWebsocketPorts = require('../shared/common/js/ports/websocket')
 const registerWindowPorts = require('../shared/common/js/ports/window')
 
 
-const sessionKey = 'session/wizard'
-const appSessionKey = 'session/app'
+const appName = 'wizard'
 
 axiosRetry(axios, {
     retries: 3,
@@ -56,21 +55,25 @@ function getBootstrapConfigUrl(apiUrl) {
     return apiUrl + '/configs/bootstrap'
 }
 
-function getLocaleUrl(apiUrl) {
-    apiUrl = apiUrl || appConfig.getDefaultApiUrl()
+function getLocaleUrl(session) {
     if (appConfig.isAdminEnabled()) {
-        apiUrl = appConfig.getAdminApiUrl() || apiUrl.replace('/wizard-api', '/admin-api')
-        return apiUrl + '/locales/current/content?module=wizard'
+        const adminApiUrl = appConfig.getAdminApiUrl()
+            || sessionApiUrl(session, 'admin')
+            || appConfig.getDefaultApiUrl().replace('/wizard-api', '/admin-api')
+        return adminApiUrl + '/locales/current/content?module=wizard'
     }
-    return apiUrl + '/locales/current/content'
+    return (sessionApiUrl(session, appName) || appConfig.getDefaultApiUrl()) + '/locales/current/content'
 }
 
 
 function loadApp(config, locale, plugins) {
+    const apiUrl = getApiUrl(config)
+
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
-        session: JSON.parse(localStorage.getItem(sessionKey)),
-        apiUrl: getApiUrl(config),
+        session: getSession(),
+        apiUrl: apiUrl,
+        apiUrlBase: toApiUrlBase(apiUrl, appName) || '',
         clientUrl: appConfig.getClientUrl(),
         webSocketThrottleDelay: appConfig.getWebSocketThrottleDelay(),
         config: config,
@@ -103,7 +106,7 @@ function loadApp(config, locale, plugins) {
     registerImportPorts(app)
     registerLocalePorts(app)
     registerLocalStoragePorts(app)
-    registerSessionPorts(app, sessionKey, [appSessionKey])
+    registerSessionPorts(app)
     registerThemePorts(app)
     registerWebsocketPorts(app)
     registerWindowPorts(app)
@@ -112,22 +115,17 @@ function loadApp(config, locale, plugins) {
     cookies.init()
 }
 
-function createBootstrapConfigRequest() {
-    const session = JSON.parse(localStorage.getItem(sessionKey))
+function createRequestConfig(session) {
     const token = session?.token?.token
-    const requestConfig = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
-    const apiUrl = session?.apiUrl
-
-    return axios.get(getBootstrapConfigUrl(apiUrl), requestConfig)
+    return token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
 }
 
-function createLocaleRequest() {
-    const session = JSON.parse(localStorage.getItem(appConfig.isAdminEnabled() ? appSessionKey : sessionKey))
-    const token = session?.token?.token
-    const requestConfig = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
-    const apiUrl = session?.apiUrl
+function createBootstrapConfigRequest(session) {
+    return axios.get(getBootstrapConfigUrl(sessionApiUrl(session, appName)), createRequestConfig(session))
+}
 
-    return axios.get(getLocaleUrl(apiUrl), requestConfig)
+function createLocaleRequest(session) {
+    return axios.get(getLocaleUrl(session), createRequestConfig(session))
 }
 
 function initPlugin(config, plugin) {
@@ -159,7 +157,7 @@ async function loadPlugins(config) {
 }
 
 window.onload = function () {
-    const session = JSON.parse(localStorage.getItem(sessionKey))
+    const session = getSession()
 
     const defaultRetryTime = 2
     const maxRetryTime = 15
@@ -179,8 +177,8 @@ window.onload = function () {
 
     function load() {
         const promises = [
-            createBootstrapConfigRequest(),
-            createLocaleRequest()
+            createBootstrapConfigRequest(session),
+            createLocaleRequest(session)
         ]
 
         axios.all(promises)
@@ -209,11 +207,9 @@ window.onload = function () {
                     showMessageAndRetry(notSeededHTML)
                 } else {
                     const errorCode = response ? err.response.status : null
-                    const appSession = localStorage.getItem(appSessionKey)
 
-                    if (Math.floor(errorCode / 100) === 4 && (session !== null || appSession !== null)) {
-                        localStorage.removeItem(sessionKey)
-                        localStorage.removeItem(appSessionKey)
+                    if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                        clearSession()
                         window.location.reload()
                     } else {
                         document.body.innerHTML = bootstrapErrorHTML(errorCode)

@@ -4,6 +4,8 @@ import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
 import Common.Components.AIAssistant as AIAssistant
 import Common.Components.NewsModal as NewsModal
+import Common.Data.Session as Session
+import Common.Ports.Session as Session
 import Common.Ports.Window as Window
 import Common.Utils.Driver as Driver
 import Common.Utils.TimeUtils as TimeUtils
@@ -12,7 +14,6 @@ import Wizard.Api.Tours as ToursApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.Menu.Update
 import Wizard.Data.AppState as AppState
-import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, addTour, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Pages.Auth.Update
@@ -34,7 +35,6 @@ import Wizard.Pages.Settings.Update
 import Wizard.Pages.Tenants.Update
 import Wizard.Pages.Users.Update
 import Wizard.Ports.Cookies as Cookies
-import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation, routeIfAllowed)
 import Wizard.Utils.TourId as TourId
@@ -247,7 +247,7 @@ update msg model =
             Wizard.Msgs.SetSidebarCollapsed collapsed ->
                 let
                     newSession =
-                        Session.setSidebarCollapsed model.appState.session collapsed
+                        Session.setSidebarCollapsed collapsed model.appState.session
 
                     newModel =
                         setSession newSession model
@@ -257,7 +257,7 @@ update msg model =
             Wizard.Msgs.SetRightPanelCollapsed collapsed ->
                 let
                     newSession =
-                        Session.setRightPanelCollapsed model.appState.session collapsed
+                        Session.setRightPanelCollapsed collapsed model.appState.session
 
                     newModel =
                         setSession newSession model
@@ -267,7 +267,7 @@ update msg model =
             Wizard.Msgs.SetFullscreen fullscreen ->
                 let
                     newSession =
-                        Session.setFullscreen model.appState.session fullscreen
+                        Session.setFullscreen fullscreen model.appState.session
 
                     newModel =
                         setSession newSession model

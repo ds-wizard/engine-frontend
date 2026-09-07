@@ -12,11 +12,11 @@ module Wizard.Models exposing
 import Common.Components.AIAssistant as AIAssistant
 import Common.Components.NewsModal as NewsModal
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.Session as Session exposing (Session)
 import Random exposing (Seed)
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig
 import Wizard.Components.Menu.Models
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session exposing (Session)
 import Wizard.Pages.Comments.Models
 import Wizard.Pages.Dashboard.Models
 import Wizard.Pages.Dev.Models

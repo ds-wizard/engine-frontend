@@ -29,55 +29,61 @@ import Wizard.Routes as Routes
 view : AppState -> Model -> Html Msg
 view appState model =
     if Admin.isEnabled appState.config.admin then
+        -- The user is being redirected to the Admin login
         Html.nothing
 
     else
-        let
-            form =
-                if model.codeRequired then
-                    ( "code", codeFormView appState model )
+        loginScreenView appState model
 
-                else
-                    ( "login", loginFormView appState model )
 
-            loginInfoSidebar =
-                ( "login-info-sidebar"
-                , Maybe.unwrap Html.nothing (MarkdownOrHtml.toHtml [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
-                )
+loginScreenView : AppState -> Model -> Html Msg
+loginScreenView appState model =
+    let
+        form =
+            if model.codeRequired then
+                ( "code", codeFormView appState model )
 
-            content =
-                case appState.config.dashboardAndLoginScreen.loginInfo of
-                    Just loginInfo ->
-                        let
-                            splitScreenClass =
-                                "col-12 d-flex align-items-center"
-                        in
-                        [ ( "side-info"
-                          , div
-                                [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 side-info"
-                                , dataCy "login_info"
-                                ]
-                                [ MarkdownOrHtml.toHtml [ class "flex-grow-1" ] loginInfo ]
-                          )
-                        , ( "login-form"
-                          , Html.Keyed.node "div"
-                                [ class <| splitScreenClass ++ " justify-content-start align-items-stretch flex-column col-xl-4 col-lg-5 col-md-6 col-sm-8 side-login" ]
-                                [ form, loginInfoSidebar ]
-                          )
-                        ]
+            else
+                ( "login", loginFormView appState model )
 
-                    Nothing ->
-                        [ ( "login-form-only"
-                          , Html.Keyed.node "div" [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8" ] [ form, loginInfoSidebar ]
-                          )
-                        ]
+        loginInfoSidebar =
+            ( "login-info-sidebar"
+            , Maybe.unwrap Html.nothing (MarkdownOrHtml.toHtml [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
+            )
 
-            announcements =
-                ( "announcements", Announcements.viewLoginScreen appState.config.dashboardAndLoginScreen.announcements )
-        in
-        Html.Keyed.node "div"
-            [ class "row justify-content-center Public__Login" ]
-            (announcements :: content)
+        content =
+            case appState.config.dashboardAndLoginScreen.loginInfo of
+                Just loginInfo ->
+                    let
+                        splitScreenClass =
+                            "col-12 d-flex align-items-center"
+                    in
+                    [ ( "side-info"
+                      , div
+                            [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 side-info"
+                            , dataCy "login_info"
+                            ]
+                            [ MarkdownOrHtml.toHtml [ class "flex-grow-1" ] loginInfo ]
+                      )
+                    , ( "login-form"
+                      , Html.Keyed.node "div"
+                            [ class <| splitScreenClass ++ " justify-content-start align-items-stretch flex-column col-xl-4 col-lg-5 col-md-6 col-sm-8 side-login" ]
+                            [ form, loginInfoSidebar ]
+                      )
+                    ]
+
+                Nothing ->
+                    [ ( "login-form-only"
+                      , Html.Keyed.node "div" [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8" ] [ form, loginInfoSidebar ]
+                      )
+                    ]
+
+        announcements =
+            ( "announcements", Announcements.viewLoginScreen appState.config.dashboardAndLoginScreen.announcements )
+    in
+    Html.Keyed.node "div"
+        [ class "row justify-content-center Public__Login" ]
+        (announcements :: content)
 
 
 loginFormView : AppState -> Model -> Html Msg

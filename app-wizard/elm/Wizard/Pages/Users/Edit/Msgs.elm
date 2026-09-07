@@ -4,7 +4,6 @@ import Common.Api.ApiError exposing (ApiError)
 import Wizard.Api.Models.User exposing (User)
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
-import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
@@ -22,7 +21,6 @@ type Msg
     | LanguageMsg Language.Msg
     | ToursMsg Tours.Msg
     | ApiKeysMsg ApiKeys.Msg
-    | AppKeysMsg AppKeys.Msg
     | ActiveSessionsMsg ActiveSessions.Msg
     | SubmissionSettingsMsg SubmissionSettings.Msg
     | PluginSettingsMsg PluginSettings.Msg

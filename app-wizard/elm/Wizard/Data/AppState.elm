@@ -30,6 +30,7 @@ import Common.Api.Models.RolePermission exposing (RolePermission)
 import Common.Api.Request exposing (ServerInfo)
 import Common.Components.GuideLink as GuideLink
 import Common.Data.Navigator exposing (Navigator)
+import Common.Data.Session as Session exposing (Session)
 import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Common.Utils.Theme exposing (Theme)
 import Dict
@@ -46,7 +47,6 @@ import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Data.Flags as Flags
-import Wizard.Data.Session as Session exposing (Session)
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
@@ -121,7 +121,7 @@ init flagsValue key =
     in
     ( { route = Routes.NotFoundRoute
       , seed = Random.initialSeed flags.seed
-      , session = Maybe.withDefault (Session.init flags.apiUrl) flags.session
+      , session = Maybe.withDefault (Session.init flags.apiUrlBase) flags.session
       , invalidSession = invalidSession
       , key = key
       , apiUrl = flags.apiUrl

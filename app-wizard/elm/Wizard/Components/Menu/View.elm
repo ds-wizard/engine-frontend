@@ -635,8 +635,7 @@ viewSessionWarningContent model =
     let
         logoutMsg =
             Just (Routing.toUrl model.appState.route)
-                |> Routes.publicLogin
-                |> Wizard.Pages.Auth.Msgs.LogoutTo
+                |> Wizard.Pages.Auth.Msgs.LogoutToLogin
                 |> Wizard.Msgs.AuthMsg
     in
     [ text

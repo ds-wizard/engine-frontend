@@ -4,14 +4,13 @@ module Wizard.Components.SessionModal exposing
     )
 
 import Common.Components.Modal as Modal
+import Common.Data.Session as Session
 import Gettext exposing (gettext)
 import Html exposing (Html, text)
 import String.Format as String
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Pages.Auth.Msgs
-import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
 
@@ -20,8 +19,7 @@ expiresSoonModal appState =
     let
         logoutMsg =
             Just (Routing.toUrl appState.route)
-                |> Routes.publicLogin
-                |> Wizard.Pages.Auth.Msgs.LogoutTo
+                |> Wizard.Pages.Auth.Msgs.LogoutToLogin
                 |> Wizard.Msgs.AuthMsg
 
         modalContent =
@@ -53,8 +51,7 @@ expiredModal appState =
     let
         logoutMsg =
             Just (Routing.toUrl appState.route)
-                |> Routes.publicLogin
-                |> Wizard.Pages.Auth.Msgs.LogoutTo
+                |> Wizard.Pages.Auth.Msgs.LogoutToLogin
                 |> Wizard.Msgs.AuthMsg
 
         modalContent =

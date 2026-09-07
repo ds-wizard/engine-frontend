@@ -1,7 +1,7 @@
 module Wizard.Msgs exposing
     ( Msg(..)
     , logoutMsg
-    , logoutToMsg
+    , logoutToLoginMsg
     )
 
 import Browser exposing (UrlRequest)
@@ -28,7 +28,6 @@ import Wizard.Pages.Registry.Msgs
 import Wizard.Pages.Settings.Msgs
 import Wizard.Pages.Tenants.Msgs
 import Wizard.Pages.Users.Msgs
-import Wizard.Routes as Routes
 
 
 type Msg
@@ -74,6 +73,6 @@ logoutMsg =
     AuthMsg Wizard.Pages.Auth.Msgs.Logout
 
 
-logoutToMsg : Routes.Route -> Msg
-logoutToMsg =
-    AuthMsg << Wizard.Pages.Auth.Msgs.LogoutTo
+logoutToLoginMsg : Maybe String -> Msg
+logoutToLoginMsg =
+    AuthMsg << Wizard.Pages.Auth.Msgs.LogoutToLogin

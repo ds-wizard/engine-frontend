@@ -1,7 +1,6 @@
 module Common.Utils.Setters exposing
     ( setApiKey
     , setApiKeys
-    , setAppKeys
     , setAssets
     , setAuthenticating
     , setCommentThreads
@@ -65,11 +64,6 @@ setApiKey value record =
 setApiKeys : a -> { b | apiKeys : a } -> { b | apiKeys : a }
 setApiKeys value record =
     { record | apiKeys = value }
-
-
-setAppKeys : a -> { b | appKeys : a } -> { b | appKeys : a }
-setAppKeys value record =
-    { record | appKeys = value }
 
 
 setAssets : a -> { b | assets : a } -> { b | assets : a }

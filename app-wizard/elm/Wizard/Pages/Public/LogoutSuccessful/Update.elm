@@ -1,7 +1,7 @@
 module Wizard.Pages.Public.LogoutSuccessful.Update exposing (fetchData)
 
+import Common.Data.Session as Session
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 

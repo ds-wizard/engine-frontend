@@ -18,6 +18,7 @@ import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faDelete, faDetailShowAll, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
+import Common.Data.Session as Session
 import Common.Utils.FileIcon as FileIcon
 import Common.Utils.Markdown as Markdown
 import Common.Utils.TimeUtils as TimeUtils
@@ -52,7 +53,6 @@ import Wizard.Components.Questionnaire.Components.DeleteVersionModal as DeleteVe
 import Wizard.Components.Questionnaire.Components.VersionModal as VersionModal
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Utils.ProjectUtils as ProjectUtils
 

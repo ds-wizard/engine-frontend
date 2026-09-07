@@ -11,7 +11,6 @@ import Wizard.Api.Models.User exposing (User)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
-import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
@@ -31,7 +30,6 @@ type alias Model =
     , languageModel : Language.Model
     , toursModel : Tours.Model
     , apiKeysModel : ApiKeys.Model
-    , appKeysModel : AppKeys.Model
     , activeSessionsModel : ActiveSessions.Model
     , submissionSettingsModel : SubmissionSettings.Model
     , pluginSettingsModel : PluginSettings.Model
@@ -48,7 +46,6 @@ initialModel appState uuidOrEmpty =
     , languageModel = Language.initialModel
     , toursModel = Tours.initialModel
     , apiKeysModel = ApiKeys.initialModel uuidOrEmpty
-    , appKeysModel = AppKeys.initialModel uuidOrEmpty
     , activeSessionsModel = ActiveSessions.initialModel
     , submissionSettingsModel = SubmissionSettings.initialModel
     , pluginSettingsModel = PluginSettings.initialModel uuidOrEmpty Uuid.nil
@@ -77,9 +74,6 @@ initLocalModel appState userEditRoute uuidOrCurrent model =
 
                 UserEditRoute.ApiKeys ->
                     { model | apiKeysModel = ApiKeys.initialModel uuidOrCurrent }
-
-                UserEditRoute.AppKeys ->
-                    { model | appKeysModel = AppKeys.initialModel uuidOrCurrent }
 
                 UserEditRoute.ActiveSessions ->
                     { model | activeSessionsModel = ActiveSessions.initialModel }

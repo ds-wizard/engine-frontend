@@ -9,6 +9,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError(..))
 import Common.Api.Models.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Common.Api.WebSocket as WebSocket
+import Common.Data.Session as Session
 import Common.Ports.Copy as Ports
 import Common.Ports.Window as Window
 import Common.Utils.Driver as Driver exposing (TourConfig)
@@ -33,7 +34,6 @@ import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Pages.Projects.Common.ProjectShareForm as QuestionnaireShareForm
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
@@ -218,20 +218,17 @@ update wrapMsg msg appState model =
         setError result error =
             let
                 questionnaireRoute =
-                    Routing.toUrl (Routes.projectsDetailQuestionnaire model.uuid model.mbSelectedPath model.mbCommentThreadUuid)
-
-                loginRoute =
-                    Routes.publicLogin (Just questionnaireRoute)
+                    Just (Routing.toUrl (Routes.projectsDetailQuestionnaire model.uuid model.mbSelectedPath model.mbCommentThreadUuid))
             in
             case ( error, Session.exists appState.session ) of
                 ( BadStatus 403 _, False ) ->
-                    withSeed ( model, cmdNavigate appState loginRoute )
+                    withSeed ( model, Routing.cmdNavigateToLogin appState questionnaireRoute )
 
                 ( BadStatus 401 _, False ) ->
-                    withSeed ( model, cmdNavigate appState loginRoute )
+                    withSeed ( model, Routing.cmdNavigateToLogin appState questionnaireRoute )
 
                 ( BadStatus 401 _, True ) ->
-                    withSeed ( model, Task.dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
+                    withSeed ( model, Task.dispatch (Wizard.Msgs.logoutToLoginMsg questionnaireRoute) )
 
                 _ ->
                     withSeed <|

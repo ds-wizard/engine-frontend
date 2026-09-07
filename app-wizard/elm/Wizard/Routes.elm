@@ -113,7 +113,6 @@ module Wizard.Routes exposing
     , usersEdit
     , usersEditActiveSessions
     , usersEditApiKeys
-    , usersEditAppKeys
     , usersEditConnectedAccounts
     , usersEditCurrent
     , usersEditLanguage
@@ -128,13 +127,13 @@ module Wizard.Routes exposing
 
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.Session exposing (Session)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
-import Wizard.Data.Session exposing (Session)
 import Wizard.Pages.Dev.Routes
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute
 import Wizard.Pages.DocumentTemplateEditors.Routes
@@ -968,11 +967,6 @@ usersEditLanguageCurrent =
 usersEditApiKeys : UuidOrCurrent -> Route
 usersEditApiKeys =
     UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.ApiKeys
-
-
-usersEditAppKeys : UuidOrCurrent -> Route
-usersEditAppKeys =
-    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.AppKeys
 
 
 usersEditActiveSessions : UuidOrCurrent -> Route

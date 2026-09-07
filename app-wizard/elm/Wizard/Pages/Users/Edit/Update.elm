@@ -11,7 +11,6 @@ import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
-import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
@@ -52,9 +51,6 @@ fetchSubrouteData appState uuidOrCurrent subroute =
 
         UserEditRoute.ApiKeys ->
             Cmd.map ApiKeysMsg (ApiKeys.fetchData appState)
-
-        UserEditRoute.AppKeys ->
-            Cmd.map AppKeysMsg (AppKeys.fetchData appState)
 
         UserEditRoute.ActiveSessions ->
             Cmd.map ActiveSessionsMsg (ActiveSessions.fetchData appState)
@@ -143,18 +139,6 @@ update msg wrapMsg appState model =
                     ApiKeys.update updateConfig appState apiKeysMsg model.apiKeysModel
             in
             ( { model | apiKeysModel = apiKeysModel }, apiKeysCmd )
-
-        AppKeysMsg appKeysMsg ->
-            let
-                updateConfig =
-                    { wrapMsg = wrapMsg << AppKeysMsg
-                    , logoutMsg = Wizard.Msgs.logoutMsg
-                    }
-
-                ( appKeysModel, appKeysCmd ) =
-                    AppKeys.update updateConfig appState appKeysMsg model.appKeysModel
-            in
-            ( { model | appKeysModel = appKeysModel }, appKeysCmd )
 
         ActiveSessionsMsg activeSessionsMsg ->
             let

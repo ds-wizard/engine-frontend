@@ -10,6 +10,7 @@ import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipCustom)
+import Common.Data.Session as Session
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Common.Utils.Markdown as Markdown
@@ -38,7 +39,6 @@ import Wizard.Components.PluginModal as PluginModal
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Pages.Documents.Common.DocumentPluginActions as DocumentPluginActions
 import Wizard.Pages.Projects.Detail.Documents.Models exposing (Model)
 import Wizard.Pages.Projects.Detail.Documents.Msgs exposing (Msg(..))

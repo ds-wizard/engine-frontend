@@ -10,6 +10,7 @@ import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.Session as Session
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
@@ -25,7 +26,6 @@ import Wizard.Components.PluginView as PluginView
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Pages.Projects.Common.View exposing (shareIcon, shareTooltipHtml)
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Pages.Projects.Detail.Components.Preview as Preview

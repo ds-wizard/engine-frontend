@@ -5,6 +5,7 @@ module Wizard.Api.Models.Project exposing
     , isOwner
     )
 
+import Common.Data.Session as Session
 import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
@@ -24,7 +25,6 @@ import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (Proj
 import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility(..))
 import Wizard.Api.Models.ProjectPerm as ProjectPerm
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 
 
 type alias Project =

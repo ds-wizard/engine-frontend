@@ -6,6 +6,7 @@ module Wizard.Utils.ProjectUtils exposing
     , isOwner
     )
 
+import Common.Data.Session as Session
 import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import List.Extra as List
@@ -17,7 +18,6 @@ import Wizard.Api.Models.Project.ProjectSharing exposing (ProjectSharing(..))
 import Wizard.Api.Models.Project.ProjectVisibility exposing (ProjectVisibility(..))
 import Wizard.Api.Models.ProjectPerm as ProjectPerm
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 
 
 type alias ProjectLike q =

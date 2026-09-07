@@ -84,7 +84,6 @@ module Wizard.Utils.Feature exposing
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
-    , userEditAppKeys
     , userEditConnectedAccounts
     , userEditLanguage
     , userEditPlugins
@@ -96,6 +95,7 @@ module Wizard.Utils.Feature exposing
     )
 
 import Common.Api.Models.RolePermission exposing (RolePermission)
+import Common.Data.Session as Session
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Data.WizardRolePermission as RolePermission
 import Maybe.Extra as Maybe
@@ -112,7 +112,6 @@ import Wizard.Api.Models.Project.ProjectCreation as ProjectCreation
 import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Utils.ProjectUtils as ProjectUtils exposing (ProjectLike)
 
 
@@ -572,18 +571,14 @@ userEditTours appState uuidOrCurrent =
 
 userEditApiKeys : AppState -> UuidOrCurrent -> Bool
 userEditApiKeys appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
-
-
-userEditAppKeys : AppState -> UuidOrCurrent -> Bool
-userEditAppKeys appState uuidOrCurrent =
-    Admin.isEnabled appState.config.admin
+    not (Admin.isEnabled appState.config.admin)
         && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
 
 
 userEditActiveSessions : AppState -> UuidOrCurrent -> Bool
 userEditActiveSessions appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
+    not (Admin.isEnabled appState.config.admin)
+        && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
 
 
 userEditSubmissionSettings : AppState -> UuidOrCurrent -> Bool
