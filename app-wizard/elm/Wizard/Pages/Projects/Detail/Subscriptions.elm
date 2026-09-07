@@ -5,6 +5,7 @@ import Bootstrap.Dropdown as Dropdown
 import Common.Api.WebSocket as WebSocket
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
+import Wizard.Pages.Projects.Detail.Components.Preview as Preview
 import Wizard.Pages.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Pages.Projects.Detail.Components.Settings as Settings
 import Wizard.Pages.Projects.Detail.Components.ShareModal as ShareModal
@@ -40,6 +41,10 @@ subscriptions route model =
                 ProjectDetailRoute.Files _ ->
                     Sub.map FilesMsg <|
                         Files.subscriptions model.filesModel
+
+                ProjectDetailRoute.Preview ->
+                    Sub.map PreviewMsg <|
+                        Preview.subscriptions model.previewModel
 
                 ProjectDetailRoute.Settings ->
                     Sub.map SettingsMsg <|

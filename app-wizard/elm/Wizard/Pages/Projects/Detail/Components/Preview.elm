@@ -4,11 +4,13 @@ module Wizard.Pages.Projects.Detail.Components.Preview exposing
     , PreviewState(..)
     , fetchData
     , init
+    , subscriptions
     , update
     , view
     )
 
 import ActionResult exposing (ActionResult(..))
+import Browser.Events
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UrlResponse exposing (UrlResponse)
 import Common.Api.ServerError as ServerError
@@ -24,6 +26,7 @@ import Http
 import Process
 import String.Format as String
 import Task
+import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.ProjectPreview exposing (ProjectPreview)
 import Wizard.Api.Projects as ProjectsApi
@@ -41,6 +44,9 @@ import Wizard.Utils.ProjectUtils as ProjectUtils
 type alias Model =
     { projectUuid : Uuid
     , previewState : PreviewState
+    , visibility : Browser.Events.Visibility
+    , reloadWhenVisible : Bool
+    , waitingForFrame : Bool
     }
 
 
@@ -54,7 +60,31 @@ init : Uuid -> PreviewState -> Model
 init uuid previewState =
     { projectUuid = uuid
     , previewState = previewState
+    , visibility = Browser.Events.Visible
+    , reloadWhenVisible = False
+    , waitingForFrame = False
     }
+
+
+isHidden : Model -> Bool
+isHidden model =
+    model.visibility == Browser.Events.Hidden
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Browser.Events.onVisibilityChange VisibilityChanged
+        , if model.waitingForFrame then
+            Browser.Events.onAnimationFrame (always AnimationFrame)
+
+          else
+            Sub.none
+        ]
 
 
 
@@ -63,13 +93,15 @@ init uuid previewState =
 
 type Msg
     = GetDocumentPreviewComplete (Result ApiError ( Http.Metadata, Maybe UrlResponse ))
-    | HeadRequest
+    | ScheduleRequest
+    | AnimationFrame
+    | VisibilityChanged Browser.Events.Visibility
 
 
-fetchData : AppState -> Uuid -> Bool -> Cmd Msg
-fetchData appState projectUuid hasTemplate =
+fetchData : Bool -> Cmd Msg
+fetchData hasTemplate =
     if hasTemplate then
-        ProjectsApi.getDocumentPreview appState projectUuid GetDocumentPreviewComplete
+        Task.dispatch ScheduleRequest
 
     else
         Cmd.none
@@ -81,8 +113,33 @@ update msg appState model =
         GetDocumentPreviewComplete result ->
             handleHeadDocumentPreviewComplete appState model result
 
-        HeadRequest ->
-            ( model, fetchData appState model.projectUuid True )
+        -- Requests are never fired directly. Elm renders on animation frames, which are paused
+        -- while the page is not rendered (hidden tab, minimized window). Waiting for a frame
+        -- before asking for a URL guarantees that the page can actually paint the iframe with
+        -- it, instead of parking a short lived signed URL in the model until the user comes
+        -- back to the tab minutes later.
+        ScheduleRequest ->
+            ( { model | waitingForFrame = True }, Cmd.none )
+
+        AnimationFrame ->
+            if model.waitingForFrame then
+                ( { model | waitingForFrame = False }
+                , ProjectsApi.getDocumentPreview appState model.projectUuid GetDocumentPreviewComplete
+                )
+
+            else
+                ( model, Cmd.none )
+
+        VisibilityChanged visibility ->
+            let
+                newModel =
+                    { model | visibility = visibility }
+            in
+            if visibility == Browser.Events.Visible && model.reloadWhenVisible then
+                ( { newModel | reloadWhenVisible = False, waitingForFrame = True }, Cmd.none )
+
+            else
+                ( newModel, Cmd.none )
 
 
 handleHeadDocumentPreviewComplete : AppState -> Model -> Result ApiError ( Http.Metadata, Maybe UrlResponse ) -> ( Model, Cmd Msg )
@@ -91,10 +148,17 @@ handleHeadDocumentPreviewComplete appState model result =
         Ok ( metadata, mbUrlResponse ) ->
             case ( metadata.statusCode, mbUrlResponse ) of
                 ( 202, _ ) ->
-                    ( model, Task.perform (always HeadRequest) (Process.sleep 1000) )
+                    ( model, Task.perform (always ScheduleRequest) (Process.sleep 1000) )
 
                 ( 200, Just urlResponse ) ->
-                    ( { model | previewState = Preview (Success urlResponse) }, Cmd.none )
+                    -- The page may still have been hidden between issuing the request and getting
+                    -- the response. The signed URL expires within a minute, so drop it and ask for
+                    -- a fresh one once the page is visible again.
+                    if isHidden model then
+                        ( { model | reloadWhenVisible = True }, Cmd.none )
+
+                    else
+                        ( { model | previewState = Preview (Success urlResponse) }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )

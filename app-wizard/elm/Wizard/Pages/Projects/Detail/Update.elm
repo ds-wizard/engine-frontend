@@ -505,7 +505,7 @@ update wrapMsg msg appState model =
                         ( newModel
                         , Cmd.batch
                             [ openWebSocket
-                            , Cmd.map (wrapMsg << PreviewMsg) (Preview.fetchData appState model.uuid hasTemplate)
+                            , Cmd.map (wrapMsg << PreviewMsg) (Preview.fetchData hasTemplate)
                             ]
                         )
 

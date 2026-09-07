@@ -14,6 +14,7 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Browser.Events
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UrlResponse exposing (UrlResponse)
 import Common.Api.ServerError as ServerError
@@ -61,6 +62,9 @@ type alias Model =
     , kmEditorTypeHintInputModal : TypeHintInput.Model KnowledgeModelEditorSuggestion
     , urlResponse : ActionResult UrlResponse
     , mode : PreviewMode
+    , visibility : Browser.Events.Visibility
+    , reloadWhenVisible : Bool
+    , waitingForFrame : Bool
     }
 
 
@@ -75,7 +79,15 @@ initialModel =
     , kmEditorTypeHintInputModal = TypeHintInput.init "uuid"
     , urlResponse = ActionResult.Unset
     , mode = ProjectMode
+    , visibility = Browser.Events.Visible
+    , reloadWhenVisible = False
+    , waitingForFrame = False
     }
+
+
+isHidden : Model -> Bool
+isHidden model =
+    model.visibility == Browser.Events.Hidden
 
 
 setSelectedProject : Maybe ProjectSuggestion -> Model -> Model
@@ -125,6 +137,8 @@ type Msg
     | GetPreviewRequest
     | GetPreviewCompleted (Result ApiError ( Http.Metadata, Maybe UrlResponse ))
     | LoadPreview
+    | AnimationFrame
+    | VisibilityChanged Browser.Events.Visibility
 
 
 loadPreviewMsg : Msg
@@ -143,6 +157,12 @@ subscriptions model =
             TypeHintInput.subscriptions model.projectTypeHintInputModel
         , Sub.map KnowledgeModelEditorTypeHintInputMsg <|
             TypeHintInput.subscriptions model.kmEditorTypeHintInputModal
+        , Browser.Events.onVisibilityChange VisibilityChanged
+        , if model.waitingForFrame then
+            Browser.Events.onAnimationFrame (always AnimationFrame)
+
+          else
+            Sub.none
         ]
 
 
@@ -162,9 +182,6 @@ type alias UpdateConfig msg =
 update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     let
-        getPreviewCmd =
-            DocumentTemplateDraftsApi.getPreview appState cfg.documentTemplateUuid (cfg.wrapMsg << GetPreviewCompleted)
-
         updatePreviewSettings updateFn =
             let
                 previewSettings =
@@ -237,11 +254,8 @@ update cfg appState msg model =
                             Task.dispatch (cfg.updatePreviewSettings previewSettings)
                     in
                     if DocumentTemplateDraftPreviewSettings.isPreviewSet previewSettings then
-                        ( { model | urlResponse = ActionResult.Loading }
-                        , Cmd.batch
-                            [ getPreviewCmd
-                            , dispatchUpdateCmd
-                            ]
+                        ( { model | urlResponse = ActionResult.Loading, waitingForFrame = True }
+                        , dispatchUpdateCmd
                         )
 
                     else
@@ -250,8 +264,22 @@ update cfg appState msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
+        -- Requests are never fired directly. Elm renders on animation frames, which are paused
+        -- while the page is not rendered (hidden tab, minimized window). Waiting for a frame
+        -- before asking for a URL guarantees that the page can actually paint the iframe with
+        -- it, instead of parking a short lived signed URL in the model until the user comes
+        -- back to the tab minutes later.
         GetPreviewRequest ->
-            ( model, getPreviewCmd )
+            ( { model | waitingForFrame = True }, Cmd.none )
+
+        AnimationFrame ->
+            if model.waitingForFrame then
+                ( { model | waitingForFrame = False }
+                , DocumentTemplateDraftsApi.getPreview appState cfg.documentTemplateUuid (cfg.wrapMsg << GetPreviewCompleted)
+                )
+
+            else
+                ( model, Cmd.none )
 
         GetPreviewCompleted result ->
             case result of
@@ -261,7 +289,14 @@ update cfg appState msg model =
                             ( model, Task.perform (always (cfg.wrapMsg GetPreviewRequest)) (Process.sleep 1000) )
 
                         ( 200, Just urlResponse ) ->
-                            ( { model | urlResponse = ActionResult.Success urlResponse }, Cmd.none )
+                            -- The page may still have been hidden between issuing the request and
+                            -- getting the response. The signed URL expires within a minute, so drop
+                            -- it and ask for a fresh one once the page is visible again.
+                            if isHidden model then
+                                ( { model | reloadWhenVisible = True }, Cmd.none )
+
+                            else
+                                ( { model | urlResponse = ActionResult.Success urlResponse }, Cmd.none )
 
                         _ ->
                             ( model, Cmd.none )
@@ -282,7 +317,18 @@ update cfg appState msg model =
                     )
 
         LoadPreview ->
-            ( { model | urlResponse = ActionResult.Loading }, getPreviewCmd )
+            ( { model | urlResponse = ActionResult.Loading, waitingForFrame = True }, Cmd.none )
+
+        VisibilityChanged visibility ->
+            let
+                newModel =
+                    { model | visibility = visibility }
+            in
+            if visibility == Browser.Events.Visible && model.reloadWhenVisible then
+                ( { newModel | reloadWhenVisible = False, waitingForFrame = True }, Cmd.none )
+
+            else
+                ( newModel, Cmd.none )
 
 
 
