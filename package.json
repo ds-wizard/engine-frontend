@@ -1,6 +1,5 @@
 {
   "name": "engine-frontend",
-  "version": "4.34.1",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -30,6 +29,7 @@
     "css-minimizer-webpack-plugin": "^8.0.0",
     "elm-review": "^2.13.5",
     "elm-test": "^0.19.1-revision17",
+    "glob": "^13.0.6",
     "html-webpack-plugin": "^5.6.8",
     "lodash": "^4.18.1",
     "mini-css-extract-plugin": "^2.10.2",

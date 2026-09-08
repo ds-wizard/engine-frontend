@@ -1,9 +1,10 @@
+const _ = require('lodash');
+const {execSync} = require('child_process')
 const fs = require('fs')
 const glob = require('glob')
-const package = require('../package.json')
-const utils = require('./utils')
 
-const {component} = utils.getComponentData()
+const {component} = getComponentData()
+const version = getVersion()
 
 
 const regexGettext = /[\s+(]gettext "(.*?[^\\])?(\\\\)*"/g
@@ -14,13 +15,13 @@ const keys = {}
 // npm install po2json@1.0.0-beta
 // npx po2json -f jed cs.po cs.json
 
-glob(`{app-${component},shared/common}/elm/**/*.elm`, (err, files) => {
+glob.glob(`{app-${component},shared/common}/elm/**/*.elm`).then((files) => {
     files.forEach(parseFile)
 
     const metadata = [
         'msgid ""',
         'msgstr ""',
-        `"Project-Id-Version: ${component}-client:${package.version}\\n"`,
+        `"Project-Id-Version: ${component}-client:${version}\\n"`,
         `"POT-Creation-Date: ${new Date().toISOString()} \\n"`,
         '"Language: en\\n"',
         '"Content-Type: text/plain; charset=UTF-8\\n"',
@@ -31,6 +32,33 @@ glob(`{app-${component},shared/common}/elm/**/*.elm`, (err, files) => {
     const keyLines = Object.values(keys).map(keyToString).join('\n\n')
     fs.writeFileSync(`locale/${component}.pot`, metadata + '\n\n' + keyLines)
 })
+
+function getVersion() {
+    // Version comes from the git tag pointing at HEAD (empty when not on a tag)
+    try {
+        return execSync('git tag --points-at HEAD', {encoding: 'utf8'}).split('\n')[0].trim().replace(/^v/, '')
+    } catch (err) {
+        return ''
+    }
+}
+
+
+function getComponentData() {
+    const component = process.env.COMPONENT
+    const moduleName = _.upperFirst(_.camelCase(component))
+    const componentSource = `app-${component}/elm`
+
+    return {
+        component,
+        moduleName,
+        componentSource,
+    }
+}
+
+
+function toModuleName(componentSource, file) {
+    return file.replace(`${componentSource}/`, '').replace('.elm', '').replace(/\//g, '.')
+}
 
 
 function parseFile(file) {
