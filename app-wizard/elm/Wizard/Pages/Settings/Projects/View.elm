@@ -51,25 +51,6 @@ formView appState form =
             else
                 []
 
-        feedbackEnabled =
-            Maybe.withDefault False (Form.getFieldAsBool "feedbackEnabled" form).value
-
-        feedbackInput =
-            if feedbackEnabled then
-                ( "feedback"
-                , div [ class "nested-group" ]
-                    [ FormGroup.input appState.locale form "feedbackOwner" (gettext "GitHub Repository Owner" appState.locale)
-                    , FormExtra.mdAfter (gettext "ht&#8203;tps://github.com/**exampleOwner**/exampleRepository" appState.locale)
-                    , FormGroup.input appState.locale form "feedbackRepo" (gettext "GitHub Repository Name" appState.locale)
-                    , FormExtra.mdAfter (gettext "ht&#8203;tps://github.com/exampleOwner/**exampleRepository**" appState.locale)
-                    , FormGroup.secret appState.locale form "feedbackToken" (gettext "Access Token" appState.locale)
-                    , FormExtra.mdAfter (gettext "[Personal Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) for GitHub account creating the issues. Make sure to select **public_repo** scope if the repository is public or **repo** if it is private. We recommend creating a bot account with the access to the feedback repository instead of using your own GitHub account." appState.locale)
-                    ]
-                )
-
-            else
-                ( "feedback-nothing", Html.nothing )
-
         projectTaggingEnabled =
             Maybe.withDefault False (Form.getFieldAsBool "projectTaggingEnabled" form).value
 
@@ -103,9 +84,6 @@ formView appState form =
                , ( "separator3", hr [] [] )
                , ( "summaryReport", FormGroup.toggle form "summaryReport" (gettext "Summary Report" appState.locale) )
                , ( "summaryReport-extra", FormExtra.mdAfter (gettext "If enabled, users can view a summary report showing various metrics for the questionnaire." appState.locale) )
-               , ( "feedbackEnabled", FormGroup.toggle form "feedbackEnabled" (gettext "Feedback" appState.locale) )
-               , ( "feedbackEnabled-extra", FormExtra.mdAfter (gettext "If enabled, users can submit a feedback to questions to the specified GitHub repository." appState.locale) )
-               , feedbackInput
                , ( "projectTaggingEnabled", FormGroup.toggle form "projectTaggingEnabled" (gettext "Project Tagging" appState.locale) )
                , ( "projectTaggingEnabled-extra", FormExtra.mdAfter (gettext "If enabled, users can tag their projects and use these tags to filter them." appState.locale) )
                , projectTaggingInput

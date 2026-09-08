@@ -121,7 +121,6 @@ module Common.Components.FontAwesome exposing
     , faQuestionnaireDesirable
     , faQuestionnaireExpand
     , faQuestionnaireExperts
-    , faQuestionnaireFeedback
     , faQuestionnaireFollowUpsIndication
     , faQuestionnaireHistoryCreateDocument
     , faQuestionnaireHistoryRevert
@@ -810,11 +809,6 @@ faQuestionnaireExpand =
 faQuestionnaireExperts : Html msg
 faQuestionnaireExperts =
     far "fa-address-book"
-
-
-faQuestionnaireFeedback : Html msg
-faQuestionnaireFeedback =
-    fas "fa-exclamation"
 
 
 faQuestionnaireFollowUpsIndication : Html msg
