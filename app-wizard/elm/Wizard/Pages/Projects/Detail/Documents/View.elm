@@ -195,7 +195,7 @@ listingActions appState cfg document =
                 }
 
         submitEnabled =
-            Feature.documentSubmit appState document && cfg.projectEditable
+            Feature.projectDocumentSubmit appState cfg.project document
 
         submit =
             ListingDropdown.dropdownAction

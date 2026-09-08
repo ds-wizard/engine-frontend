@@ -63,6 +63,7 @@ module Wizard.Utils.Feature exposing
     , projectCreateFromTemplate
     , projectCreateMigration
     , projectDelete
+    , projectDocumentSubmit
     , projectDocumentsView
     , projectFiles
     , projectMetrics
@@ -410,6 +411,14 @@ projectPreview =
 projectDocumentsView : Bool
 projectDocumentsView =
     True
+
+
+projectDocumentSubmit : AppState -> ProjectLike q -> Document -> Bool
+projectDocumentSubmit appState project document =
+    (document.state == DoneDocumentState)
+        && appState.config.submission.enabled
+        && Session.exists appState.session
+        && ProjectUtils.isEditor appState project
 
 
 projectTodos : AppState -> ProjectLike q -> Bool
