@@ -19,6 +19,7 @@ type alias DocumentTemplate =
     { createdAt : Time.Posix
     , description : String
     , uuid : Uuid
+    , language : String
     , name : String
     , organization : Maybe OrganizationInfo
     , organizationId : String
@@ -28,6 +29,7 @@ type alias DocumentTemplate =
     , templateId : String
     , version : Version
     , nonEditable : Bool
+    , potFileReady : Bool
     }
 
 
@@ -37,6 +39,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "uuid" Uuid.decoder
+        |> D.required "language" D.string
         |> D.required "name" D.string
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
         |> D.required "organizationId" D.string
@@ -46,6 +49,7 @@ decoder =
         |> D.required "templateId" D.string
         |> D.required "version" Version.decoder
         |> D.required "nonEditable" D.bool
+        |> D.required "potFileReady" D.bool
 
 
 isOutdated : { a | remoteLatestVersion : Maybe Version, version : Version } -> Bool

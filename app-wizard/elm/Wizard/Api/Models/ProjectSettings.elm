@@ -29,6 +29,7 @@ type alias ProjectSettings =
     , documentTemplateSupportState : Maybe DocumentTemplateState
     , documentTemplateState : Maybe DocumentTemplateProjectState
     , formatUuid : Maybe Uuid
+    , documentTemplateLanguage : Maybe String
     , isTemplate : Bool
     , knowledgeModelTags : List Tag
     , language : Maybe String
@@ -41,17 +42,18 @@ decoder =
     D.succeed ProjectSettings
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
-        |> D.required "description" (D.maybe D.string)
+        |> D.required "description" (D.nullable D.string)
         |> D.required "knowledgeModelPackage" KnowledgeModelPackage.decoder
         |> D.required "knowledgeModelState" KnowledgeModelProjectState.decoder
         |> D.required "projectTags" (D.list D.string)
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
-        |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)
-        |> D.required "documentTemplatePhase" (D.maybe DocumentTemplatePhase.decoder)
-        |> D.required "documentTemplateSupportState" (D.maybe DocumentTemplateState.decoder)
-        |> D.required "documentTemplateState" (D.maybe DocumentTemplateProjectState.decoder)
-        |> D.required "formatUuid" (D.maybe Uuid.decoder)
+        |> D.required "documentTemplate" (D.nullable DocumentTemplateSuggestion.decoder)
+        |> D.required "documentTemplatePhase" (D.nullable DocumentTemplatePhase.decoder)
+        |> D.required "documentTemplateSupportState" (D.nullable DocumentTemplateState.decoder)
+        |> D.required "documentTemplateState" (D.nullable DocumentTemplateProjectState.decoder)
+        |> D.required "formatUuid" (D.nullable Uuid.decoder)
+        |> D.required "documentTemplateLanguage" (D.nullable D.string)
         |> D.required "isTemplate" D.bool
         |> D.required "knowledgeModelTags" (D.list Tag.decoder)
-        |> D.required "language" (D.maybe D.string)
+        |> D.required "language" (D.nullable D.string)
         |> D.required "availableLocales" (D.list KnowledgeModelLocale.decoder)

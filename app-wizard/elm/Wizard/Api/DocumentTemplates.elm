@@ -1,13 +1,17 @@
 module Wizard.Api.DocumentTemplates exposing
-    ( deleteTemplate
+    ( deleteLocale
+    , deleteTemplate
     , deleteTemplateVersion
+    , exportTemplatePotUrl
     , exportTemplateUrl
+    , getLocaleContent
     , getOutdatedTemplates
     , getTemplate
     , getTemplates
     , getTemplatesAll
     , getTemplatesFor
     , getTemplatesSuggestions
+    , importLocale
     , importTemplate
     , pullTemplate
     , putTemplate
@@ -20,6 +24,7 @@ import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Utils.Bool as Bool
 import File exposing (File)
+import Http
 import Json.Decode as D
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
@@ -27,6 +32,7 @@ import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (Document
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplateAllSuggestion as DocumentTemplateAllSuggestion exposing (DocumentTemplateAllSuggestion)
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
+import Wizard.Api.Models.DocumentTemplateLocale as DocumentTemplateLocale exposing (DocumentTemplateLocale)
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
@@ -140,3 +146,29 @@ importTemplate appState file =
 exportTemplateUrl : Uuid -> String
 exportTemplateUrl templateUuid =
     "/document-templates/" ++ Uuid.toString templateUuid ++ "/bundle"
+
+
+exportTemplatePotUrl : Uuid -> String
+exportTemplatePotUrl templateUuid =
+    "/document-templates/" ++ Uuid.toString templateUuid ++ "/locales/template"
+
+
+deleteLocale : AppState -> Uuid -> Uuid -> ToMsg () msg -> Cmd msg
+deleteLocale appState templateUuid localeUuid =
+    Request.delete (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString templateUuid ++ "/locales/" ++ Uuid.toString localeUuid)
+
+
+getLocaleContent : AppState -> Uuid -> Uuid -> ToMsg String msg -> Cmd msg
+getLocaleContent appState templateUuid localeUuid =
+    Request.getString (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString templateUuid ++ "/locales/" ++ Uuid.toString localeUuid ++ "/content")
+
+
+importLocale : AppState -> Uuid -> String -> File -> ToMsg DocumentTemplateLocale msg -> Cmd msg
+importLocale appState templateUuid name poContent =
+    let
+        parts =
+            [ Http.stringPart "name" name
+            , Http.filePart "poContent" poContent
+            ]
+    in
+    Request.postMultiPartWithData (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString templateUuid ++ "/locales") parts DocumentTemplateLocale.decoder

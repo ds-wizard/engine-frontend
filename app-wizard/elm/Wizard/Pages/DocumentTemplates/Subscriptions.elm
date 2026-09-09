@@ -10,7 +10,7 @@ import Wizard.Pages.DocumentTemplates.Routes exposing (Route(..))
 subscriptions : Route -> Model -> Sub Msg
 subscriptions route model =
     case route of
-        DetailRoute _ ->
+        DetailRoute _ _ ->
             Sub.map DetailMsg <| Wizard.Pages.DocumentTemplates.Detail.Subscriptions.subscriptions model.detailModel
 
         IndexRoute _ ->

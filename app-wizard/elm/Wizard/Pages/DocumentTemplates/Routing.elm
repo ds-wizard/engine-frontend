@@ -8,8 +8,9 @@ import Common.Data.PaginationQueryString as PaginationQueryString
 import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extensions as Parser
 import Url.Parser.Query as Query
-import Uuid
+import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.DocumentTemplates.Detail.DocumentTemplateDetailRoute as DocumentTemplateDetailRoute
 import Wizard.Pages.DocumentTemplates.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
 
@@ -22,16 +23,32 @@ moduleRoot =
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "documentTemplateId")
-    , map (wrapRoute << DetailRoute) (s moduleRoot </> Parser.uuid)
+    , map (detailLocales wrapRoute) (s moduleRoot </> Parser.uuid </> s "locales")
+    , map (detail wrapRoute) (s moduleRoot </> Parser.uuid)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     ]
+
+
+detail : (Route -> a) -> Uuid -> a
+detail wrapRoute templateUuid =
+    wrapRoute <| DetailRoute templateUuid DocumentTemplateDetailRoute.Readme
+
+
+detailLocales : (Route -> a) -> Uuid -> a
+detailLocales wrapRoute templateUuid =
+    wrapRoute <| DetailRoute templateUuid DocumentTemplateDetailRoute.Locales
 
 
 toUrl : Route -> List String
 toUrl route =
     case route of
-        DetailRoute templateUuid ->
-            [ moduleRoot, Uuid.toString templateUuid ]
+        DetailRoute templateUuid templateDetailRoute ->
+            case templateDetailRoute of
+                DocumentTemplateDetailRoute.Readme ->
+                    [ moduleRoot, Uuid.toString templateUuid ]
+
+                DocumentTemplateDetailRoute.Locales ->
+                    [ moduleRoot, Uuid.toString templateUuid, "locales" ]
 
         ImportRoute tempalteId ->
             case tempalteId of

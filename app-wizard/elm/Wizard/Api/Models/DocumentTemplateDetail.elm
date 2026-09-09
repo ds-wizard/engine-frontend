@@ -17,6 +17,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemp
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage exposing (DocumentTemplatePackage)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
+import Wizard.Api.Models.DocumentTemplateLocale as DocumentTemplateLocale exposing (DocumentTemplateLocale)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Api.Models.VersionUuid as VersionUuid exposing (VersionUuid)
 
@@ -27,7 +28,9 @@ type alias DocumentTemplateDetail =
     , description : String
     , formats : List DocumentTemplateFormat
     , uuid : Uuid
+    , language : String
     , license : String
+    , locales : List DocumentTemplateLocale
     , metamodelVersion : Version
     , name : String
     , organization : Maybe OrganizationInfo
@@ -42,6 +45,7 @@ type alias DocumentTemplateDetail =
     , version : Version
     , versions : List VersionUuid
     , nonEditable : Bool
+    , potFileReady : Bool
     }
 
 
@@ -53,7 +57,9 @@ decoder =
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormat.decoder)
         |> D.required "uuid" Uuid.decoder
+        |> D.required "language" D.string
         |> D.required "license" D.string
+        |> D.required "locales" (D.list DocumentTemplateLocale.decoder)
         |> D.required "metamodelVersion" Version.decoder
         |> D.required "name" D.string
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
@@ -68,6 +74,7 @@ decoder =
         |> D.required "version" Version.decoder
         |> D.required "versions" (D.list VersionUuid.decoder)
         |> D.required "nonEditable" D.bool
+        |> D.required "potFileReady" D.bool
 
 
 encode : { a | phase : DocumentTemplatePhase } -> E.Value

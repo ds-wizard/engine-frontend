@@ -7,7 +7,7 @@ module Wizard.Pages.DocumentTemplates.Common.DocumentTemplateActionsDropdown exp
     )
 
 import Bootstrap.Dropdown as Dropdown
-import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faEdit, faExport, faView)
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faEdit, faExport, faLocale, faView)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Uuid exposing (Uuid)
@@ -23,6 +23,7 @@ type alias DocumentTemplateLike a =
         | uuid : Uuid
         , phase : DocumentTemplatePhase
         , nonEditable : Bool
+        , potFileReady : Bool
     }
 
 
@@ -34,6 +35,7 @@ type alias DropdownConfig msg =
 
 type alias ActionsConfig a msg =
     { exportMsg : DocumentTemplateLike a -> msg
+    , exportPotMsg : DocumentTemplateLike a -> msg
     , updatePhaseMsg : DocumentTemplateLike a -> DocumentTemplatePhase -> msg
     , deleteMsg : DocumentTemplateLike a -> msg
     , viewActionVisible : Bool
@@ -66,6 +68,18 @@ actions appState cfg template =
 
         exportActionVisible =
             Feature.documentTemplatesExport appState && not template.nonEditable
+
+        exportPotAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faLocale
+                , label = gettext "Export .pot file" appState.locale
+                , msg = ListingActionMsg (cfg.exportPotMsg template)
+                , dataCy = "export-pot"
+                }
+
+        exportPotActionVisible =
+            Feature.documentTemplatesExportPot appState && template.potFileReady
 
         createEditorAction =
             ListingDropdown.dropdownAction
@@ -118,6 +132,7 @@ actions appState cfg template =
         groups =
             [ [ ( viewAction, viewActionVisible )
               , ( exportAction, exportActionVisible )
+              , ( exportPotAction, exportPotActionVisible )
               ]
             , [ ( createEditorAction, createEditorActionVisible ) ]
             , [ ( setDeprecatedAction, setDeprecatedActionVisible )

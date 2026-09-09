@@ -14,9 +14,9 @@ import Wizard.Pages.DocumentTemplates.Routes exposing (Route(..))
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        DetailRoute kmPackageId ->
+        DetailRoute templateUuid _ ->
             Cmd.map DetailMsg <|
-                Wizard.Pages.DocumentTemplates.Detail.Update.fetchData kmPackageId appState
+                Wizard.Pages.DocumentTemplates.Detail.Update.fetchData templateUuid appState
 
         IndexRoute _ ->
             Cmd.map IndexMsg <|

@@ -10,8 +10,12 @@ module Wizard.Utils.Feature exposing
     , documentTemplateEditorsPublish
     , documentTemplateEditorsView
     , documentTemplatesDelete
+    , documentTemplatesDeleteLocale
     , documentTemplatesExport
+    , documentTemplatesExportLocale
+    , documentTemplatesExportPot
     , documentTemplatesImport
+    , documentTemplatesImportLocale
     , documentTemplatesManage
     , documentTemplatesView
     , documentsView
@@ -281,13 +285,33 @@ documentTemplatesImport =
     hasPerm RolePermission.documentTemplatesManage
 
 
+documentTemplatesImportLocale : AppState -> Bool
+documentTemplatesImportLocale =
+    hasPerm RolePermission.documentTemplatesManage
+
+
 documentTemplatesExport : AppState -> Bool
 documentTemplatesExport =
     hasPerm RolePermission.documentTemplatesManage
 
 
+documentTemplatesExportLocale : AppState -> Bool
+documentTemplatesExportLocale =
+    hasPerm RolePermission.documentTemplatesManage
+
+
+documentTemplatesExportPot : AppState -> Bool
+documentTemplatesExportPot =
+    hasPerm RolePermission.documentTemplatesManage
+
+
 documentTemplatesDelete : AppState -> Bool
 documentTemplatesDelete =
+    hasPerm RolePermission.documentTemplatesManage
+
+
+documentTemplatesDeleteLocale : AppState -> Bool
+documentTemplatesDeleteLocale =
     hasPerm RolePermission.documentTemplatesManage
 
 

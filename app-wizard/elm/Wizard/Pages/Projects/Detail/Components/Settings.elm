@@ -42,7 +42,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
-import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Permission exposing (Permission)
@@ -100,7 +100,7 @@ type Msg
     = FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
-    | SetTemplateTypeHintInputReply String
+    | SetTemplateTypeHintInputReply (Maybe DocumentTemplateSuggestion)
     | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | ProjectTagsSearch String
     | ProjectTagsSearchComplete (Result ApiError (Pagination String))
@@ -213,16 +213,17 @@ handleDeleteModalMsg cfg deleteModalMsg appState model =
     ( { model | deleteModalModel = deleteModalModel }, cmd )
 
 
-handleSetTemplateTypeHintInputReplyMsg : AppState -> Model -> String -> ( Model, Cmd msg )
-handleSetTemplateTypeHintInputReplyMsg appState model value =
+handleSetTemplateTypeHintInputReplyMsg : AppState -> Model -> Maybe DocumentTemplateSuggestion -> ( Model, Cmd msg )
+handleSetTemplateTypeHintInputReplyMsg appState model mbDocumentTemplate =
     let
         formMsg field =
             Form.Input field Form.Select << Field.String
 
         form =
             model.form
-                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateUuid" value)
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateUuid" (Maybe.unwrap "" (Uuid.toString << .uuid) mbDocumentTemplate))
                 |> Form.update (ProjectSettingsForm.validation appState) (formMsg "formatUuid" "")
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateLanguage" (Maybe.unwrap "" .language mbDocumentTemplate))
     in
     ( { model | form = form }, Cmd.none )
 
@@ -234,8 +235,8 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageUuid
             , getError = gettext "Unable to get document templates." appState.locale
-            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Uuid.toString << .uuid
-            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Just
+            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply Nothing
             , filterResults = Nothing
             }
 
@@ -374,6 +375,22 @@ formView appState settings model =
                 _ ->
                     Html.nothing
 
+        documentTemplateLanguageInput =
+            case model.templateTypeHintInputModel.selected of
+                Just selectedTemplate ->
+                    if List.isEmpty selectedTemplate.locales then
+                        Html.nothing
+
+                    else
+                        FormGroup.select appState.locale
+                            (DocumentTemplateSuggestion.languageOptions selectedTemplate)
+                            model.form
+                            "documentTemplateLanguage"
+                            (gettext "Default document language" appState.locale)
+
+                _ ->
+                    Html.nothing
+
         isTemplateInput =
             if Feature.projectTemplatesCreate appState then
                 [ hr [] []
@@ -424,6 +441,7 @@ formView appState settings model =
                  , hr [] []
                  , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateUuid" <| gettext "Default document template" appState.locale
                  , Html.map FormMsg <| formatInput
+                 , Html.map FormMsg <| documentTemplateLanguageInput
                  ]
                     ++ isTemplateInput
                 )

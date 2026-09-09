@@ -1,7 +1,7 @@
 module Wizard.Pages.DocumentTemplates.Index.View exposing (view)
 
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faKmsUpload)
+import Common.Components.FontAwesome exposing (faKmsUpload, faLocale)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
@@ -57,6 +57,7 @@ listingConfig appState =
     , dropdownItems =
         DocumentTemplateActionsDropdown.actions appState
             { exportMsg = ExportDocumentTemplate
+            , exportPotMsg = ExportDocumentTemplatePot
             , updatePhaseMsg = UpdatePhase
             , deleteMsg = ShowHideDeleteDocumentTemplate << Just
             , viewActionVisible = True
@@ -165,6 +166,10 @@ listingDescription appState documentTemplate =
     span []
         [ code [ class "fragment" ] [ text (DocumentTemplateUtils.getId documentTemplate) ]
         , organizationFragment
+        , span [ class "fragment", title <| gettext "Language" appState.locale ]
+            [ faLocale
+            , text documentTemplate.language
+            ]
         , span [ class "fragment" ] [ text documentTemplate.description ]
         ]
 

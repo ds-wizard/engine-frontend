@@ -26,6 +26,7 @@ type alias ProjectSettingsForm =
     , isTemplate : Bool
     , documentTemplateUuid : Maybe String
     , formatUuid : Maybe String
+    , documentTemplateLanguage : Maybe String
     , language : String
     }
 
@@ -38,6 +39,14 @@ initEmpty appState =
 init : AppState -> ProjectSettings -> Form FormError ProjectSettingsForm
 init appState project =
     let
+        documentTemplateLanguage =
+            case project.documentTemplateLanguage of
+                Just language ->
+                    language
+
+                Nothing ->
+                    Maybe.unwrap "" .language project.documentTemplate
+
         initials =
             [ ( "name", Field.string project.name )
             , ( "description", Field.string (Maybe.withDefault "" project.description) )
@@ -45,6 +54,7 @@ init appState project =
             , ( "isTemplate", Field.bool project.isTemplate )
             , ( "documentTemplateUuid", Field.string (Maybe.unwrap "" (Uuid.toString << .uuid) project.documentTemplate) )
             , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString project.formatUuid) )
+            , ( "documentTemplateLanguage", Field.string documentTemplateLanguage )
             , ( "language", Field.string (Maybe.withDefault "" project.language) )
             ]
     in
@@ -60,6 +70,7 @@ validation appState =
         |> V.andMap (V.field "isTemplate" V.bool)
         |> V.andMap (V.field "documentTemplateUuid" (V.maybe V.string))
         |> V.andMap (V.field "formatUuid" (V.maybe V.string))
+        |> V.andMap (V.field "documentTemplateLanguage" (V.maybe V.string))
         |> V.andMap (V.field "language" (V.oneOf [ V.emptyString, V.string ]))
 
 
@@ -68,6 +79,9 @@ encode form =
     let
         formatUuid =
             Maybe.andThen (always form.formatUuid) form.documentTemplateUuid
+
+        documentTemplateLanguage =
+            Maybe.andThen (always form.documentTemplateLanguage) form.documentTemplateUuid
 
         projectTags =
             form.projectTags
@@ -81,5 +95,6 @@ encode form =
         , ( "isTemplate", E.bool form.isTemplate )
         , ( "documentTemplateUuid", E.maybe E.string form.documentTemplateUuid )
         , ( "formatUuid", E.maybe E.string formatUuid )
+        , ( "documentTemplateLanguage", E.maybe E.string documentTemplateLanguage )
         , ( "language", E.string form.language )
         ]

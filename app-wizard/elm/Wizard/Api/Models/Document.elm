@@ -30,6 +30,7 @@ type alias Document =
     , projectVersion : Maybe String
     , documentTemplate : DocumentTemplateInfo
     , format : DocumentTemplateFormat
+    , language : Maybe String
     , state : DocumentState
     , submissions : List Submission
     , createdBy : Maybe Uuid
@@ -56,6 +57,7 @@ decoder =
         |> D.required "projectVersion" (D.maybe D.string)
         |> D.required "documentTemplate" DocumentTemplateInfo.decoder
         |> D.required "format" DocumentTemplateFormat.decoder
+        |> D.required "language" (D.maybe D.string)
         |> D.required "state" DocumentState.decoder
         |> D.required "submissions" (D.list Submission.decoder)
         |> D.required "createdBy" (D.maybe Uuid.decoder)
@@ -74,6 +76,7 @@ encode document =
         , ( "projectVersion", E.maybe E.string document.projectVersion )
         , ( "documentTemplate", DocumentTemplateInfo.encode document.documentTemplate )
         , ( "format", DocumentTemplateFormat.encode document.format )
+        , ( "language", E.maybe E.string document.language )
         , ( "state", DocumentState.encode document.state )
         , ( "createdBy", E.maybe Uuid.encode document.createdBy )
         , ( "fileSize", E.maybe E.int document.fileSize )
