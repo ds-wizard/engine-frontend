@@ -1,4 +1,4 @@
-module Wizard.Api.Models.ProjectQuestionnaireTest exposing (generateRepliesTest)
+module Wizard.Api.Models.ProjectQuestionnaireTest exposing (generateRepliesTest, getUnansweredQuestionsTest)
 
 import Dict exposing (Dict)
 import Expect
@@ -271,4 +271,83 @@ generateRepliesTest =
                         generate savedReplies followUpQuestionUuid
                 in
                 Expect.equal (Just (AnswerReply answer1Uuid)) (valueAt optionsKey result)
+        ]
+
+
+unansweredPaths : Dict String Reply -> List String
+unansweredPaths replies =
+    let
+        questionnaire =
+            ProjectQuestionnaire.createQuestionnaireDetail KnowledgeModelPackage.dummy knowledgeModel
+    in
+    ProjectQuestionnaire.getUnansweredQuestions { questionnaire | replies = replies }
+        |> List.map .path
+
+
+getUnansweredQuestionsTest : Test
+getUnansweredQuestionsTest =
+    let
+        listKey =
+            chapterUuid ++ "." ++ listQuestionUuid
+
+        itemKey =
+            listKey ++ "." ++ savedItemUuid ++ "." ++ itemQuestionUuid
+
+        optionsKey =
+            chapterUuid ++ "." ++ optionsQuestionUuid
+
+        followUpKey =
+            optionsKey ++ "." ++ answer1Uuid ++ "." ++ followUpQuestionUuid
+    in
+    describe "ProjectQuestionnaire.getUnansweredQuestions"
+        [ test "returns top-level questions when there are no replies" <|
+            \_ ->
+                Expect.equal [ listKey, optionsKey ] (unansweredPaths Dict.empty)
+        , test "returns unanswered item and follow-up questions in answered parents" <|
+            \_ ->
+                let
+                    replies =
+                        Dict.fromList
+                            [ ( listKey, reply (ItemListReply [ savedItemUuid ]) )
+                            , ( itemKey, reply (StringReply "") )
+                            , ( optionsKey, reply (AnswerReply answer1Uuid) )
+                            ]
+                in
+                Expect.equal [ itemKey, followUpKey ] (unansweredPaths replies)
+        , test "treats an empty list and an unknown answer as unanswered" <|
+            \_ ->
+                let
+                    replies =
+                        Dict.fromList
+                            [ ( listKey, reply (ItemListReply []) )
+                            , ( optionsKey, reply (AnswerReply "unknown-answer") )
+                            ]
+                in
+                Expect.equal [ listKey, optionsKey ] (unansweredPaths replies)
+        , test "returns nothing when all visible questions are answered" <|
+            \_ ->
+                let
+                    replies =
+                        Dict.fromList
+                            [ ( listKey, reply (ItemListReply [ savedItemUuid ]) )
+                            , ( itemKey, reply (StringReply "value") )
+                            , ( optionsKey, reply (AnswerReply answer2Uuid) )
+                            ]
+                in
+                Expect.equal [] (unansweredPaths replies)
+        , test "matches the unanswered question count of the chapter" <|
+            \_ ->
+                let
+                    replies =
+                        Dict.fromList
+                            [ ( listKey, reply (ItemListReply [ savedItemUuid ]) )
+                            , ( optionsKey, reply (AnswerReply answer1Uuid) )
+                            ]
+
+                    questionnaire =
+                        ProjectQuestionnaire.createQuestionnaireDetail KnowledgeModelPackage.dummy knowledgeModel
+                in
+                Expect.equal
+                    (ProjectQuestionnaire.calculateUnansweredQuestionsForChapter { questionnaire | replies = replies } chapterUuid)
+                    (List.length (unansweredPaths replies))
         ]

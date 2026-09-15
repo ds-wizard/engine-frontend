@@ -1,6 +1,7 @@
 module Wizard.Api.Models.ProjectQuestionnaire exposing
     ( ProjectQuestionnaire
     , QuestionCommentInfo
+    , QuestionnaireUnansweredQuestion
     , QuestionnaireWarning
     , addCommentCount
     , addFile
@@ -21,6 +22,7 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , getItemTitle
     , getItemUsageInItemSelectQuestions
     , getTodos
+    , getUnansweredQuestions
     , getUnresolvedCommentCount
     , getWarnings
     , hasTodo
@@ -707,6 +709,54 @@ getWarnings questionnaire =
 
                 _ ->
                     []
+    in
+    concatMapVisibleQuestions fn questionnaire
+
+
+type alias QuestionnaireUnansweredQuestion =
+    { chapter : Chapter
+    , question : Question
+    , path : String
+    }
+
+
+{-| Visible questions that are desirable in the current phase and not answered yet,
+consistent with the chapter counts from `calculateUnansweredQuestionsForChapter`.
+-}
+getUnansweredQuestions : ProjectQuestionnaire -> List QuestionnaireUnansweredQuestion
+getUnansweredQuestions questionnaire =
+    let
+        currentPhase =
+            Uuid.toString (Maybe.withDefault Uuid.nil questionnaire.phaseUuid)
+
+        isUnanswered path question =
+            case ( question, getReplyValue questionnaire path ) of
+                ( OptionsQuestion _ questionData, Just value ) ->
+                    not (List.member (ReplyValue.getAnswerUuid value) questionData.answerUuids)
+
+                ( ListQuestion _ _, Just value ) ->
+                    List.isEmpty (ReplyValue.getItemUuids value)
+
+                ( _, Just value ) ->
+                    ReplyValue.isEmpty value
+
+                ( _, Nothing ) ->
+                    True
+
+        fn chapter currentPath question =
+            let
+                path =
+                    pathToString currentPath
+            in
+            if Question.isDesirable questionnaire.knowledgeModel.phaseUuids currentPhase question && isUnanswered path question then
+                [ { chapter = chapter
+                  , question = question
+                  , path = path
+                  }
+                ]
+
+            else
+                []
     in
     concatMapVisibleQuestions fn questionnaire
 

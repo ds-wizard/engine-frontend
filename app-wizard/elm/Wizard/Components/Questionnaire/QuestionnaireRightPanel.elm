@@ -15,6 +15,7 @@ import Wizard.Plugins.Plugin exposing (Plugin, ProjectQuestionActionConnector)
 type QuestionnaireRightPanel
     = None
     | Search
+    | UnansweredQuestions
     | TODOs
     | VersionHistory
     | CommentsOverview
@@ -42,6 +43,9 @@ decoder =
 
                     "Search" ->
                         D.succeed Search
+
+                    "UnansweredQuestions" ->
+                        D.succeed UnansweredQuestions
 
                     "TODOs" ->
                         D.succeed TODOs
@@ -74,6 +78,11 @@ encode rightPanel =
         Search ->
             E.object
                 [ ( "type", E.string "Search" )
+                ]
+
+        UnansweredQuestions ->
+            E.object
+                [ ( "type", E.string "UnansweredQuestions" )
                 ]
 
         TODOs ->
