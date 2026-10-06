@@ -7,6 +7,7 @@ import Common.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
 import Common.Components.Page as Page
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
+import Common.Utils.ShortcutUtils as Shortcut
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, div, h5, li, span, strong, text, ul)
@@ -15,6 +16,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shortcut
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
@@ -73,7 +75,16 @@ viewContentBeforeImport appState model project kmString =
 
 viewContentImportResult : AppState -> Model -> ProjectQuestionnaire -> Questionnaire.Model -> ImporterResult -> Html Msg
 viewContentImportResult appState model questionnaire questionnaireModel importResult =
-    div [ class "Projects__Import col-full flex-column" ]
+    let
+        shortcuts =
+            if ActionResult.isLoading model.importing then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac PutImportData ]
+    in
+    Shortcut.shortcutElement shortcuts
+        [ class "Projects__Import col-full flex-column" ]
         [ viewNavigation appState model questionnaire importResult
         , div [ class "Projects__Import__Content" ]
             [ viewQuestionnairePreview appState model questionnaire questionnaireModel importResult ]

@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.Token as Token
+import Common.Data.Session as Session
 import Common.Ports.LocalStorage as LocalStorage
 import Gettext exposing (gettext)
 import Json.Encode as E
@@ -15,7 +16,6 @@ import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
 import Wizard.Api.OpenIdClients as OpenIdClientApi
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Pages.Auth.Msgs
 import Wizard.Pages.Public.Login.Models exposing (Model)
@@ -24,18 +24,13 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> Cmd Msg
-fetchData appState =
-    if Session.exists appState.session && not (Session.expired appState.currentTime appState.session) then
+fetchData : AppState -> Maybe String -> Cmd Msg
+fetchData appState mbOriginalUrl =
+    if Session.isValid appState.currentTime appState.session then
         cmdNavigate appState Routes.appHome
 
     else if Admin.isEnabled appState.config.admin then
-        case List.head appState.config.authentication.external.services of
-            Just service ->
-                OpenIdClientApi.request appState service ExternalLoginOpenIdCompleted
-
-            Nothing ->
-                Cmd.none
+        Routing.cmdNavigateToLogin appState mbOriginalUrl
 
     else
         Cmd.none

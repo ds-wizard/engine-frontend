@@ -5,7 +5,7 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faExternalLink, faRemove, faSpinner)
+import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faExternalLink, faLocale, faRemove, faSpinner)
 import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Modal as Modal
@@ -167,6 +167,14 @@ listingDescription document =
         formatFragment =
             span [ class "fragment" ] [ fa document.format.icon, text document.format.name ]
 
+        languageFragment =
+            case document.language of
+                Just language ->
+                    span [ class "fragment" ] [ faLocale, text language ]
+
+                Nothing ->
+                    Html.nothing
+
         fileSizeFragment =
             case document.fileSize of
                 Just fileSize ->
@@ -185,6 +193,7 @@ listingDescription document =
     in
     span []
         [ formatFragment
+        , languageFragment
         , fileSizeFragment
         , projectLink
         , documentTemplateLink

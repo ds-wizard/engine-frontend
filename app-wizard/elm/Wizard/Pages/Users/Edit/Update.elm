@@ -1,11 +1,16 @@
 module Wizard.Pages.Users.Edit.Update exposing (fetchData, update)
 
+import ActionResult
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Gettext exposing (gettext)
+import Wizard.Api.Models.User exposing (User)
+import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
-import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
@@ -20,6 +25,14 @@ import Wizard.Pages.Users.Edit.UserEditRoutes as UserEditRoute exposing (UserEdi
 
 fetchData : AppState -> UuidOrCurrent -> UserEditRoute -> Cmd Msg
 fetchData appState uuidOrCurrent subroute =
+    Cmd.batch
+        [ UsersApi.getUser appState uuidOrCurrent GetUserCompleted
+        , fetchSubrouteData appState uuidOrCurrent subroute
+        ]
+
+
+fetchSubrouteData : AppState -> UuidOrCurrent -> UserEditRoute -> Cmd Msg
+fetchSubrouteData appState uuidOrCurrent subroute =
     case subroute of
         UserEditRoute.Profile ->
             Cmd.map ProfileMsg (Profile.fetchData appState uuidOrCurrent)
@@ -39,9 +52,6 @@ fetchData appState uuidOrCurrent subroute =
         UserEditRoute.ApiKeys ->
             Cmd.map ApiKeysMsg (ApiKeys.fetchData appState)
 
-        UserEditRoute.AppKeys ->
-            Cmd.map AppKeysMsg (AppKeys.fetchData appState)
-
         UserEditRoute.ActiveSessions ->
             Cmd.map ActiveSessionsMsg (ActiveSessions.fetchData appState)
 
@@ -55,6 +65,9 @@ fetchData appState uuidOrCurrent subroute =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        GetUserCompleted result ->
+            getUserCompleted appState model result
+
         ProfileMsg profileMsg ->
             let
                 updateConfig =
@@ -127,18 +140,6 @@ update msg wrapMsg appState model =
             in
             ( { model | apiKeysModel = apiKeysModel }, apiKeysCmd )
 
-        AppKeysMsg appKeysMsg ->
-            let
-                updateConfig =
-                    { wrapMsg = wrapMsg << AppKeysMsg
-                    , logoutMsg = Wizard.Msgs.logoutMsg
-                    }
-
-                ( appKeysModel, appKeysCmd ) =
-                    AppKeys.update updateConfig appState appKeysMsg model.appKeysModel
-            in
-            ( { model | appKeysModel = appKeysModel }, appKeysCmd )
-
         ActiveSessionsMsg activeSessionsMsg ->
             let
                 updateConfig =
@@ -174,3 +175,20 @@ update msg wrapMsg appState model =
                     PluginSettings.update updateConfig appState pluginSettingsMsg model.pluginSettingsModel
             in
             ( { model | pluginSettingsModel = pluginSettingsModel }, submissionSettingsCmd )
+
+
+getUserCompleted : AppState -> Model -> Result ApiError User -> ( Model, Cmd Wizard.Msgs.Msg )
+getUserCompleted appState model result =
+    let
+        newModel =
+            case result of
+                Ok user ->
+                    { model
+                        | user = ActionResult.Success user
+                        , profileModel = Profile.setUser user model.profileModel
+                    }
+
+                Err error ->
+                    { model | user = ApiError.toActionResult appState (gettext "Unable to get the user." appState.locale) error }
+    in
+    ( newModel, RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result )

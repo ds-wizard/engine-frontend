@@ -1,4 +1,4 @@
-port module Wizard.Ports.Session exposing
+port module Common.Ports.Session exposing
     ( clearSession
     , clearSessionAndReload
     , storeSession

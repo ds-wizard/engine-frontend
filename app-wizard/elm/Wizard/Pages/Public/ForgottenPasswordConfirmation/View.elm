@@ -47,7 +47,7 @@ signupForm appState model =
             , link = Nothing
             }
     in
-    publicForm formConfig
+    publicForm appState formConfig
 
 
 formView : AppState -> Form FormError PasswordForm -> Html Form.Msg

@@ -16,6 +16,10 @@
         border-color: var(--bs-primary);
     }
 
+    &.is-invalid {
+        border-color: var(--bs-form-invalid-border-color);
+    }
+
     p {
         padding: 20px;
         font-size: 16px;

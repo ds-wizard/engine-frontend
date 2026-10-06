@@ -155,6 +155,32 @@
         color: $body-color;
       }
     }
+
+    // The panel scrolls (overflow: auto), so a dropdown menu wider than the panel
+    // gets clipped and cannot be scrolled into view. Drop the positioning context
+    // of the toggle (and of the wrapper elm-bootstrap adds with an inline
+    // position: relative) so the menus are positioned against the comment itself
+    // and can be capped at its width.
+    .ListingDropdown,
+    .UserSuggestionDropdown {
+      position: static;
+
+      & > div {
+        position: static !important;
+      }
+
+      .dropdown-menu {
+        // keep the default min-width, but never let it beat max-width
+        min-width: min(var(--bs-dropdown-min-width), 100%);
+        max-width: 100%;
+      }
+    }
+
+    .ListingDropdown {
+      .dropdown-item {
+        white-space: normal;
+      }
+    }
   }
 
   &__commentText {

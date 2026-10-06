@@ -67,7 +67,7 @@ import Wizard.Api.Models.ProjectDetail.ProjectEvent.ResolveCommentThreadData exp
 import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData as SetReplyData
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
 import Wizard.Api.Models.ProjectFileSimple exposing (ProjectFileSimple)
-import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire, QuestionnaireWarning)
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire, QuestionnaireUnansweredQuestion, QuestionnaireWarning)
 import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.PluginModal as PluginModal
@@ -81,6 +81,7 @@ import Wizard.Components.Questionnaire.Components.QuestionnaireContent as Questi
 import Wizard.Components.Questionnaire.Components.SearchRightPanel as SearchRightPanel
 import Wizard.Components.Questionnaire.Components.TodosRightPanel as TodosRightPanel
 import Wizard.Components.Questionnaire.Components.Toolbar as Toolbar
+import Wizard.Components.Questionnaire.Components.UnansweredQuestionsRightPanel as UnansweredQuestionsRightPanel
 import Wizard.Components.Questionnaire.Components.VersionHistoryRightPanel as VersionHistoryRightPanel
 import Wizard.Components.Questionnaire.Components.WarningsRightPanel as WarningsRightPanel
 import Wizard.Components.Questionnaire.QuestionnaireLocalStorage as QuestionnaireLocalStorage
@@ -114,6 +115,7 @@ type alias Model =
     , mbHighlightedPath : Maybe String
     , questionnaire : ProjectQuestionnaire
     , todos : List ProjectTodo
+    , unansweredQuestions : List QuestionnaireUnansweredQuestion
     , viewNamedOnlyVersions : Bool
     , viewResolvedComments : Bool
     , viewSettings : QuestionnaireViewSettings
@@ -187,6 +189,7 @@ init appState projectQuestionnaire mbPath mbCommentThreadUuid =
             , mbHighlightedPath = Nothing
             , questionnaire = projectQuestionnaire
             , todos = ProjectQuestionnaire.getTodos projectQuestionnaire
+            , unansweredQuestions = []
             , viewNamedOnlyVersions = False
             , viewResolvedComments = False
             , viewSettings = QuestionnaireViewSettings.default
@@ -286,6 +289,7 @@ type Msg
     | NavigationTreeMsg NavigationTree.Msg
     | ToolbarMsg Toolbar.Msg
     | SearchRightPanelMsg SearchRightPanel.Msg
+    | UnansweredQuestionsRightPanelMsg UnansweredQuestionsRightPanel.Msg
     | TodosRightPanelMsg TodosRightPanel.Msg
     | WarningsRightPanelMsg WarningsRightPanel.Msg
     | CommentsRightPanelMsg CommentsRightPanel.Msg
@@ -528,6 +532,15 @@ update appState cfg msg model =
             QuestionnaireUpdateReturnData.fromModelCmd appState
                 newModel
                 (Cmd.map (cfg.wrapMsg << SearchRightPanelMsg) searchRightPanelCmd)
+
+        UnansweredQuestionsRightPanelMsg unansweredQuestionsMsg ->
+            let
+                cmd =
+                    UnansweredQuestionsRightPanel.update
+                        { scrollToPathCmd = dispatchScrollToPath cfg.wrapMsg False }
+                        unansweredQuestionsMsg
+            in
+            QuestionnaireUpdateReturnData.fromModelCmd appState model cmd
 
         TodosRightPanelMsg todosMsg ->
             let
@@ -1261,6 +1274,9 @@ calculateUnansweredQuestionsIfNeeded projectEvent model =
                 ProjectEvent.ClearReply _ ->
                     True
 
+                ProjectEvent.SetPhase _ ->
+                    True
+
                 _ ->
                     False
     in
@@ -1282,7 +1298,10 @@ calculateUnansweredQuestions model =
                     )
                 |> Dict.fromList
     in
-    { model | chapterUnansweredQuestions = chapterUnansweredQuestions }
+    { model
+        | chapterUnansweredQuestions = chapterUnansweredQuestions
+        , unansweredQuestions = ProjectQuestionnaire.getUnansweredQuestions model.questionnaire
+    }
 
 
 updateTodosIfNeeded : ProjectEvent -> Model -> Model
@@ -1410,6 +1429,7 @@ view appState cfg model =
                         model.viewSettings
                         model.rightPanel
                         model.questionnaire
+                        model.unansweredQuestions
                         model.todos
                         model.warnings
                         model.toolbarModel
@@ -1503,6 +1523,10 @@ view appState cfg model =
                             , wrapMsg = SearchRightPanelMsg
                             }
                             model.searchRightPanelModel
+
+                QuestionnaireRightPanel.UnansweredQuestions ->
+                    Html.map (cfg.wrapMsg << UnansweredQuestionsRightPanelMsg) <|
+                        UnansweredQuestionsRightPanel.view appState.locale model.unansweredQuestions
 
                 QuestionnaireRightPanel.TODOs ->
                     Html.map (cfg.wrapMsg << TodosRightPanelMsg) <|

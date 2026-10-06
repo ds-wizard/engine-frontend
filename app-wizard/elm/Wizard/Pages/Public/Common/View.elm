@@ -6,10 +6,13 @@ module Wizard.Pages.Public.Common.View exposing
 import ActionResult exposing (ActionResult)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FormResult as FormResult
+import Common.Utils.ShortcutUtils as Shortcut
 import Html exposing (Html, div, form, span, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
+import Shortcut
 import Wizard.Components.Html exposing (linkTo)
+import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes
 
 
@@ -23,9 +26,16 @@ type alias FormConfig msg =
     }
 
 
-publicForm : FormConfig msg -> Html msg
-publicForm formConfig =
+publicForm : AppState -> FormConfig msg -> Html msg
+publicForm appState formConfig =
     let
+        shortcuts =
+            if ActionResult.isLoading formConfig.actionResult then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac formConfig.submitMsg ]
+
         link =
             case formConfig.link of
                 Just ( route, linkText ) ->
@@ -34,7 +44,8 @@ publicForm formConfig =
                 _ ->
                     span [] []
     in
-    div [ class "align-self-center col-xs-10 col-sm-8 col-md-6 col-lg-4" ]
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block align-self-center col-xs-10 col-sm-8 col-md-6 col-lg-4" ]
         [ form [ onSubmit formConfig.submitMsg, class "card bg-light" ]
             [ div [ class "card-header" ] [ text formConfig.title ]
             , div [ class "card-body" ]

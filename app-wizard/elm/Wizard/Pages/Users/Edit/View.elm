@@ -1,5 +1,6 @@
 module Wizard.Pages.Users.Edit.View exposing (view)
 
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
@@ -12,7 +13,6 @@ import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
-import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
@@ -30,6 +30,11 @@ import Wizard.Utils.HtmlAttributesUtils exposing (settingsClass)
 
 view : AppState -> UserEditRoute -> Model -> Html Msg
 view appState subroute model =
+    Page.actionResultView appState (always (userView appState subroute model)) model.user
+
+
+userView : AppState -> UserEditRoute -> Model -> Html Msg
+userView appState subroute model =
     let
         content =
             case subroute of
@@ -56,10 +61,6 @@ view appState subroute model =
                 UserEditRoutes.ApiKeys ->
                     Html.map ApiKeysMsg <|
                         ApiKeys.view appState model.apiKeysModel
-
-                UserEditRoutes.AppKeys ->
-                    Html.map AppKeysMsg <|
-                        AppKeys.view appState model.appKeysModel
 
                 UserEditRoutes.ActiveSessions ->
                     Html.map ActiveSessionsMsg <|
@@ -149,7 +150,7 @@ navigation appState subroute model =
                 [ text (gettext "Tours" appState.locale)
                 ]
             )
-         , Html.viewIf (Feature.userEditApiKeys appState model.uuidOrCurrent)
+         , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditApiKeys appState model.uuidOrCurrent)
             (linkTo (Routes.usersEditApiKeys model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ApiKeys ) ]
@@ -158,16 +159,7 @@ navigation appState subroute model =
                 [ text (gettext "API Keys" appState.locale)
                 ]
             )
-         , Html.viewIf (Feature.userEditAppKeys appState model.uuidOrCurrent)
-            (linkTo (Routes.usersEditAppKeys model.uuidOrCurrent)
-                [ class "nav-link"
-                , classList [ ( "active", subroute == UserEditRoutes.AppKeys ) ]
-                , dataCy "user_nav_app-keys"
-                ]
-                [ text (gettext "App Keys" appState.locale)
-                ]
-            )
-         , Html.viewIf (Feature.userEditActiveSessions appState model.uuidOrCurrent)
+         , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditActiveSessions appState model.uuidOrCurrent)
             (linkTo (Routes.usersEditActiveSessions model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ActiveSessions ) ]

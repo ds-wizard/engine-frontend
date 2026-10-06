@@ -23,7 +23,7 @@ import Html.Extra as Html
 import Html.Lazy as Lazy
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Project.ProjectTodo exposing (ProjectTodo)
-import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire, QuestionnaireWarning)
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire, QuestionnaireUnansweredQuestion, QuestionnaireWarning)
 import Wizard.Components.Questionnaire.QuestionnaireRightPanel as QuestionnaireRightPanel exposing (QuestionnaireRightPanel)
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Components.Questionnaire.ToolbarViewFlags as ToolbarViewFlags
@@ -74,6 +74,7 @@ type Msg
     | SetViewSettings QuestionnaireViewSettings
     | OpenPluginProjectActionModal Uuid PluginElement
     | OpenWarnings
+    | OpenUnansweredQuestions
     | OpenTodos
     | OpenComments
     | OpenVersionHistory
@@ -123,6 +124,11 @@ update cfg msg model =
             , cfg.updateRightPanelCmd QuestionnaireRightPanel.Warnings
             )
 
+        OpenUnansweredQuestions ->
+            ( model
+            , cfg.updateRightPanelCmd QuestionnaireRightPanel.UnansweredQuestions
+            )
+
         OpenTodos ->
             ( model
             , cfg.updateRightPanelCmd QuestionnaireRightPanel.TODOs
@@ -163,8 +169,8 @@ subscriptions model =
         ]
 
 
-view : AppState -> QuestionnaireViewSettings -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List ProjectTodo -> List QuestionnaireWarning -> Model -> Html Msg
-view appState viewSettings rightPanel questionnaire todos warnings model =
+view : AppState -> QuestionnaireViewSettings -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List QuestionnaireUnansweredQuestion -> List ProjectTodo -> List QuestionnaireWarning -> Model -> Html Msg
+view appState viewSettings rightPanel questionnaire unansweredQuestions todos warnings model =
     let
         toolbarViewFlags =
             ToolbarViewFlags.toInt
@@ -176,7 +182,7 @@ view appState viewSettings rightPanel questionnaire todos warnings model =
     in
     div [ class "questionnaireToolbar" ]
         [ viewToolbarLeft appState.locale viewSettings model toolbarViewFlags
-        , viewToolbarRight appState rightPanel questionnaire todos warnings toolbarViewFlags
+        , viewToolbarRight appState rightPanel questionnaire unansweredQuestions todos warnings toolbarViewFlags
         ]
 
 
@@ -299,11 +305,14 @@ viewToolbarLeftLazy locale viewSettings model toolbarViewFlags =
         ]
 
 
-viewToolbarRight : AppState -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List ProjectTodo -> List QuestionnaireWarning -> Int -> Html Msg
-viewToolbarRight appState rightPanel questionnaire todos warnings toolbarViewFlags =
+viewToolbarRight : AppState -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List QuestionnaireUnansweredQuestion -> List ProjectTodo -> List QuestionnaireWarning -> Int -> Html Msg
+viewToolbarRight appState rightPanel questionnaire unansweredQuestions todos warnings toolbarViewFlags =
     let
         warningsLength =
             List.length warnings
+
+        unansweredQuestionsLength =
+            List.length unansweredQuestions
 
         todosLength =
             List.length todos
@@ -314,20 +323,22 @@ viewToolbarRight appState rightPanel questionnaire todos warnings toolbarViewFla
         isFullScreen =
             AppState.isFullscreen appState
     in
-    Lazy.lazy7 viewToolbarRightLazy
+    Lazy.lazy8 viewToolbarRightLazy
         appState.locale
         rightPanel
         warningsLength
+        unansweredQuestionsLength
         todosLength
         commentsCount
         isFullScreen
         toolbarViewFlags
 
 
-viewToolbarRightLazy : Gettext.Locale -> QuestionnaireRightPanel -> Int -> Int -> Int -> Bool -> Int -> Html Msg
-viewToolbarRightLazy locale rightPanel warningsLength todosLength commentsCount isFullScreen toolbarViewFlags =
+viewToolbarRightLazy : Gettext.Locale -> QuestionnaireRightPanel -> Int -> Int -> Int -> Int -> Bool -> Int -> Html Msg
+viewToolbarRightLazy locale rightPanel warningsLength unansweredQuestionsLength todosLength commentsCount isFullScreen toolbarViewFlags =
     div [ class "questionnaireToolbar__right" ]
         [ warningsButton locale rightPanel warningsLength
+        , unansweredQuestionsButton locale rightPanel unansweredQuestionsLength
         , todosButton locale rightPanel (ToolbarViewFlags.todosVisible toolbarViewFlags) todosLength
         , commentsButton locale rightPanel (ToolbarViewFlags.commentsVisible toolbarViewFlags) commentsCount
         , versionHistoryButton locale rightPanel (ToolbarViewFlags.versionHistoryVisible toolbarViewFlags)
@@ -361,6 +372,33 @@ warningsButton locale rightPanel warningsLength =
                     Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsLength) ]
                 ]
             ]
+
+
+unansweredQuestionsButton : Gettext.Locale -> QuestionnaireRightPanel -> Int -> Html Msg
+unansweredQuestionsButton locale rightPanel unansweredQuestionsLength =
+    let
+        unansweredQuestionsOpen =
+            rightPanel == QuestionnaireRightPanel.UnansweredQuestions
+
+        onClickAction =
+            if unansweredQuestionsOpen then
+                CloseRightPanel
+
+            else
+                OpenUnansweredQuestions
+    in
+    div [ class "item-group" ]
+        [ a
+            [ class "item"
+            , classList [ ( "selected", unansweredQuestionsOpen ) ]
+            , onClick onClickAction
+            , dataCy "questionnaire_toolbar_unanswered-questions"
+            ]
+            [ text (gettext "Unanswered" locale)
+            , Html.viewIf (unansweredQuestionsLength > 0) <|
+                Badge.secondary [ class "rounded-pill" ] [ text (String.fromInt unansweredQuestionsLength) ]
+            ]
+        ]
 
 
 todosButton : Gettext.Locale -> QuestionnaireRightPanel -> Bool -> Int -> Html Msg

@@ -18,6 +18,7 @@ import Common.Ports.Dom as Dom
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.ShortcutUtils as Shortcut
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -25,6 +26,7 @@ import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
+import Shortcut
 import String.Format as String
 import Wizard.Api.Models.SubmissionProps exposing (SubmissionProps)
 import Wizard.Api.Users as UsersApi
@@ -224,6 +226,16 @@ formView appState model =
             else
                 div [ class "mt-5" ]
                     [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingProps) ]
+
+        shortcuts =
+            if noSubmissionFields || ActionResult.isLoading model.savingProps then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac Form.Submit ]
     in
-    Html.form [ onSubmit Form.Submit ]
-        (List.map submissionSettingsSection submissionPropsIndexes ++ [ saveButtonRow ])
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block" ]
+        [ Html.form [ onSubmit Form.Submit ]
+            (List.map submissionSettingsSection submissionPropsIndexes ++ [ saveButtonRow ])
+        ]

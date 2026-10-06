@@ -3,13 +3,15 @@ module Wizard.Pages.Auth.Update exposing (update)
 import Browser.Navigation as Navigation
 import Common.Api.Models.BuildInfo as BuildInfo
 import Common.Components.NewsModal as NewsModal
+import Common.Data.Session as Session
+import Common.Ports.Session as Session
+import Maybe.Extra as Maybe
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Data.AppState as AppState
-import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Pages.Auth.Msgs as AuthMsgs
-import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 import Wizard.Utils.Feature as Feature
@@ -21,7 +23,7 @@ update msg model =
         AuthMsgs.GotToken token mbOriginalUrl ->
             let
                 newModel =
-                    setSession (Session.setToken model.appState.session token) model
+                    setSession (Session.setToken token model.appState.session) model
 
                 redirectUrl =
                     case mbOriginalUrl of
@@ -51,28 +53,47 @@ update msg model =
             )
 
         AuthMsgs.Logout ->
-            logout model
+            if Admin.isEnabled model.appState.config.admin then
+                logoutAndLoad (Routing.loginUrl model.appState Nothing) model
 
-        AuthMsgs.LogoutTo route ->
-            logoutTo route model
+            else
+                logoutAndNavigate (cmdNavigate model.appState Routes.publicLogoutSuccessful) model
 
-        AuthMsgs.LogoutDone ->
-            ( model, Cmd.none )
+        AuthMsgs.LogoutToLogin mbOriginalUrl ->
+            if Admin.isEnabled model.appState.config.admin then
+                logoutAndLoad (Routing.loginUrl model.appState mbOriginalUrl) model
+
+            else
+                logoutAndNavigate (Routing.cmdNavigateToLogin model.appState mbOriginalUrl) model
+
+        AuthMsgs.LogoutDone mbRedirectUrl ->
+            ( model, Maybe.unwrap Cmd.none Navigation.load mbRedirectUrl )
 
 
-logout : Model -> ( Model, Cmd Msg )
-logout =
-    logoutTo Routes.publicLogoutSuccessful
+{-| Log out and navigate within the Wizard client. The token is revoked in the background, the
+navigation does not interrupt the request.
+-}
+logoutAndNavigate : Cmd Msg -> Model -> ( Model, Cmd Msg )
+logoutAndNavigate navigateCmd model =
+    logoutWith Nothing navigateCmd model
 
 
-logoutTo : Routes.Route -> Model -> ( Model, Cmd Msg )
-logoutTo route model =
+{-| Log out and leave the Wizard client. Loading another page cancels pending requests, so the
+redirect has to wait until the token is revoked.
+-}
+logoutAndLoad : String -> Model -> ( Model, Cmd Msg )
+logoutAndLoad redirectUrl model =
+    logoutWith (Just redirectUrl) Cmd.none model
+
+
+logoutWith : Maybe String -> Cmd Msg -> Model -> ( Model, Cmd Msg )
+logoutWith mbRedirectUrl navigateCmd model =
     let
         cmd =
             Cmd.batch
                 [ Session.clearSession ()
-                , TokensApi.deleteCurrentToken model.appState (Wizard.Msgs.AuthMsg << always AuthMsgs.LogoutDone)
-                , cmdNavigate model.appState route
+                , TokensApi.deleteCurrentToken model.appState (Wizard.Msgs.AuthMsg << always (AuthMsgs.LogoutDone mbRedirectUrl))
+                , navigateCmd
                 ]
     in
-    ( setSession (Session.init model.appState.apiUrl) model, cmd )
+    ( setSession (Session.init model.appState.session.apiUrlBase) model, cmd )

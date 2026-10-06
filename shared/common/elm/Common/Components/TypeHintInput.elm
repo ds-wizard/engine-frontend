@@ -17,6 +17,7 @@ import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Components.FontAwesome exposing (faError, faRemove, faSearch, faSpinner)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Ports.Dom as Dom
+import Common.Utils.ShortcutUtils as ShortcutUtils
 import Debounce exposing (Debounce)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, text, ul)
@@ -377,7 +378,7 @@ viewTypeHints cfg model =
             shortcuts =
                 [ Shortcut.simpleShortcut Shortcut.ArrowDown (cfg.wrapMsg SetTypehintFocusNext)
                 , Shortcut.simpleShortcut Shortcut.ArrowUp (cfg.wrapMsg SetTypehintFocusPrev)
-                , Shortcut.simpleShortcut Shortcut.Enter (cfg.wrapMsg SelectTypehintByFocus)
+                , ShortcutUtils.plainShortcut Shortcut.Enter (cfg.wrapMsg SelectTypehintByFocus)
                 , Shortcut.simpleShortcut Shortcut.Escape (cfg.wrapMsg HideTypeHints)
                 ]
         in

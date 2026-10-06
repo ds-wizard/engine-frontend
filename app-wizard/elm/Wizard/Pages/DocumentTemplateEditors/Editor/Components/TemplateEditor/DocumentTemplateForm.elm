@@ -31,6 +31,7 @@ import Wizard.Data.AppState exposing (AppState)
 type alias DocumentTemplateForm =
     { name : String
     , description : String
+    , language : String
     , license : String
     , readme : String
     , allowedPackages : List DocumentTemplateAllowedPackage
@@ -53,6 +54,7 @@ init appState draft =
         initialFields =
             [ ( "name", Field.string draft.name )
             , ( "description", Field.string draft.description )
+            , ( "language", Field.string draft.language )
             , ( "license", Field.string draft.license )
             , ( "readme", Field.string draft.readme )
             , ( "allowedPackages", Field.list (List.map DocumentTemplateAllowedPackage.init draft.allowedPackages) )
@@ -71,6 +73,7 @@ validation appState =
     V.succeed DocumentTemplateForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.optionalString)
+        |> V.andMap (V.field "language" V.string)
         |> V.andMap (V.field "license" V.optionalString)
         |> V.andMap (V.field "readme" V.optionalString)
         |> V.andMap (V.field "allowedPackages" (V.list DocumentTemplateAllowedPackage.validation))
@@ -90,6 +93,7 @@ encode phase form =
     E.object
         [ ( "name", E.string form.name )
         , ( "description", E.string form.description )
+        , ( "language", E.string form.language )
         , ( "license", E.string form.license )
         , ( "readme", E.string form.readme )
         , ( "allowedPackages", E.list DocumentTemplateAllowedPackage.encode form.allowedPackages )

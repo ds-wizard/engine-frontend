@@ -2,6 +2,7 @@ module Wizard.Pages.DocumentTemplates.Models exposing (Model, initLocalModel, in
 
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.DocumentTemplates.Detail.DocumentTemplateDetailRoute as DocumentTemplateDetailRoute
 import Wizard.Pages.DocumentTemplates.Detail.Models
 import Wizard.Pages.DocumentTemplates.Import.Models
 import Wizard.Pages.DocumentTemplates.Index.Models
@@ -17,7 +18,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { detailModel = Wizard.Pages.DocumentTemplates.Detail.Models.initialModel
+    { detailModel = Wizard.Pages.DocumentTemplates.Detail.Models.initialModel DocumentTemplateDetailRoute.Readme
     , importModel = Wizard.Pages.DocumentTemplates.Import.Models.initialModel appState Nothing
     , indexModel = Wizard.Pages.DocumentTemplates.Index.Models.initialModel PaginationQueryString.empty
     }
@@ -26,8 +27,8 @@ initialModel appState =
 initLocalModel : Route -> AppState -> Model -> Model
 initLocalModel route appState model =
     case route of
-        DetailRoute _ ->
-            { model | detailModel = Wizard.Pages.DocumentTemplates.Detail.Models.initialModel }
+        DetailRoute _ templateDetailRoute ->
+            { model | detailModel = Wizard.Pages.DocumentTemplates.Detail.Models.initialModel templateDetailRoute }
 
         ImportRoute kmPackageId ->
             { model | importModel = Wizard.Pages.DocumentTemplates.Import.Models.initialModel appState kmPackageId }

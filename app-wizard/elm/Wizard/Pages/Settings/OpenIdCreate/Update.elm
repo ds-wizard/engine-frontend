@@ -63,7 +63,7 @@ update cfg appState msg model =
                             ( ApiError.toActionResult appState (gettext "OpenID config could not be saved." appState.locale) error
                             , Cmd.batch
                                 [ RequestHelpers.getResultCmd cfg.logoutMsg result
-                                , Dom.scrollToTop ".container"
+                                , Dom.scrollToTop ".Settings__content"
                                 ]
                             )
             in

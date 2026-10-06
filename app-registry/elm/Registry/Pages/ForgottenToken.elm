@@ -82,7 +82,7 @@ successView appState =
 
 formView : AppState -> Model -> Html Msg
 formView appState model =
-    FormWrapper.view
+    FormWrapper.view appState
         { title = gettext "Forgotten Token" appState.locale
         , submitMsg = FormMsg Form.Submit
         , content =

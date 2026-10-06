@@ -31,6 +31,7 @@ import Html.Attributes exposing (class, classList, id)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
+import LanguageCodes
 import List.Extra as List
 import Random exposing (Seed)
 import Task.Extra as Task
@@ -282,6 +283,7 @@ formViewGeneral appState model =
         , Html.map FormMsg <| FormGroup.input appState.locale model.form "templateId" <| gettext "Document Template ID" appState.locale
         , FormExtra.textAfter <| gettext "Document template ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
         , FormGroup.version appState.locale versionInputConfig model.form
+        , Html.map FormMsg <| FormGroup.select appState.locale LanguageCodes.options model.form "language" <| gettext "Language" appState.locale
         , Html.map FormMsg <| FormGroup.input appState.locale model.form "license" <| gettext "License" appState.locale
         , Html.map FormMsg <| FormGroup.markdownEditor appState.locale (WizardGuideLinks.markdownCheatsheet appState.guideLinks) model.form "readme" <| gettext "Readme" appState.locale
         ]

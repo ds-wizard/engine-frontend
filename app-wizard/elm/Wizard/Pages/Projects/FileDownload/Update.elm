@@ -6,15 +6,15 @@ module Wizard.Pages.Projects.FileDownload.Update exposing
 import ActionResult
 import Browser.Navigation as Navigation
 import Common.Api.ApiError as ApiError
+import Common.Data.Session as Session
 import Gettext exposing (gettext)
 import Uuid exposing (Uuid)
 import Wizard.Api.ProjectFiles as ProjectFilesApi
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 import Wizard.Pages.Projects.FileDownload.Models exposing (Model)
 import Wizard.Pages.Projects.FileDownload.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate, toUrl)
+import Wizard.Routing as Routing exposing (toUrl)
 
 
 fetchData : AppState -> Uuid -> Uuid -> Cmd Msg
@@ -38,8 +38,7 @@ update appState msg model =
                                     Routes.projectsFileDownload model.projectUuid model.fileUuid
                                         |> toUrl
                                         |> Just
-                                        |> Routes.publicLogin
-                                        |> cmdNavigate appState
+                                        |> Routing.cmdNavigateToLogin appState
 
                                 _ ->
                                     Cmd.none

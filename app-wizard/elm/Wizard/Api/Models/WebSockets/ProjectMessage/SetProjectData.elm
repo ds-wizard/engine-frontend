@@ -25,6 +25,7 @@ type alias SetProjectData =
     , documentTemplate : Maybe DocumentTemplateSuggestion
     , formatUuid : Maybe Uuid
     , format : Maybe DocumentTemplateFormat
+    , documentTemplateLanguage : Maybe String
     , permissions : List Permission
     , labels : Dict String (List String)
     , unresolvedCommentCounts : Dict String (Dict String Int)
@@ -36,15 +37,16 @@ decoder : Decoder SetProjectData
 decoder =
     D.succeed SetProjectData
         |> D.required "name" D.string
-        |> D.required "description" (D.maybe D.string)
+        |> D.required "description" (D.nullable D.string)
         |> D.required "projectTags" (D.list D.string)
         |> D.required "isTemplate" D.bool
         |> D.required "visibility" ProjectVisibility.decoder
         |> D.required "sharing" ProjectSharing.decoder
-        |> D.required "documentTemplateUuid" (D.maybe Uuid.decoder)
-        |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)
-        |> D.required "formatUuid" (D.maybe Uuid.decoder)
-        |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
+        |> D.required "documentTemplateUuid" (D.nullable Uuid.decoder)
+        |> D.required "documentTemplate" (D.nullable DocumentTemplateSuggestion.decoder)
+        |> D.required "formatUuid" (D.nullable Uuid.decoder)
+        |> D.required "format" (D.nullable DocumentTemplateFormat.decoder)
+        |> D.required "documentTemplateLanguage" (D.nullable D.string)
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
         |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))

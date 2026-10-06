@@ -1,4 +1,4 @@
-module Common.Utils.ShortcutUtils exposing (primaryShortcut, submitShortcut)
+module Common.Utils.ShortcutUtils exposing (plainShortcut, primaryShortcut, submitShortcut)
 
 import Shortcut exposing (Shortcut)
 
@@ -15,3 +15,22 @@ primaryShortcut isMac key =
 submitShortcut : Bool -> msg -> Shortcut msg
 submitShortcut isMac =
     primaryShortcut isMac Shortcut.Enter
+
+
+{-| Shortcut for a key pressed without the primary modifier (ctrl or cmd).
+
+Useful when the same key is also used with the primary modifier somewhere else so that
+pressing the combination does not trigger both shortcuts at once.
+
+-}
+plainShortcut : Shortcut.Key -> msg -> Shortcut msg
+plainShortcut key msg =
+    { msg = msg
+    , keyCombination =
+        { baseKey = key
+        , alt = Nothing
+        , shift = Nothing
+        , ctrl = Just False
+        , meta = Just False
+        }
+    }

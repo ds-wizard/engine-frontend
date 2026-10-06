@@ -1,10 +1,12 @@
 module Wizard.Pages.Public.Login.View exposing (view)
 
+import ActionResult
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (fa, fas)
 import Common.Components.FormResult as FormResult
 import Common.Components.Tooltip exposing (tooltipLeft)
 import Common.Utils.MarkdownOrHtml as MarkdownOrHtml
+import Common.Utils.ShortcutUtils as Shortcut
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, input, p, span, text)
 import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeholder, type_)
@@ -13,6 +15,7 @@ import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Extra as Html
 import Html.Keyed
 import Maybe.Extra as Maybe
+import Shortcut
 import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Components.Announcements as Announcements
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton
@@ -26,55 +29,61 @@ import Wizard.Routes as Routes
 view : AppState -> Model -> Html Msg
 view appState model =
     if Admin.isEnabled appState.config.admin then
+        -- The user is being redirected to the Admin login
         Html.nothing
 
     else
-        let
-            form =
-                if model.codeRequired then
-                    ( "code", codeFormView appState model )
+        loginScreenView appState model
 
-                else
-                    ( "login", loginFormView appState model )
 
-            loginInfoSidebar =
-                ( "login-info-sidebar"
-                , Maybe.unwrap Html.nothing (MarkdownOrHtml.toHtml [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
-                )
+loginScreenView : AppState -> Model -> Html Msg
+loginScreenView appState model =
+    let
+        form =
+            if model.codeRequired then
+                ( "code", codeFormView appState model )
 
-            content =
-                case appState.config.dashboardAndLoginScreen.loginInfo of
-                    Just loginInfo ->
-                        let
-                            splitScreenClass =
-                                "col-12 d-flex align-items-center"
-                        in
-                        [ ( "side-info"
-                          , div
-                                [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 side-info"
-                                , dataCy "login_info"
-                                ]
-                                [ MarkdownOrHtml.toHtml [ class "flex-grow-1" ] loginInfo ]
-                          )
-                        , ( "login-form"
-                          , Html.Keyed.node "div"
-                                [ class <| splitScreenClass ++ " justify-content-start align-items-stretch flex-column col-xl-4 col-lg-5 col-md-6 col-sm-8 side-login" ]
-                                [ form, loginInfoSidebar ]
-                          )
-                        ]
+            else
+                ( "login", loginFormView appState model )
 
-                    Nothing ->
-                        [ ( "login-form-only"
-                          , Html.Keyed.node "div" [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8" ] [ form, loginInfoSidebar ]
-                          )
-                        ]
+        loginInfoSidebar =
+            ( "login-info-sidebar"
+            , Maybe.unwrap Html.nothing (MarkdownOrHtml.toHtml [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
+            )
 
-            announcements =
-                ( "announcements", Announcements.viewLoginScreen appState.config.dashboardAndLoginScreen.announcements )
-        in
-        Html.Keyed.node "div"
-            [ class "row justify-content-center Public__Login" ]
-            (announcements :: content)
+        content =
+            case appState.config.dashboardAndLoginScreen.loginInfo of
+                Just loginInfo ->
+                    let
+                        splitScreenClass =
+                            "col-12 d-flex align-items-center"
+                    in
+                    [ ( "side-info"
+                      , div
+                            [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 side-info"
+                            , dataCy "login_info"
+                            ]
+                            [ MarkdownOrHtml.toHtml [ class "flex-grow-1" ] loginInfo ]
+                      )
+                    , ( "login-form"
+                      , Html.Keyed.node "div"
+                            [ class <| splitScreenClass ++ " justify-content-start align-items-stretch flex-column col-xl-4 col-lg-5 col-md-6 col-sm-8 side-login" ]
+                            [ form, loginInfoSidebar ]
+                      )
+                    ]
+
+                Nothing ->
+                    [ ( "login-form-only"
+                      , Html.Keyed.node "div" [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8" ] [ form, loginInfoSidebar ]
+                      )
+                    ]
+
+        announcements =
+            ( "announcements", Announcements.viewLoginScreen appState.config.dashboardAndLoginScreen.announcements )
+    in
+    Html.Keyed.node "div"
+        [ class "row justify-content-center Public__Login" ]
+        (announcements :: content)
 
 
 loginFormView : AppState -> Model -> Html Msg
@@ -115,7 +124,8 @@ loginFormView appState model =
                         [ text (gettext "Or connect with" appState.locale) ]
                         :: externalLoginButtons
         in
-        div []
+        Shortcut.shortcutElement (loginShortcuts appState model)
+            [ class "d-block" ]
             [ form [ onSubmit DoLogin, class "card bg-light" ]
                 [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
                 , div [ class "card-body" ]
@@ -143,7 +153,19 @@ loginFormView appState model =
 
 codeFormView : AppState -> Model -> Html Msg
 codeFormView appState model =
-    div []
+    let
+        codeValid =
+            Maybe.isJust (String.toInt model.code)
+
+        shortcuts =
+            if codeValid then
+                loginShortcuts appState model
+
+            else
+                []
+    in
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block" ]
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]
@@ -166,9 +188,18 @@ codeFormView appState model =
                     [ ActionButton.submitWithAttrs
                         { label = gettext "Verify" appState.locale
                         , result = model.loggingIn
-                        , attrs = [ class "w-100", disabled (Maybe.isNothing (String.toInt model.code)) ]
+                        , attrs = [ class "w-100", disabled (not codeValid) ]
                         }
                     ]
                 ]
             ]
         ]
+
+
+loginShortcuts : AppState -> Model -> List (Shortcut.Shortcut Msg)
+loginShortcuts appState model =
+    if ActionResult.isLoading model.loggingIn then
+        []
+
+    else
+        [ Shortcut.submitShortcut appState.navigator.isMac DoLogin ]

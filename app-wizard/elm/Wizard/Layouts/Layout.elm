@@ -11,8 +11,8 @@ import Common.Components.NewsModal as NewsModal
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
-import Html exposing (Html, div, img, li, nav, text, ul)
-import Html.Attributes exposing (class, classList, src)
+import Html exposing (Html, a, div, img, li, nav, text, ul)
+import Html.Attributes exposing (class, classList, href, src)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
@@ -113,8 +113,11 @@ publicHeader model =
                             Html.nothing
                 in
                 [ li [ class "nav-item" ]
-                    [ linkTo (Routes.publicLogin (Just (Routing.toUrl model.appState.route)))
-                        [ class "nav-link", dataCy "public_nav_login" ]
+                    [ a
+                        [ href (Routing.loginUrl model.appState (Just (Routing.toUrl model.appState.route)))
+                        , class "nav-link"
+                        , dataCy "public_nav_login"
+                        ]
                         [ text (gettext "Log In" model.appState.locale) ]
                     ]
                 , signUpLink

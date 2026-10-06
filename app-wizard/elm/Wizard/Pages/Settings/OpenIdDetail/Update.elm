@@ -65,7 +65,7 @@ update cfg appState msg model =
                             )
             in
             ( { model | savingOpenId = newResult }
-            , Cmd.batch [ cmd, Dom.scrollToTop ".container" ]
+            , Cmd.batch [ cmd, Dom.scrollToTop ".Settings__content" ]
             )
 
         FormMsg formMsg ->

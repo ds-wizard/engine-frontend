@@ -6,6 +6,7 @@ import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Components.UserExternalCompletionForm as UserExternalCompletionForm
+import Common.Utils.ShortcutUtils as Shortcut
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, input, label, span, text)
 import Html.Attributes exposing (checked, class, disabled, href, target, type_)
@@ -13,6 +14,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onCheck, onSubmit)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
+import Shortcut
 import String.Format as String
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Public.OpenIdCallback.Models exposing (Model)
@@ -79,9 +81,17 @@ viewConsentForm appState model =
 
                 _ ->
                     []
+
+        shortcuts =
+            if model.consent && not (ActionResult.isLoading model.submittingConsent) then
+                [ Shortcut.submitShortcut appState.navigator.isMac SubmitConsent ]
+
+            else
+                []
     in
     div [ class "row" ]
-        [ div [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8 mx-auto" ]
+        [ Shortcut.shortcutElement shortcuts
+            [ class "d-block col-xl-4 col-lg-5 col-md-6 col-sm-8 mx-auto" ]
             [ form [ class "card bg-light", onSubmit SubmitConsent ]
                 [ div [ class "card-body" ]
                     [ FormResult.view model.submittingConsent

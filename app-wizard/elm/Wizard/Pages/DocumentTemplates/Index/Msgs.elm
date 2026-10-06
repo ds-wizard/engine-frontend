@@ -16,4 +16,5 @@ type Msg
     | UpdatePhase DocumentTemplate DocumentTemplatePhase
     | UpdatePhaseCompleted (Result ApiError DocumentTemplateDetail)
     | ExportDocumentTemplate DocumentTemplate
+    | ExportDocumentTemplatePot DocumentTemplate
     | FileDownloaderMsg FileDownloader.Msg

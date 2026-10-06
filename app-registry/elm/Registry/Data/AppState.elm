@@ -11,6 +11,7 @@ module Registry.Data.AppState exposing
 
 import Browser.Navigation as Navigation
 import Common.Api.Request exposing (ServerInfo)
+import Common.Data.Navigator as Navigator exposing (Navigator)
 import Gettext
 import Json.Decode as D
 import Registry.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
@@ -27,6 +28,7 @@ type alias AppState =
     , appTitle : Maybe String
     , apiUrl : String
     , locale : Gettext.Locale
+    , navigator : Navigator
     , timeZone : Time.Zone
     , session : Maybe Session
     }
@@ -40,6 +42,7 @@ default key =
     , appTitle = Nothing
     , apiUrl = ""
     , locale = Gettext.defaultLocale
+    , navigator = Navigator.default
     , timeZone = Time.utc
     , session = Nothing
     }
@@ -56,6 +59,7 @@ init flagsValue key =
                 , appTitle = flags.appTitle
                 , apiUrl = flags.apiUrl
                 , locale = Gettext.defaultLocale
+                , navigator = flags.navigator
                 , timeZone = Time.utc
                 , session = flags.session
                 }

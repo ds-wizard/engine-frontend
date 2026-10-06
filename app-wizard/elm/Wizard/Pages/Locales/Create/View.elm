@@ -27,9 +27,12 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 view : AppState -> Model -> Html Msg
 view appState model =
     let
+        fileMissing file =
+            Form.isSubmitted model.form && Maybe.isNothing file
+
         fileWarning file =
-            if Form.isSubmitted model.form && Maybe.isNothing file then
-                p [ class "form-text form-text-after text-danger mt-2" ]
+            if fileMissing file then
+                p [ class "invalid-feedback" ]
                     [ text (gettext "File is required." appState.locale) ]
 
             else
@@ -43,10 +46,10 @@ view appState model =
                     , FormGroup.input appState.locale model.form "code" <| gettext "Language Code" appState.locale
                     , FormGroup.input appState.locale model.form "localeId" <| gettext "Locale ID" appState.locale
                     , FormExtra.textAfter <| gettext "Locale ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
-                    , versionInputGroup { form = model.form, label = gettext "Locale Version" appState.locale, major = "localeMajor", minor = "localeMinor", patch = "localePatch" }
+                    , versionInputGroup { form = model.form, label = gettext "Locale Version" appState.locale, major = "localeMajor", minor = "localeMinor", patch = "localePatch", locale = appState.locale }
                     , FormGroup.input appState.locale model.form "license" <| gettext "License" appState.locale
                     , FormGroup.markdownEditor appState.locale (WizardGuideLinks.markdownCheatsheet appState.guideLinks) model.form "readme" <| gettext "Readme" appState.locale
-                    , versionInputGroup { form = model.form, label = gettext "Recommended App Version" appState.locale, major = "appMajor", minor = "appMinor", patch = "appPatch" }
+                    , versionInputGroup { form = model.form, label = gettext "Recommended App Version" appState.locale, major = "appMajor", minor = "appMinor", patch = "appPatch", locale = appState.locale }
                     ]
 
         formActions =
@@ -64,6 +67,7 @@ view appState model =
                 , buttonText = gettext "Select .po file" appState.locale
                 , dropzoneText = gettext "or drop it here" appState.locale
                 , fileIcon = Nothing
+                , invalid = fileMissing model.wizardContent
                 }
                 model.wizardContentFileDropzone
             , fileWarning model.wizardContent
@@ -75,6 +79,7 @@ view appState model =
                 , buttonText = gettext "Select .po file" appState.locale
                 , dropzoneText = gettext "or drop it here" appState.locale
                 , fileIcon = Nothing
+                , invalid = fileMissing model.mailContent
                 }
                 model.mailContentFileDropzone
             , fileWarning model.mailContent
@@ -89,6 +94,7 @@ type alias VersionInputGroupConfig =
     , major : String
     , minor : String
     , patch : String
+    , locale : Gettext.Locale
     }
 
 
@@ -104,21 +110,17 @@ versionInputGroup cfg =
         patchField =
             Form.getFieldAsString cfg.patch cfg.form
 
-        errorClass =
-            case ( majorField.liveError, minorField.liveError, patchField.liveError ) of
-                ( Nothing, Nothing, Nothing ) ->
-                    ""
-
-                _ ->
-                    " is-invalid"
+        ( error, errorClass ) =
+            FormGroup.getErrorsForFields cfg.locale [ majorField, minorField, patchField ] cfg.label
     in
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text cfg.label ]
-        , div [ class "version-inputs" ]
-            [ Input.baseInput "number" String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name cfg.major, id cfg.major ]
+        , div [ class <| "version-inputs " ++ errorClass ]
+            [ Input.baseInput "number" String Form.Text majorField [ class <| "form-control " ++ errorClass, Html.Attributes.min "0", name cfg.major, id cfg.major ]
             , text "."
-            , Input.baseInput "number" String Form.Text minorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name cfg.minor, id cfg.minor ]
+            , Input.baseInput "number" String Form.Text minorField [ class <| "form-control " ++ errorClass, Html.Attributes.min "0", name cfg.minor, id cfg.minor ]
             , text "."
-            , Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name cfg.patch, id cfg.patch ]
+            , Input.baseInput "number" String Form.Text patchField [ class <| "form-control " ++ errorClass, Html.Attributes.min "0", name cfg.patch, id cfg.patch ]
             ]
+        , error
         ]

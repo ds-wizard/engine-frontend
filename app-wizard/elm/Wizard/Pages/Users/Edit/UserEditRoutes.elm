@@ -10,7 +10,6 @@ type UserEditRoute
     | Language
     | Tours
     | ApiKeys
-    | AppKeys
     | ActiveSessions
     | SubmissionSettings
     | PluginSettings Uuid

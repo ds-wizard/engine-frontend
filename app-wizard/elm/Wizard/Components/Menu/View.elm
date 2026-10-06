@@ -3,6 +3,7 @@ module Wizard.Components.Menu.View exposing (view, viewAboutModal, viewReportIss
 import ActionResult exposing (ActionResult)
 import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo, MetamodelVersionInfo)
+import Common.Api.Models.Role as Role
 import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuNews, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.NewsModal as NewsModal
@@ -634,8 +635,7 @@ viewSessionWarningContent model =
     let
         logoutMsg =
             Just (Routing.toUrl model.appState.route)
-                |> Routes.publicLogin
-                |> Wizard.Pages.Auth.Msgs.LogoutTo
+                |> Wizard.Pages.Auth.Msgs.LogoutToLogin
                 |> Wizard.Msgs.AuthMsg
     in
     [ text
@@ -677,7 +677,7 @@ viewProfileMenu model =
         ( name, role, imageUrl ) =
             case model.appState.config.user of
                 Just user ->
-                    ( User.fullName user, gettext user.role.name model.appState.locale, User.imageUrl user )
+                    ( User.fullName user, Role.localizedName model.appState.locale user.role, User.imageUrl user )
 
                 Nothing ->
                     ( "", "", "" )

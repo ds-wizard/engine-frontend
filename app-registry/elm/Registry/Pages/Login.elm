@@ -86,7 +86,7 @@ update cfg appState msg model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    FormWrapper.view
+    FormWrapper.view appState
         { title = gettext "Login" appState.locale
         , submitMsg = FormMsg Form.Submit
         , content =

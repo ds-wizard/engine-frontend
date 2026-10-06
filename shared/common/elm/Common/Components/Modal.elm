@@ -228,7 +228,11 @@ confirm appState (ConfirmConfig data) =
                                     ]
 
                         shortcut =
-                            wrapShortcut (Shortcut.simpleShortcut Shortcut.Enter actionMsg)
+                            if data.actionEnabled then
+                                wrapShortcut (Shortcut.simpleShortcut Shortcut.Enter actionMsg)
+
+                            else
+                                Nothing
                     in
                     ( btn, shortcut )
 

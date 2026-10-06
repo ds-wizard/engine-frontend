@@ -25,6 +25,7 @@ type alias DocumentTemplateDraftDetail =
     , description : String
     , formats : List DocumentTemplateFormatDraft
     , uuid : Uuid
+    , language : String
     , license : String
     , name : String
     , readme : String
@@ -46,6 +47,7 @@ decoder =
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormatDraft.decoder)
         |> D.required "uuid" Uuid.decoder
+        |> D.required "language" D.string
         |> D.required "license" D.string
         |> D.required "name" D.string
         |> D.required "readme" D.string

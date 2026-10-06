@@ -6,29 +6,36 @@ module Wizard.Pages.Public.Routing exposing
 import Url exposing (percentEncode)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string, top)
 import Url.Parser.Query as Query
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Public.Routes exposing (Route(..))
 
 
 parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
 parsers appState wrapRoute =
-    let
-        signUpRoutes =
-            if appState.config.authentication.internal.registration.enabled then
-                [ map (wrapRoute <| SignupRoute) (s "signup")
-                , map (signupConfirmation wrapRoute) (s "signup" </> string </> string)
-                ]
+    if Admin.isEnabled appState.config.admin then
+        -- Admin owns authentication, the Wizard has no authentication pages of its own. Only the
+        -- app root is kept, it redirects to the Admin login when the user is not logged in.
+        [ map (wrapRoute << LoginRoute) (top <?> Query.string "originalUrl") ]
 
-            else
-                []
-    in
-    [ map (openIdCallback wrapRoute) (s "open-id" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state" <?> Query.string "state")
-    , map (wrapRoute ForgottenPasswordRoute) (s "forgotten-password")
-    , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
-    , map (wrapRoute << LoginRoute) (top <?> Query.string "originalUrl")
-    , map (wrapRoute LogoutSuccessful) (s "logout-successful")
-    ]
-        ++ signUpRoutes
+    else
+        let
+            signUpRoutes =
+                if appState.config.authentication.internal.registration.enabled then
+                    [ map (wrapRoute <| SignupRoute) (s "signup")
+                    , map (signupConfirmation wrapRoute) (s "signup" </> string </> string)
+                    ]
+
+                else
+                    []
+        in
+        [ map (openIdCallback wrapRoute) (s "open-id" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state" <?> Query.string "state")
+        , map (wrapRoute ForgottenPasswordRoute) (s "forgotten-password")
+        , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
+        , map (wrapRoute << LoginRoute) (top <?> Query.string "originalUrl")
+        , map (wrapRoute LogoutSuccessful) (s "logout-successful")
+        ]
+            ++ signUpRoutes
 
 
 openIdCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> a

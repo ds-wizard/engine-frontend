@@ -16,7 +16,6 @@ type alias ProjectConfig =
     { projectVisibility : ProjectVisibilityConfig
     , projectSharing : ProjectSharingConfig
     , projectCreation : ProjectCreation
-    , feedback : SimpleFeatureConfig
     , summaryReport : SimpleFeatureConfig
     , projectTagging : SimpleFeatureConfig
     }
@@ -28,7 +27,6 @@ decoder =
         |> D.required "projectVisibility" ProjectVisibilityConfig.decoder
         |> D.required "projectSharing" ProjectSharingConfig.decoder
         |> D.required "projectCreation" ProjectCreation.decoder
-        |> D.required "feedback" SimpleFeatureConfig.decoder
         |> D.required "summaryReport" SimpleFeatureConfig.decoder
         |> D.required "projectTagging" SimpleFeatureConfig.decoder
 
@@ -38,7 +36,6 @@ default =
     { projectVisibility = ProjectVisibilityConfig.default
     , projectSharing = ProjectSharingConfig.default
     , projectCreation = ProjectCreation.TemplateAndCustom
-    , feedback = SimpleFeatureConfig.init True
     , summaryReport = SimpleFeatureConfig.init True
     , projectTagging = SimpleFeatureConfig.init True
     }

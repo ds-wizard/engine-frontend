@@ -35,7 +35,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Documents as DocumentsApi
 import Wizard.Api.Models.Document exposing (Document)
-import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
@@ -65,7 +65,7 @@ type alias Model =
 
 
 initialModel :
-    { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid }
+    { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid, documentTemplateLanguage : Maybe String }
     -> Maybe Uuid
     -> Model
 initialModel project mbEventUuid =
@@ -79,7 +79,7 @@ initialModel project mbEventUuid =
 
 initEmpty : Model
 initEmpty =
-    initialModel { name = "", documentTemplate = Nothing, formatUuid = Nothing, events = [] } Nothing
+    initialModel { name = "", documentTemplate = Nothing, formatUuid = Nothing, documentTemplateLanguage = Nothing, events = [] } Nothing
 
 
 
@@ -91,7 +91,7 @@ type Msg
     | GetProjectEventComplete (Result ApiError ProjectEvent)
     | Cancel
     | FormMsg Form.Msg
-    | SetTemplateTypeHintInputReply String
+    | SetTemplateTypeHintInputReply (Maybe DocumentTemplateSuggestion)
     | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | PostDocumentCompleted (Result ApiError Document)
 
@@ -200,8 +200,8 @@ handleForm cfg formMsg appState model =
             ( newModel, FormUtils.scrollToInvalidField formMsg )
 
 
-handleSetTemplateTypeHintInputReplyMsg : Model -> String -> ( Model, Cmd msg )
-handleSetTemplateTypeHintInputReplyMsg model value =
+handleSetTemplateTypeHintInputReplyMsg : Model -> Maybe DocumentTemplateSuggestion -> ( Model, Cmd msg )
+handleSetTemplateTypeHintInputReplyMsg model mbDocumentTemplate =
     let
         formMsg field =
             Form.Input field Form.Select << Field.String
@@ -216,8 +216,9 @@ handleSetTemplateTypeHintInputReplyMsg model value =
 
         form =
             model.form
-                |> Form.update DocumentCreateForm.validation (formMsg "documentTemplateUuid" value)
+                |> Form.update DocumentCreateForm.validation (formMsg "documentTemplateUuid" (Maybe.unwrap "" (Uuid.toString << .uuid) mbDocumentTemplate))
                 |> updateFormatUuid
+                |> Form.update DocumentCreateForm.validation (formMsg "language" (Maybe.unwrap "" .language mbDocumentTemplate))
     in
     ( { model | form = form }, Cmd.none )
 
@@ -229,8 +230,8 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageUuid
             , getError = gettext "Unable to get document templates." appState.locale
-            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Uuid.toString << .uuid
-            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Just
+            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply Nothing
             , filterResults = Nothing
             }
 
@@ -323,6 +324,22 @@ formView appState project mbEvent model summaryReport =
                 _ ->
                     Html.nothing
 
+        languageInput =
+            case model.templateTypeHintInputModel.selected of
+                Just selectedTemplate ->
+                    if List.isEmpty selectedTemplate.locales then
+                        Html.nothing
+
+                    else
+                        FormGroup.select appState.locale
+                            (DocumentTemplateSuggestion.languageOptions selectedTemplate)
+                            model.form
+                            "language"
+                            (gettext "Language" appState.locale)
+
+                _ ->
+                    Html.nothing
+
         extraInfo =
             case mbEvent of
                 Just event ->
@@ -353,4 +370,5 @@ formView appState project mbEvent model summaryReport =
         , div [ class "form-group" ] [ extraInfo ]
         , FormGroup.formGroupCustom templateInput appState.locale model.form "documentTemplateUuid" <| gettext "Document Template" appState.locale
         , Html.map FormMsg <| formatInput
+        , Html.map FormMsg <| languageInput
         ]

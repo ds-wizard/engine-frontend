@@ -16,7 +16,6 @@ import Common.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuest
 import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryString as PaginationQueryString
@@ -43,7 +42,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
-import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Permission exposing (Permission)
@@ -51,7 +50,6 @@ import Wizard.Api.Models.Project.DocumentTemplateProjectState as DocumentTemplat
 import Wizard.Api.Models.Project.KnowledgeModelProjectState as KnowledgeModelProjectState
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
@@ -102,7 +100,7 @@ type Msg
     = FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
-    | SetTemplateTypeHintInputReply String
+    | SetTemplateTypeHintInputReply (Maybe DocumentTemplateSuggestion)
     | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | ProjectTagsSearch String
     | ProjectTagsSearchComplete (Result ApiError (Pagination String))
@@ -215,16 +213,17 @@ handleDeleteModalMsg cfg deleteModalMsg appState model =
     ( { model | deleteModalModel = deleteModalModel }, cmd )
 
 
-handleSetTemplateTypeHintInputReplyMsg : AppState -> Model -> String -> ( Model, Cmd msg )
-handleSetTemplateTypeHintInputReplyMsg appState model value =
+handleSetTemplateTypeHintInputReplyMsg : AppState -> Model -> Maybe DocumentTemplateSuggestion -> ( Model, Cmd msg )
+handleSetTemplateTypeHintInputReplyMsg appState model mbDocumentTemplate =
     let
         formMsg field =
             Form.Input field Form.Select << Field.String
 
         form =
             model.form
-                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateUuid" value)
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateUuid" (Maybe.unwrap "" (Uuid.toString << .uuid) mbDocumentTemplate))
                 |> Form.update (ProjectSettingsForm.validation appState) (formMsg "formatUuid" "")
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateLanguage" (Maybe.unwrap "" .language mbDocumentTemplate))
     in
     ( { model | form = form }, Cmd.none )
 
@@ -236,8 +235,8 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageUuid
             , getError = gettext "Unable to get document templates." appState.locale
-            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Uuid.toString << .uuid
-            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Just
+            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply Nothing
             , filterResults = Nothing
             }
 
@@ -376,6 +375,22 @@ formView appState settings model =
                 _ ->
                     Html.nothing
 
+        documentTemplateLanguageInput =
+            case model.templateTypeHintInputModel.selected of
+                Just selectedTemplate ->
+                    if List.isEmpty selectedTemplate.locales then
+                        Html.nothing
+
+                    else
+                        FormGroup.select appState.locale
+                            (DocumentTemplateSuggestion.languageOptions selectedTemplate)
+                            model.form
+                            "documentTemplateLanguage"
+                            (gettext "Default document language" appState.locale)
+
+                _ ->
+                    Html.nothing
+
         isTemplateInput =
             if Feature.projectTemplatesCreate appState then
                 [ hr [] []
@@ -417,27 +432,18 @@ formView appState settings model =
         formChanged =
             not <| Set.isEmpty <| Set.remove (lastProjectTagFieldName model.form) <| Form.getChangedFields model.form
 
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.savingQuestionnaire
-            , formChanged = tagsChanged || formChanged
-            , wide = False
-            }
-
         formContent =
             div []
-                ([ FormResult.errorOnlyView model.savingQuestionnaire
-                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
+                ([ Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
                  , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" <| gettext "Description" appState.locale
                  , Html.map FormMsg <| projectTagsInput
                  , languageInput
                  , hr [] []
                  , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateUuid" <| gettext "Default document template" appState.locale
                  , Html.map FormMsg <| formatInput
+                 , Html.map FormMsg <| documentTemplateLanguageInput
                  ]
                     ++ isTemplateInput
-                    ++ [ FormActions.viewDynamic formActionsConfig appState
-                       ]
                 )
     in
     Form.initDynamic appState (FormMsg Form.Submit) model.savingQuestionnaire

@@ -14,6 +14,7 @@ module Wizard.Routes exposing
     , documentTemplateEditorsIndex
     , documentTemplateEditorsIndexWithFilters
     , documentTemplatesDetail
+    , documentTemplatesDetailLocales
     , documentTemplatesImport
     , documentTemplatesIndex
     , documentTemplatesIndexWithFilters
@@ -113,7 +114,6 @@ module Wizard.Routes exposing
     , usersEdit
     , usersEditActiveSessions
     , usersEditApiKeys
-    , usersEditAppKeys
     , usersEditConnectedAccounts
     , usersEditCurrent
     , usersEditLanguage
@@ -128,16 +128,17 @@ module Wizard.Routes exposing
 
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.Session exposing (Session)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
-import Wizard.Data.Session exposing (Session)
 import Wizard.Pages.Dev.Routes
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute
 import Wizard.Pages.DocumentTemplateEditors.Routes
+import Wizard.Pages.DocumentTemplates.Detail.DocumentTemplateDetailRoute
 import Wizard.Pages.DocumentTemplates.Routes
 import Wizard.Pages.Documents.Routes
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute
@@ -215,6 +216,7 @@ isSameListingRoute originalRoute nextRoute =
     in
     List.any checkRoute listingRouteMatchers
         || isSameKnowledgeModelDetail originalRoute nextRoute
+        || isSameDocumentTemplateDetail originalRoute nextRoute
 
 
 {-| The knowledge model detail page keeps its data in the page model and switches
@@ -226,6 +228,21 @@ isSameKnowledgeModelDetail : Route -> Route -> Bool
 isSameKnowledgeModelDetail originalRoute nextRoute =
     case ( originalRoute, nextRoute ) of
         ( KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.DetailRoute uuid1 _), KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.DetailRoute uuid2 _) ) ->
+            uuid1 == uuid2
+
+        _ ->
+            False
+
+
+{-| The document template detail page keeps its data in the page model and switches
+between tabs (readme, locales) only by changing the route. Two detail routes for
+the same document template are therefore treated as the same context, so switching
+tabs does not reload the whole page.
+-}
+isSameDocumentTemplateDetail : Route -> Route -> Bool
+isSameDocumentTemplateDetail originalRoute nextRoute =
+    case ( originalRoute, nextRoute ) of
+        ( DocumentTemplatesRoute (Wizard.Pages.DocumentTemplates.Routes.DetailRoute uuid1 _), DocumentTemplatesRoute (Wizard.Pages.DocumentTemplates.Routes.DetailRoute uuid2 _) ) ->
             uuid1 == uuid2
 
         _ ->
@@ -343,8 +360,13 @@ isDocumentsIndex route =
 
 
 documentTemplatesDetail : Uuid -> Route
-documentTemplatesDetail =
-    DocumentTemplatesRoute << Wizard.Pages.DocumentTemplates.Routes.DetailRoute
+documentTemplatesDetail uuid =
+    DocumentTemplatesRoute <| Wizard.Pages.DocumentTemplates.Routes.DetailRoute uuid Wizard.Pages.DocumentTemplates.Detail.DocumentTemplateDetailRoute.Readme
+
+
+documentTemplatesDetailLocales : Uuid -> Route
+documentTemplatesDetailLocales uuid =
+    DocumentTemplatesRoute <| Wizard.Pages.DocumentTemplates.Routes.DetailRoute uuid Wizard.Pages.DocumentTemplates.Detail.DocumentTemplateDetailRoute.Locales
 
 
 documentTemplatesImport : Maybe String -> Route
@@ -968,11 +990,6 @@ usersEditLanguageCurrent =
 usersEditApiKeys : UuidOrCurrent -> Route
 usersEditApiKeys =
     UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.ApiKeys
-
-
-usersEditAppKeys : UuidOrCurrent -> Route
-usersEditAppKeys =
-    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.AppKeys
 
 
 usersEditActiveSessions : UuidOrCurrent -> Route

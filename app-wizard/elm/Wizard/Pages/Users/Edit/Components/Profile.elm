@@ -4,6 +4,7 @@ module Wizard.Pages.Users.Edit.Components.Profile exposing
     , UpdateConfig
     , fetchData
     , initialModel
+    , setUser
     , update
     , view
     )
@@ -25,12 +26,14 @@ import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.ShortcutUtils as Shortcut
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
+import Shortcut
 import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Roles as RolesApi
@@ -59,26 +62,26 @@ initialModel uuidOrCurrent =
 
 
 type Msg
-    = GetUserCompleted (Result ApiError User)
-    | GetRolesCompleted (Result ApiError (Pagination Role))
+    = GetRolesCompleted (Result ApiError (Pagination Role))
     | EditFormMsg Form.Msg
     | PutUserCompleted (Result ApiError User)
 
 
 fetchData : AppState -> UuidOrCurrent -> Cmd Msg
 fetchData appState uuidOrCurrent =
-    let
-        rolesCmd =
-            if UuidOrCurrent.isCurrent uuidOrCurrent then
-                Cmd.none
+    if UuidOrCurrent.isCurrent uuidOrCurrent then
+        Cmd.none
 
-            else
-                RolesApi.getRoles appState GetRolesCompleted
-    in
-    Cmd.batch
-        [ UsersApi.getUser appState uuidOrCurrent GetUserCompleted
-        , rolesCmd
-        ]
+    else
+        RolesApi.getRoles appState GetRolesCompleted
+
+
+setUser : User -> Model -> Model
+setUser user model =
+    { model
+        | user = ActionResult.Success user
+        , userForm = UserEditForm.init user
+    }
 
 
 type alias UpdateConfig msg =
@@ -92,9 +95,6 @@ update cfg appState msg model =
     case msg of
         EditFormMsg formMsg ->
             handleUserForm cfg appState formMsg model
-
-        GetUserCompleted result ->
-            getUserCompleted cfg appState model result
 
         GetRolesCompleted result ->
             getRolesCompleted cfg appState model result
@@ -123,27 +123,6 @@ handleUserForm cfg appState formMsg model =
                     Form.update UserEditForm.validation formMsg model.userForm
             in
             ( { model | userForm = userForm }, FormUtils.scrollToInvalidField formMsg )
-
-
-getUserCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError User -> ( Model, Cmd msg )
-getUserCompleted cfg appState model result =
-    let
-        newModel =
-            case result of
-                Ok user ->
-                    let
-                        userForm =
-                            UserEditForm.init user
-                    in
-                    { model | userForm = userForm, user = ActionResult.Success user }
-
-                Err error ->
-                    { model | user = ApiError.toActionResult appState (gettext "Unable to get the user." appState.locale) error }
-
-        cmd =
-            RequestHelpers.getResultCmd cfg.logoutMsg result
-    in
-    ( newModel, cmd )
 
 
 getRolesCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError (Pagination Role) -> ( Model, Cmd msg )
@@ -245,9 +224,7 @@ userFormView appState model roles isCurrent =
             else
                 let
                     roleOptions =
-                        roles
-                            |> List.sortBy .name
-                            |> List.map Role.toFormOption
+                        Role.toFormOptions appState.locale roles
                 in
                 FormGroup.select appState.locale roleOptions model.userForm "role" <| gettext "Role" appState.locale
 
@@ -257,17 +234,27 @@ userFormView appState model roles isCurrent =
 
             else
                 FormGroup.toggle model.userForm "active" <| gettext "Active" appState.locale
+
+        shortcuts =
+            if ActionResult.isLoading model.savingUser then
+                []
+
+            else
+                [ Shortcut.submitShortcut appState.navigator.isMac Form.Submit ]
     in
-    Html.form [ onSubmit Form.Submit, class "col-8" ]
-        [ FormResult.view model.savingUser
-        , FormGroup.input appState.locale model.userForm "email" <| gettext "Email" appState.locale
-        , FormGroup.input appState.locale model.userForm "firstName" <| gettext "First name" appState.locale
-        , FormGroup.input appState.locale model.userForm "lastName" <| gettext "Last name" appState.locale
-        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState.locale model.userForm "affiliation" <| gettext "Affiliation" appState.locale
-        , roleSelect
-        , activeToggle
-        , div [ class "mt-5" ]
-            [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+    Shortcut.shortcutElement shortcuts
+        [ class "d-block col-8" ]
+        [ Html.form [ onSubmit Form.Submit ]
+            [ FormResult.view model.savingUser
+            , FormGroup.input appState.locale model.userForm "email" <| gettext "Email" appState.locale
+            , FormGroup.input appState.locale model.userForm "firstName" <| gettext "First name" appState.locale
+            , FormGroup.input appState.locale model.userForm "lastName" <| gettext "Last name" appState.locale
+            , FormGroup.inputWithTypehints appState.config.organization.affiliations appState.locale model.userForm "affiliation" <| gettext "Affiliation" appState.locale
+            , roleSelect
+            , activeToggle
+            , div [ class "mt-5" ]
+                [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+            ]
         ]
 
 

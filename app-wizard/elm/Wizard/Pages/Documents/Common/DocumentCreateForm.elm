@@ -20,19 +20,30 @@ type alias DocumentCreateForm =
     { name : String
     , documentTemplateUuid : String
     , formatUuid : String
+    , language : Maybe String
     , projectEventUuid : Maybe String
     }
 
 
 init :
-    { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid }
+    { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid, documentTemplateLanguage : Maybe String }
     -> Maybe Uuid
     -> Form FormError DocumentCreateForm
 init project mbEventUuid =
+    let
+        language =
+            case project.documentTemplateLanguage of
+                Just documentTemplateLanguage ->
+                    documentTemplateLanguage
+
+                Nothing ->
+                    Maybe.unwrap "" .language project.documentTemplate
+    in
     Form.initial
         [ ( "name", Field.string project.name )
         , ( "documentTemplateUuid", Field.string (Maybe.unwrap "" (Uuid.toString << .uuid) project.documentTemplate) )
         , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString project.formatUuid) )
+        , ( "language", Field.string language )
         , ( "projectEventUuid", Field.string (Maybe.unwrap "" Uuid.toString mbEventUuid) )
         ]
         validation
@@ -40,10 +51,11 @@ init project mbEventUuid =
 
 validation : Validation FormError DocumentCreateForm
 validation =
-    Validate.map4 DocumentCreateForm
+    Validate.map5 DocumentCreateForm
         (Validate.field "name" Validate.string)
         (Validate.field "documentTemplateUuid" Validate.string)
         (Validate.field "formatUuid" Validate.string)
+        (Validate.field "language" (Validate.maybe Validate.string))
         (Validate.field "projectEventUuid" (Validate.maybe Validate.string))
 
 
@@ -54,5 +66,6 @@ encode projectUuid form =
         , ( "projectUuid", E.string (Uuid.toString projectUuid) )
         , ( "documentTemplateUuid", E.string form.documentTemplateUuid )
         , ( "formatUuid", E.string form.formatUuid )
+        , ( "language", E.maybe E.string form.language )
         , ( "projectEventUuid", E.maybe E.string form.projectEventUuid )
         ]

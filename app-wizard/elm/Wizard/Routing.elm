@@ -1,16 +1,19 @@
 module Wizard.Routing exposing
     ( cmdNavigate
+    , cmdNavigateToLogin
+    , loginUrl
     , parseLocation
     , routeIfAllowed
     , toUrl
     )
 
-import Browser.Navigation exposing (pushUrl)
+import Browser.Navigation exposing (load, pushUrl)
 import Common.Data.PaginationQueryString as PaginationQueryString
-import Url exposing (Url)
+import Url exposing (Url, percentEncode)
 import Url.Parser exposing ((</>), Parser, map, oneOf, s)
 import Url.Parser.Query as Query
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Dev.Routing
 import Wizard.Pages.DocumentTemplateEditors.Routing
 import Wizard.Pages.DocumentTemplates.Routing
@@ -214,3 +217,29 @@ parseLocation appState url =
 cmdNavigate : AppState -> Routes.Route -> Cmd msg
 cmdNavigate appState =
     pushUrl appState.key << toUrl
+
+
+{-| Where the user is sent to log in. When Admin is enabled, it owns the login (and the rest of
+the authentication pages), so it is an URL outside of the Wizard client and the user is brought
+back to the Wizard once logged in.
+-}
+loginUrl : AppState -> Maybe String -> String
+loginUrl appState mbOriginalUrl =
+    if Admin.isEnabled appState.config.admin then
+        let
+            originalUrl =
+                Maybe.withDefault (toUrl Routes.appHome) mbOriginalUrl
+        in
+        AppState.getAdminClientUrl appState ++ "?originalUrl=" ++ percentEncode originalUrl
+
+    else
+        toUrl (Routes.publicLogin mbOriginalUrl)
+
+
+cmdNavigateToLogin : AppState -> Maybe String -> Cmd msg
+cmdNavigateToLogin appState mbOriginalUrl =
+    if Admin.isEnabled appState.config.admin then
+        load (loginUrl appState mbOriginalUrl)
+
+    else
+        cmdNavigate appState (Routes.publicLogin mbOriginalUrl)

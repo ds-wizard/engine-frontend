@@ -5,6 +5,7 @@ import Common.Api.ApiError as ApiError
 import Common.Api.Models.RolePermission as RolePermission
 import Common.Data.WizardRolePermission as RolePermission
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Flip exposing (flip)
@@ -52,7 +53,9 @@ update cfg appState msg model =
                         form =
                             Form.update RoleForm.validation formMsg model.form
                     in
-                    ( { model | form = form }, Cmd.none )
+                    ( { model | form = form }
+                    , FormUtils.scrollToInvalidField formMsg
+                    )
 
         AddPermission permission ->
             let
@@ -92,7 +95,7 @@ update cfg appState msg model =
                             ( ApiError.toActionResult appState (gettext "Role could not be saved." appState.locale) error
                             , Cmd.batch
                                 [ RequestHelpers.getResultCmd cfg.logoutMsg result
-                                , Dom.scrollToTop ".container"
+                                , Dom.scrollToTop ".Settings__content"
                                 ]
                             )
             in

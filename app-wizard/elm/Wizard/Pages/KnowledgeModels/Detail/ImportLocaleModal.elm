@@ -192,6 +192,7 @@ view appState model =
                     , buttonText = gettext "Select .po file" appState.locale
                     , dropzoneText = gettext "or drop it here" appState.locale
                     , fileIcon = Nothing
+                    , invalid = False
                     }
                     model.dropzone
                 ]

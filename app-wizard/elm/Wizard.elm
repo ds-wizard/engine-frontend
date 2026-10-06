@@ -5,19 +5,19 @@ import Browser.Navigation exposing (Key)
 import Common.Api.Models.BuildInfo as BuildInfo
 import Common.Components.AIAssistant as AIAssistant
 import Common.Components.NewsModal as NewsModal
+import Common.Data.Session as Session
+import Common.Ports.Session as Session
 import Common.Utils.Theme as Theme
 import Common.Utils.TimeUtils as TimeUtils
 import Json.Decode exposing (Value)
 import Task.Extra as Task
 import Url exposing (Url)
 import Wizard.Data.AppState as AppState
-import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Pages.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Pages.Projects.Routes as ProjectsRoutes
 import Wizard.Pages.Public.Routes as PublicRoutes
-import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -124,7 +124,7 @@ decideInitialRoute model location route originalRoute =
                 dispatchUrlChange
 
             else
-                cmdNavigate model.appState (Routes.publicLogin <| Just <| toUrl originalRoute)
+                Routing.cmdNavigateToLogin model.appState (Just (toUrl originalRoute))
 
 
 main : Program Value Model Msg

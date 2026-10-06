@@ -2,15 +2,17 @@ module Wizard.Pages.DocumentTemplates.Detail.View exposing (view)
 
 import Common.Components.Badge as Badge
 import Common.Components.DetailPage as DetailPage
-import Common.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
+import Common.Components.FontAwesome exposing (fa, faDelete, faDetailShowAll, faDownload, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faLocaleImport, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Components.Undraw as Undraw
 import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, li, p, span, strong, text, ul)
+import Html exposing (Html, a, button, div, li, p, span, strong, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
@@ -23,12 +25,15 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePackage as DocumentTem
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
+import Wizard.Api.Models.DocumentTemplateLocale exposing (DocumentTemplateLocale)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplates.Common.DocumentTemplateActionsDropdown as DocumentTemplateActionsDropdown
+import Wizard.Pages.DocumentTemplates.Detail.DocumentTemplateDetailRoute as DocumentTemplateDetailRoute exposing (DocumentTemplateDetailRoute)
+import Wizard.Pages.DocumentTemplates.Detail.ImportLocaleModal as ImportLocaleModal
 import Wizard.Pages.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.Pages.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -46,11 +51,23 @@ viewDocumentTemplate appState model template =
     DetailPage.container
         [ header appState model template
         , DetailPage.content
-            { body = readme appState template
+            { body = content model.detailRoute appState template
             , sidePanel = sidePanel appState model template
             }
         , deleteVersionModal appState model template
+        , Html.map ImportLocaleModalMsg <| ImportLocaleModal.view appState model.importLocaleModal
+        , deleteLocaleModal appState model
         ]
+
+
+content : DocumentTemplateDetailRoute -> AppState -> DocumentTemplateDetail -> List (Html Msg)
+content route appState template =
+    case route of
+        DocumentTemplateDetailRoute.Readme ->
+            readme appState template
+
+        DocumentTemplateDetailRoute.Locales ->
+            locales appState template
 
 
 header : AppState -> Model -> DocumentTemplateDetail -> Html Msg
@@ -76,13 +93,31 @@ header appState model template =
                 , toggleMsg = DropdownMsg
                 }
                 { exportMsg = ExportTemplate
+                , exportPotMsg = ExportTemplatePot
                 , updatePhaseMsg = \_ phase -> UpdatePhase phase
                 , deleteMsg = always (ShowDeleteDialog True)
                 , viewActionVisible = False
                 }
                 template
     in
-    DetailPage.header (span [] [ text template.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.headerWithNav
+        { title = span [] [ text template.name, nonEditableBadge, deprecatedBadge ]
+        , actions = [ dropdownActions ]
+        , navItems =
+            [ { title = gettext "Readme" appState.locale
+              , onClick = OpenDetailRoute DocumentTemplateDetailRoute.Readme
+              , count = Nothing
+              , isActive = model.detailRoute == DocumentTemplateDetailRoute.Readme
+              , dataCy = "document-template-detail_nav_readme"
+              }
+            , { title = gettext "Locales" appState.locale
+              , onClick = OpenDetailRoute DocumentTemplateDetailRoute.Locales
+              , count = Just (List.length template.locales)
+              , isActive = model.detailRoute == DocumentTemplateDetailRoute.Locales
+              , dataCy = "document-template-detail_nav_locales"
+              }
+            ]
+        }
 
 
 readme : AppState -> DocumentTemplateDetail -> List (Html msg)
@@ -116,6 +151,128 @@ readme appState template =
     , unsupportedMetamodelVersionWarning appState template
     , DetailPage.contentBodyNarrow [ Markdown.toHtml [] template.readme ]
     ]
+
+
+locales : AppState -> DocumentTemplateDetail -> List (Html Msg)
+locales appState template =
+    let
+        importButton =
+            if Feature.documentTemplatesImportLocale appState then
+                div [ class "d-flex justify-content-end mb-3" ]
+                    [ button
+                        [ class "btn btn-primary with-icon"
+                        , onClick OpenImportLocaleModal
+                        , dataCy "document-template-detail_import-locale"
+                        ]
+                        [ faLocaleImport
+                        , text (gettext "Import" appState.locale)
+                        ]
+                    ]
+
+            else
+                Html.nothing
+
+        localesBody =
+            if List.isEmpty template.locales then
+                let
+                    secondLine =
+                        if template.potFileReady then
+                            gettext "Export the .pot file to create one." appState.locale
+
+                        else
+                            gettext "This document template is not prepared for translations." appState.locale
+                in
+                Page.illustratedMessage
+                    { illustration = Undraw.noData
+                    , heading = gettext "No locales" appState.locale
+                    , lines =
+                        [ gettext "There are no locales for this document template yet." appState.locale
+                        , secondLine
+                        ]
+                    , cy = "document-template-locales-empty"
+                    }
+
+            else
+                table [ class "table table-hover" ]
+                    [ thead []
+                        [ tr []
+                            [ th [] [ text (gettext "Name" appState.locale) ]
+                            , th [] [ text (gettext "Code" appState.locale) ]
+                            , th [] []
+                            ]
+                        ]
+                    , tbody [] (List.map (viewLocale appState) template.locales)
+                    ]
+    in
+    [ DetailPage.contentBodyNarrow [ importButton, localesBody ] ]
+
+
+viewLocale : AppState -> DocumentTemplateLocale -> Html Msg
+viewLocale appState locale =
+    let
+        downloadButton =
+            if Feature.documentTemplatesExportLocale appState then
+                a
+                    (class "text-primary me-3"
+                        :: onClick (DownloadLocale locale)
+                        :: dataCy "document-template-detail_locale-download"
+                        :: tooltip (gettext "Download" appState.locale)
+                    )
+                    [ faDownload ]
+
+            else
+                Html.nothing
+
+        deleteButton =
+            if Feature.documentTemplatesDeleteLocale appState then
+                a
+                    (class "text-danger"
+                        :: onClick (ShowDeleteLocale locale)
+                        :: dataCy "document-template-detail_locale-delete"
+                        :: tooltip (gettext "Delete" appState.locale)
+                    )
+                    [ faDelete ]
+
+            else
+                Html.nothing
+    in
+    tr []
+        [ td [] [ text locale.name ]
+        , td [] [ text locale.code ]
+        , td [ class "text-end" ] [ downloadButton, deleteButton ]
+        ]
+
+
+deleteLocaleModal : AppState -> Model -> Html Msg
+deleteLocaleModal appState model =
+    let
+        ( visible, name ) =
+            case model.localeToDelete of
+                Just locale ->
+                    ( True, locale.name )
+
+                Nothing ->
+                    ( False, "" )
+
+        modalContent =
+            [ p []
+                (String.formatHtml
+                    (gettext "Are you sure you want to delete the locale %s?" appState.locale)
+                    [ strong [] [ text name ] ]
+                )
+            ]
+
+        modalConfig =
+            Modal.confirmConfig (gettext "Delete locale" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingLocale
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteLocale
+                |> Modal.confirmConfigCancelMsg HideDeleteLocale
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "document-template-locale-delete"
+    in
+    Modal.confirm appState modalConfig
 
 
 newVersionInRegistryWarning : AppState -> DocumentTemplateDetail -> Html msg
@@ -231,6 +388,7 @@ sidePanelKmInfo appState template =
             , ( gettext "Version" appState.locale, "version", text <| Version.toString template.version )
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| Version.toStringMinor template.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text template.license )
+            , ( gettext "Language" appState.locale, "language", text template.language )
             , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone template.createdAt )
             ]
     in

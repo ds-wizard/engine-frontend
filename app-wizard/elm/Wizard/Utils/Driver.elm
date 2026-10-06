@@ -1,8 +1,8 @@
 module Wizard.Utils.Driver exposing (fromAppState)
 
+import Common.Data.Session as Session
 import Common.Utils.Driver as Driver exposing (TourConfig, TourId)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Session as Session
 
 
 fromAppState : TourId -> AppState -> TourConfig

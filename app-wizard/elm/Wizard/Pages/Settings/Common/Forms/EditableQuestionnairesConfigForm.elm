@@ -26,10 +26,6 @@ type alias EditableQuestionnairesConfigForm =
     , questionnaireSharingDefaultValue : ProjectSharing
     , questionnaireSharingAnonymousEnabled : Bool
     , questionnaireCreation : ProjectCreation
-    , feedbackEnabled : Bool
-    , feedbackToken : String
-    , feedbackOwner : String
-    , feedbackRepo : String
     , summaryReport : SimpleFeatureConfig
     , projectTaggingEnabled : Bool
     , projectTaggingTags : Maybe String
@@ -51,10 +47,6 @@ init appState config =
             , ( "questionnaireSharingDefaultValue", ProjectSharing.field config.projectSharing.defaultValue )
             , ( "questionnaireSharingAnonymousEnabled", Field.bool config.projectSharing.anonymousEnabled )
             , ( "questionnaireCreation", ProjectCreation.field config.projectCreation )
-            , ( "feedbackEnabled", Field.bool config.feedback.enabled )
-            , ( "feedbackToken", Field.string config.feedback.token )
-            , ( "feedbackOwner", Field.string config.feedback.owner )
-            , ( "feedbackRepo", Field.string config.feedback.repo )
             , ( "summaryReport", SimpleFeatureConfig.field config.summaryReport )
             , ( "projectTaggingEnabled", Field.bool config.projectTagging.enabled )
             , ( "projectTaggingTags", Field.string <| String.join "\n" config.projectTagging.tags )
@@ -72,10 +64,6 @@ validation appState =
         |> V.andMap (V.field "questionnaireSharingDefaultValue" ProjectSharing.validation)
         |> V.andMap (V.field "questionnaireSharingAnonymousEnabled" V.bool)
         |> V.andMap (V.field "questionnaireCreation" ProjectCreation.validation)
-        |> V.andMap (V.field "feedbackEnabled" V.bool)
-        |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
-        |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackOwner" V.string V.optionalString)
-        |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackRepo" V.string V.optionalString)
         |> V.andMap (V.field "summaryReport" SimpleFeatureConfig.validation)
         |> V.andMap (V.field "projectTaggingEnabled" V.bool)
         |> V.andMap (V.field "projectTaggingTags" (V.projectTags appState))
@@ -105,12 +93,6 @@ toEditableQuestionnaireConfig form =
         , anonymousEnabled = form.questionnaireSharingAnonymousEnabled
         }
     , projectCreation = form.questionnaireCreation
-    , feedback =
-        { enabled = form.feedbackEnabled
-        , token = form.feedbackToken
-        , owner = form.feedbackOwner
-        , repo = form.feedbackRepo
-        }
     , summaryReport = form.summaryReport
     , projectTagging =
         { enabled = form.projectTaggingEnabled
