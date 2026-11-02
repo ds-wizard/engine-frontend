@@ -1,0 +1,91 @@
+// Banner — a notice about the whole application, pinned to the block end.
+//
+// Pinned with sticky rather than moved with CSS: the banner comes after the
+// main content in the DOM, so it is reached after it, and sticky lets it be
+// seen before. Reordering it visually would make focus jump.
+//
+// The ground is the raised surface, not the status tint. Buttons and links go
+// inside a banner, and on the elevated surface every one of them sits on a
+// pairing the checker already verifies; the tone is carried by an edge and an
+// icon, so it is never a color alone (1.4.1).
+
+.ui-banner {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 10;
+  container-type: inline-size;
+
+  border-block-start: 3px solid var(--ui-info-border);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+  color: var(--ui-text);
+}
+
+.ui-banner--warning { border-block-start-color: var(--ui-warning-border); }
+
+// Narrow: the words beside the icon and the close button, the answers on a row
+// of their own beneath the words. Wide: all of it on one row. Visual order is
+// DOM order in both — nothing is moved ahead of anything it follows.
+.ui-banner__inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--ui-space-4);
+  row-gap: var(--ui-space-3);
+
+  padding-block: var(--ui-space-4);
+  padding-inline: var(--ui-space-6);
+}
+
+.ui-banner__icon {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  // One line of text tall, so the glyph sits on the first line of a notice
+  // that wraps rather than in the middle of the paragraph.
+  line-height: var(--ui-leading-normal);
+  color: var(--ui-info-on-subtle);
+}
+
+.ui-banner--warning .ui-banner__icon { color: var(--ui-warning-on-subtle); }
+
+.ui-banner__content {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.ui-banner__actions {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-3);
+}
+
+.ui-banner__dismiss {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+}
+
+@container (min-width: 48rem) {
+  .ui-banner__inner {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+
+  .ui-banner__actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .ui-banner__dismiss {
+    grid-column: 4;
+    align-self: center;
+  }
+}

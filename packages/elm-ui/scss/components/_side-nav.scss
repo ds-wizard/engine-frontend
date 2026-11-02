@@ -1,0 +1,783 @@
+// The width is set inline, in pixels, by Ui.SideNav — it is a number the user
+// dragged. The fallback here is what an app gets before anyone has dragged
+// anything, and the rail is what collapsing goes to.
+.ui-side-nav {
+  --ui-side-nav-rail: 3.5rem;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  inline-size: var(--ui-side-nav-width, 15rem);
+  // Owns its own height: the shell gives it a region and nothing more, so a
+  // long menu scrolls inside it rather than moving the page.
+  block-size: 100%;
+  min-block-size: 0;
+
+  // The frame. It recedes behind the content rather than floating over it, and
+  // the step up to the canvas beside it is the whole separation — no border,
+  // which is one fewer line on a screen that has enough of them.
+  background: var(--ui-frame);
+
+  // No transition on the width, deliberately. A width transition on a grid
+  // column re-lays out everything in the content area on every frame of it —
+  // including any table that happens to be open — and the system's own style
+  // rules say layout properties do not animate. Collapsing is instant.
+}
+
+// The scroll region is inside, not on the nav itself: the separator and the
+// footer are positioned against the nav, and a scrolled ancestor takes them
+// with it.
+// Only the menu scrolls. The brand above it and the account below it stay put,
+// which is what makes them reachable from anywhere in a long menu.
+.ui-side-nav__scroll {
+  display: flex;
+  flex-direction: column;
+  // Between sections — the application's entries and an instance's own links.
+  // A section's worth of air, so the two read as two lists rather than one long
+  // one.
+  gap: var(--ui-space-7);
+
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--ui-space-2) var(--ui-space-4);
+}
+
+.ui-side-nav__brand {
+  // The brand is where the navigation starts, not its first entry: the air
+  // under it is a section's worth, so the logo does not read as a menu item.
+  padding: var(--ui-space-5) var(--ui-space-4) var(--ui-space-7);
+
+  // The application's name is a title, so it takes the display face.
+  font-family: var(--ui-font-display);
+
+  // Whatever the app puts here is usually a link home. It gets the same target
+  // and the same hover as a menu item, so it reads as one thing to press.
+  a {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+    min-block-size: var(--ui-hit-min);
+    padding: var(--ui-space-3);
+    border-radius: var(--ui-radius-control);
+    color: var(--ui-text);
+    text-decoration: none;
+    transition: var(--ui-transition-state);
+
+    &:hover { background: var(--ui-state-hover); }
+  }
+}
+
+.ui-side-nav__list,
+.ui-side-nav__sublist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  list-style: none;
+}
+
+// The top-level entries a little further apart than the links inside a group,
+// so each group reads as one thing and its children as its parts.
+.ui-side-nav__list {
+  gap: var(--ui-space-2);
+}
+
+// Inside an open group, the children sit within the box with the same air the
+// box has against the sidebar — which is what makes them read as its contents
+// rather than as a list that happens to follow it.
+.ui-side-nav__sublist {
+  padding: 0 var(--ui-space-4) var(--ui-space-4);
+}
+
+// The group you are inside is the brand color, and so is the page within it:
+// one hue at two strengths, which is what the existing sidebar does with its
+// 10% and 20% mixes of the primary. The box says which group; the stronger tint
+// inside it says which page.
+.ui-side-nav__item.is-open {
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-brand-subtle);
+}
+
+// The group keeps its highlight — it is still the thing you are in — and takes
+// the same foreground as the page below it, so the two differ by ground alone.
+.ui-side-nav__link.is-within {
+  color: var(--ui-brand-on-subtle);
+  font-weight: var(--ui-weight-medium);
+}
+
+.ui-side-nav__link.is-within .ui-side-nav__icon {
+  color: inherit;
+}
+
+// The page itself, on the stronger of the two tints.
+.ui-side-nav__item.is-open .ui-side-nav__link.is-active {
+  background: var(--ui-brand-subtle-selected);
+  color: var(--ui-brand-on-subtle);
+}
+
+// The open group's own link gets no hover: it is the heading of the box you are
+// already in, and a hover on it would offer a change that is not there.
+.ui-side-nav__item.is-open > .ui-side-nav__link.is-within:hover {
+  background: transparent;
+}
+
+// Links inside the open box hover on the brand's own tint, one step towards the
+// selected page, so a hover stays inside the box's color rather than graying it.
+// A flyout's links hover on the lighter tint, because their ground is the flyout's
+// rather than the box's.
+.ui-side-nav__item.is-open > .ui-side-nav__sublist .ui-side-nav__link:not(.is-active):hover {
+  background: var(--ui-brand-subtle-hover);
+}
+
+.ui-side-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-3);
+
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-text);
+  text-decoration: none;
+  font-size: var(--ui-text-body);
+
+  transition: var(--ui-transition-state);
+
+  // The brand's lightest tint, not a neutral state layer: the navigation is the
+  // one place where every hover is on the same kind of thing — a page to go to —
+  // and the tint is the color that says so, one step below the group you are in
+  // and two below the page you are on. `--ui-brand-on-subtle` is derived against
+  // the stronger tint, so it clears 4.5:1 on this one.
+  &:hover {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+  }
+
+  &:hover .ui-side-nav__icon { color: inherit; }
+
+  // Active is carried by weight and a tint, not by color alone.
+  &.is-active {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+    font-weight: var(--ui-weight-medium);
+  }
+}
+
+.ui-side-nav__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1rem;
+  flex-shrink: 0;
+  color: var(--ui-text-muted);
+}
+
+.ui-side-nav__link.is-active .ui-side-nav__icon { color: inherit; }
+
+.ui-side-nav__label {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-side-nav__badge {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+// After a folded group's name: there is more behind it, in a flyout. Only on a
+// folded group, and never in the rail, where every group is a flyout.
+.ui-side-nav__chevron {
+  display: none;
+  flex-shrink: 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+.ui-side-nav__item.has-children:not(.is-open) > .ui-side-nav__link .ui-side-nav__chevron {
+  display: inline-flex;
+}
+
+// A link that opens in a new tab says so with an icon, after the label and
+// quieter than it. The words are in the accessible name.
+.ui-side-nav__external {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+// A heading and the list it names. The section is the group; the gap inside it
+// is the list's own, so a heading sits as close to its links as they do to each
+// other.
+.ui-side-nav__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+}
+
+.ui-side-nav__heading {
+  padding: var(--ui-space-2) var(--ui-space-3) 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+}
+
+.ui-side-nav__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3) var(--ui-space-4) var(--ui-space-4);
+}
+
+.ui-side-nav__footer {
+  min-inline-size: 0;
+}
+
+// Quiet by design: it is the least important control in the navigation and it
+// is on screen permanently. Muted until you are on it. A panel toggle at the
+// foot (`panelToggle`) is drawn the same way, and shows it is open.
+.ui-side-nav__collapse,
+.ui-side-nav__action {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-2) var(--ui-space-3);
+
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+  text-align: start;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+}
+
+// Open: the panel it controls is on screen. The state layer the hover uses,
+// held, and the text's own color — and `aria-expanded`, so the color is not
+// the only thing that says so.
+.ui-side-nav__action[aria-expanded='true'] {
+  background: var(--ui-state-active);
+  color: var(--ui-text);
+}
+
+// The brand and the account each come in two sizes, and the stylesheet picks.
+// `contents`, so the wrapper that makes the choice is not a box of its own.
+.ui-side-nav__brand-full,
+.ui-side-nav__user-avatar-full {
+  display: contents;
+}
+
+.ui-side-nav__brand-compact,
+.ui-side-nav__user-avatar-compact {
+  display: none;
+}
+
+// Every top-level link can carry a tooltip, and only the rail shows them.
+.ui-side-nav .ui-tooltip {
+  display: flex;
+}
+
+.ui-side-nav .ui-tooltip > .ui-side-nav__link,
+.ui-side-nav .ui-tooltip > .ui-side-nav__collapse,
+.ui-side-nav .ui-tooltip > .ui-side-nav__action {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.ui-side-nav .ui-tooltip__bubble,
+.ui-side-nav__flyout-heading {
+  display: none;
+}
+
+// The identity inside the account menu exists for the rail, which hides the name
+// and role from the button.
+.ui-side-nav__foot .ui-menu__note:has(.ui-side-nav__user--note),
+.ui-side-nav__foot .ui-menu__note:has(.ui-side-nav__user--note) + .ui-menu__separator {
+  display: none;
+}
+
+// FLYOUTS
+//
+// A group's children, beside the navigation, with the group's name at the top —
+// the existing sidebar's floating submenu. Every group in the rail is one, and
+// in the column so is every group but the one you are in: its link goes to the
+// group's first page, and its subpages stay one hover or one Tab away.
+//
+// Opened by hover and by focus: focus on the group link is inside the item, so
+// the flyout is showing by the time Tab moves on, and the next thing Tab reaches
+// is its first link.
+//
+// Positioned the same way as the rail's tooltips — nothing positioned between it
+// and the navigation, so the scroller cannot clip it — and aligned to the top of
+// the item because the item is a flex container, whose static position for an
+// absolutely positioned child is its own top edge.
+@mixin flyout {
+  display: flex;
+  background: transparent;
+
+  > .ui-side-nav__link {
+    flex: 1 1 auto;
+  }
+
+  > .ui-side-nav__sublist {
+    position: absolute;
+    inset-inline-start: calc(100% + var(--ui-space-3));
+    inset-block-start: auto;
+    z-index: 30;
+
+    min-inline-size: 12rem;
+    padding: var(--ui-space-2);
+
+    border: 1px solid var(--ui-border-elevated);
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-elevation-2-surface);
+    box-shadow: var(--ui-elevation-2);
+
+    // Hidden by visibility rather than display, so that it can take a moment to
+    // go. The pointer leaves the group the instant it moves towards the flyout,
+    // and a flyout that vanishes on that instant is one nobody can reach. A short
+    // delay on the way out — and none on the way in — is the grace period for
+    // the journey. Hidden this way it is still out of the tab order and the
+    // accessibility tree, and it cannot catch a click.
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity var(--ui-duration-fast) var(--ui-ease-out),
+      visibility 0s linear 300ms;
+
+    // The route there. Transparent, part of the flyout as far as the pointer is
+    // concerned, and wide enough to reach back into the navigation: the dead zone
+    // is not only the gap outside it but its own padding and the resize separator
+    // sitting on its edge, both of which end the hover.
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      inset-inline-end: 100%;
+      inline-size: calc(var(--ui-space-3) + var(--ui-space-4) + 1px);
+    }
+
+    // On the flyout's own ground, the lighter brand tint — the one an open group
+    // is drawn in — for a hover, and the stronger one for the current page, so
+    // the two differ by ground as they do inside the open box. `--ui-brand-on-
+    // subtle` is derived against the stronger tint and clears both.
+    .ui-side-nav__link:not(.is-active):hover {
+      background: var(--ui-brand-subtle);
+      color: var(--ui-brand-on-subtle);
+    }
+
+    .ui-side-nav__link.is-active {
+      background: var(--ui-brand-subtle-selected);
+      color: var(--ui-brand-on-subtle);
+    }
+  }
+
+  &:focus-within > .ui-side-nav__sublist {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+
+  // Hover-opened flyouts can be dismissed with Escape, through the same root flag
+  // as every tooltip (1.4.13). Focus-opened ones cannot, deliberately: hiding the
+  // element that has focus would leave the keyboard nowhere.
+  &:hover:not(:root[data-tooltips-suppressed] *) > .ui-side-nav__sublist {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+
+  .ui-side-nav__flyout-heading {
+    display: block;
+    padding: var(--ui-space-2) var(--ui-space-3);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-label);
+    font-weight: var(--ui-weight-semibold);
+  }
+}
+
+// In the column, every group but the one you are in.
+.ui-side-nav__list > .ui-side-nav__item.has-children:not(.is-open) {
+  @include flyout;
+}
+
+// One flyout at a time. A flyout opens on hover and on focus, and focus stays
+// where it was left: clicking a group leaves its flyout up, and hovering
+// another group put a second one beside it. The one under the pointer is the
+// one about to be used, so the other goes — and comes back when the pointer
+// leaves, since the focus that opened it has not moved.
+//
+// What the menu below is the menu of — a workspace, or the level above them —
+// and the way to another (Ui.SideNav.context). It sits under the brand: the
+// brand says which application this is, this says where in it the reader is.
+// A title that can be pressed, not a field and not the first entry of the list
+// under it. Little air below it, because the menu is its own.
+.ui-side-nav__context {
+  // Nothing under it: the menu's own top padding is all that separates the two,
+  // so the control and its entries read as one block.
+  padding: 0 var(--ui-space-4);
+
+  // The menu is anchored to the trigger, which spans the navigation.
+  .ui-menu {
+    display: block;
+  }
+
+  // As wide as the navigation at least, and wider when a name needs it.
+  .ui-menu__list {
+    min-inline-size: max(100%, 16rem);
+    max-block-size: min(32rem, calc(100vh - 12rem));
+    overflow-y: auto;
+  }
+}
+
+// The air between the brand and the context is what sets the two apart: the
+// brand is the application, and the context with the menu under it is where
+// the reader is in it.
+.ui-side-nav__brand:has(+ .ui-side-nav__context) {
+  padding-block-end: var(--ui-space-6);
+}
+
+// The same target, padding and hover as the brand's link, so the two are one
+// shape whichever of them an application shows.
+.ui-side-nav__context-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3);
+
+  // A hairline, the subtle one a card has rather than the control border of a
+  // field: enough to say this is one thing that can be pressed, without making
+  // it look like something to type into.
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { background: var(--ui-state-hover); }
+
+  &[aria-expanded='true'] { background: var(--ui-state-active); }
+}
+
+.ui-side-nav__context-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.ui-side-nav__context-name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  // A step under the brand's title over it, so the two do not read as two
+  // names of the same thing.
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-semibold);
+}
+
+.ui-side-nav__context-chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+// The group you are in is not part of this in the column: its children are a
+// box in the navigation rather than a flyout over it, and a box that closed
+// whenever the pointer passed another group would take the page you are on out
+// of sight.
+.ui-side-nav__list:has(> .ui-side-nav__item.has-children:not(.is-open):hover) > .ui-side-nav__item.has-children:not(.is-open):not(:hover) > .ui-side-nav__sublist {
+  visibility: hidden;
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+// THE RAIL
+//
+// Two ways into it, and one set of rules: the user collapses the navigation, or
+// the screen is narrow enough that an expanded one would take more of it than the
+// page it frames. The second is a media query rather than a message from Elm, so
+// it follows text size as well as width — someone who sets a large font gets the
+// rail sooner, which is exactly when they need the room (1.4.10).
+@mixin rail {
+  inline-size: var(--ui-side-nav-rail);
+
+  .ui-side-nav__brand-full,
+  .ui-side-nav__user-avatar-full {
+    display: none;
+  }
+
+  .ui-side-nav__brand-compact,
+  .ui-side-nav__user-avatar-compact {
+    display: contents;
+  }
+
+  // Top-level labels only. The flyout under a group is the one place in the
+  // rail where names are written out, because it is where they are needed.
+  .ui-side-nav__list > .ui-side-nav__item > .ui-side-nav__link .ui-side-nav__label,
+  .ui-side-nav__list > .ui-side-nav__item > .ui-tooltip .ui-side-nav__label,
+  .ui-side-nav__collapse .ui-side-nav__label,
+  .ui-side-nav__action .ui-side-nav__label {
+    @include ui-visually-hidden;
+  }
+
+  .ui-side-nav__scroll {
+    padding-inline: var(--ui-space-2);
+  }
+
+  .ui-side-nav__brand {
+    display: flex;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .ui-side-nav__brand a {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  // Not a flex container: a shrink-to-fit menu wrapper made the account's hover
+  // a narrower box than every item above it. It stays full width and centers its
+  // own content.
+  .ui-side-nav__footer {
+    padding-inline: 0;
+  }
+
+  .ui-side-nav__foot {
+    padding-inline: var(--ui-space-2);
+  }
+
+  .ui-side-nav__list > .ui-side-nav__item > .ui-side-nav__link,
+  .ui-side-nav__list > .ui-side-nav__item > .ui-tooltip > .ui-side-nav__link,
+  .ui-side-nav__collapse,
+  .ui-side-nav__action {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .ui-side-nav__list > .ui-side-nav__item > .ui-side-nav__link .ui-side-nav__icon,
+  .ui-side-nav__list > .ui-side-nav__item > .ui-tooltip .ui-side-nav__icon,
+  .ui-side-nav__collapse .ui-side-nav__icon,
+  .ui-side-nav__action .ui-side-nav__icon {
+    inline-size: auto;
+  }
+
+  .ui-side-nav__badge,
+  .ui-side-nav__external {
+    display: none;
+  }
+
+  // Hidden visually, not removed: it still names its group.
+  .ui-side-nav__heading {
+    @include ui-visually-hidden;
+  }
+
+  // No box: there are no children in the column for it to hold, so the group
+  // takes the tint instead — in the rail it *is* the thing you are looking at.
+  .ui-side-nav__item.is-open {
+    background: transparent;
+  }
+
+  .ui-side-nav__link.is-within {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+  }
+
+  // TOOLTIPS
+  //
+  // The bubble has to escape .ui-side-nav__scroll, which clips: overflow-y with
+  // a visible overflow-x is not a thing CSS will give you. The way out is the one
+  // the codebase already uses for clipped dropdowns — take away the positioned
+  // ancestor *inside* the scroller, so the containing block becomes the
+  // navigation itself, which the scroller cannot clip because it is its own
+  // ancestor.
+  .ui-tooltip {
+    // flex, so the bubble's static position is aligned inside it and
+    // align-items centers it on the icon; static, for the containing block.
+    align-items: center;
+    position: static;
+  }
+
+  .ui-tooltip__bubble {
+    display: block;
+    // Measured against the navigation now, so 100% is the width of the rail.
+    inset-inline-start: calc(100% + var(--ui-space-3));
+    inset-inline-end: auto;
+    inset-block-start: auto;
+    translate: none;
+    text-align: start;
+  }
+
+  // Every group is a flyout in the rail, the one it is open in included.
+  .ui-side-nav__item.has-children {
+    @include flyout;
+  }
+
+  // One flyout at a time here too, and here the group you are in is one of
+  // them: in the rail it has no box in the navigation to keep open.
+  .ui-side-nav__list:has(> .ui-side-nav__item.has-children:hover) > .ui-side-nav__item.has-children:not(:hover) > .ui-side-nav__sublist {
+    visibility: hidden;
+    opacity: 0;
+    transition-delay: 0s;
+  }
+
+  // Nothing to unfold in the rail, where every group is a flyout already. As
+  // specific as the rule that shows it on a folded group, and later, so it wins.
+  .ui-side-nav__item.has-children > .ui-side-nav__link .ui-side-nav__chevron {
+    display: none;
+  }
+
+  // The open group keeps its tint in the rail and, as in the column, no hover.
+  .ui-side-nav__item.is-open > .ui-side-nav__link.is-within:hover {
+    background: var(--ui-brand-subtle);
+  }
+
+  // The context keeps its icon and gives up its name.
+  .ui-side-nav__context {
+    padding-inline: var(--ui-space-2);
+  }
+
+  .ui-side-nav__context-trigger {
+    justify-content: center;
+    padding-inline: 0;
+    // A box round one icon in a rail of bare icons would be the loudest thing
+    // in it.
+    border-color: transparent;
+  }
+
+  .ui-side-nav__context-name {
+    @include ui-visually-hidden;
+  }
+
+  .ui-side-nav__context-chevron {
+    display: none;
+  }
+
+  // The account's trigger only. The same markup appears again inside the open
+  // menu, where the rail's rules must not reach it — that copy exists precisely
+  // to say the name and role the rail cannot.
+  .ui-side-nav__user:not(.ui-side-nav__user--note) {
+    justify-content: center;
+    padding-inline: 0;
+
+    .ui-side-nav__user-text {
+      @include ui-visually-hidden;
+    }
+  }
+
+  .ui-side-nav__foot .ui-menu__note:has(.ui-side-nav__user--note),
+  .ui-side-nav__foot .ui-menu__note:has(.ui-side-nav__user--note) + .ui-menu__separator {
+    display: list-item;
+  }
+}
+
+.ui-side-nav.is-collapsed {
+  @include rail;
+}
+
+// Narrow enough that the navigation should not take a quarter of the screen. The
+// rail is forced, and the controls that would undo it go: there is nothing to
+// expand into, and a separator with nowhere to drag to is a control that lies.
+@media (max-width: 60rem) {
+  .ui-side-nav {
+    @include rail;
+  }
+
+  .ui-side-nav__toggle,
+  .ui-side-nav__resizer {
+    display: none;
+  }
+}
+
+// The signed-in user, at the foot of the navigation.
+.ui-side-nav__user {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+  // The same padding as a navigation link, so the account lines up with the
+  // menu above it rather than sitting in its own inset.
+  padding: var(--ui-space-3);
+
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { background: var(--ui-state-hover); }
+}
+
+// The menu is anchored to the button, so the button's own box is what
+// `inset-inline-start: 100%` measures — it has to span the navigation rather
+// than shrink to the name.
+.ui-side-nav__foot .ui-menu {
+  display: block;
+}
+
+.ui-side-nav__user--note {
+  cursor: default;
+
+  &:hover { background: transparent; }
+}
+
+.ui-side-nav__user-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.ui-side-nav__user-text {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.ui-side-nav__user-name,
+.ui-side-nav__user-role {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-side-nav__user-name {
+  // Stated, because this markup appears again inside the menu, where the
+  // surrounding note is muted and the name should not be.
+  color: var(--ui-text);
+  font-size: var(--ui-text-body-sm);
+  font-weight: var(--ui-weight-medium);
+}
+
+.ui-side-nav__user-role {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+

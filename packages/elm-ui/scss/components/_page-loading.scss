@@ -1,0 +1,44 @@
+// Page loading — the region between a route and its data.
+//
+// The words are in the document from the first frame, so the live region has
+// them immediately; only the picture waits. A load that finishes inside the
+// delay never shows a spinner at all, which is the difference between a page
+// that flickers and one that simply arrives.
+
+.ui-page-loading {
+  display: grid;
+  place-items: center;
+  block-size: 100%;
+  min-block-size: 12rem;
+  padding: var(--ui-space-8) var(--ui-space-5);
+}
+
+.ui-page-loading__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body);
+  text-align: center;
+
+  // Opacity only, so the delay costs a composite and never a layout. The delay
+  // is the slow duration: long enough to cover a request that comes back from
+  // cache, short enough that a real wait is acknowledged. `both` holds the
+  // invisible first frame through the delay. The global reduced-motion rule
+  // shortens the fade to nothing and leaves the delay, so the spinner still
+  // does not flash — it appears rather than fading in. The fade is the reveal
+  // duration on ease-in, so the spinner builds up rather than snapping in.
+  animation: ui-page-loading-in var(--ui-duration-reveal) var(--ui-ease-in) var(--ui-duration-slow) both;
+}
+
+.ui-page-loading__icon {
+  display: inline-flex;
+  font-size: var(--ui-text-title);
+}
+
+@keyframes ui-page-loading-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

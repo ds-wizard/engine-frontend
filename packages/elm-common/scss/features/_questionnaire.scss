@@ -1,0 +1,903 @@
+// The questionnaire (`Common.Components.Questionnaire`).
+//
+// A chapter is a flat list of nodes that only look nested: each node sits inside
+// as many indentation boxes as it is deep (`.c-questionnaire-nest`), and every
+// box after the first draws a line down its start edge — a follow-up's under the
+// answer that opened it, an item's down the length of the item. The structure is
+// stated to assistive technology on the node itself (`Nest.listItem`); these
+// rules only draw it.
+
+// THE WORKSPACE
+//
+// The host fills the region it is given — a flush tab, a flush page — and the
+// workspace inside it does the rest (`Ui.Page.Workspace`). The dialogs after it
+// are closed `dialog`s, which take no room.
+
+.c-questionnaire {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.c-questionnaire-toolbar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+// A chapter with nothing left to answer: the tick is the success role, and
+// says so in words for a screen reader.
+.c-questionnaire-nav__answered {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ui-success-on-subtle);
+}
+
+// The phase, above the chapters: what it is, a button to change it, and how far
+// along the list of phases the project is.
+.c-questionnaire-phase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-4);
+  border-radius: var(--ui-radius-control);
+  // The app's navigation's ground on the navigation's white, like the chapters
+  // under it.
+  background: var(--ui-frame);
+  min-inline-size: 0;
+
+  // A long phase title in a narrow navigation is cut short with an ellipsis
+  // rather than running out of the button. The whole title is still the
+  // button's name ("Change phase, current: …"), and the dialog shows it in full.
+  .ui-button {
+    justify-content: flex-start;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .ui-button > span {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// "Chapters", above the list that scrolls under it.
+.c-questionnaire-nav__title {
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+  color: var(--ui-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.c-questionnaire-phase__label {
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+  color: var(--ui-text-muted);
+}
+
+// The phase progress: a bar through a point for each phase — the phases reached
+// filled in the brand color, the current one ringed.
+.c-questionnaire-phase-progress {
+  --c-phase-point: 0.75rem;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--c-phase-point);
+}
+
+.c-questionnaire-phase-progress__bar {
+  position: absolute;
+  inset-inline: calc(var(--c-phase-point) / 2);
+  block-size: 0.25rem;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-border-control);
+}
+
+.c-questionnaire-phase-progress__fill {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--ui-brand);
+}
+
+.c-questionnaire-phase-progress__point {
+  position: relative;
+  inline-size: var(--c-phase-point);
+  block-size: var(--c-phase-point);
+  border-radius: 50%;
+  background: var(--ui-border-control);
+
+  &.is-reached {
+    background: var(--ui-brand);
+  }
+
+  &.is-current {
+    box-shadow: 0 0 0 var(--ui-space-1) var(--ui-brand-subtle-selected);
+  }
+}
+
+// The phases in the dialog: one button each, the current one marked as the step
+// the project is on and the ones before it as done.
+//
+// Down their start, a vertical progress: a point for each phase and a
+// line to the next, in the brand color for the phases done and the current one.
+.c-questionnaire-phase-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.c-questionnaire-phase-step {
+  --c-step-point: 1rem;
+  --c-step-top: calc(var(--ui-space-4) + 0.125rem);
+
+  position: relative;
+  padding-inline-start: var(--ui-space-7);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block-start: var(--c-step-top);
+    inset-inline-start: var(--ui-space-2);
+    inline-size: var(--c-step-point);
+    block-size: var(--c-step-point);
+    border-radius: 50%;
+    background: var(--ui-border-control);
+  }
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    inset-block-start: calc(var(--c-step-top) + var(--c-step-point));
+    inset-block-end: calc(var(--c-step-top) * -1 - var(--ui-space-3));
+    inset-inline-start: calc(var(--ui-space-2) + var(--c-step-point) / 2 - 0.125rem);
+    inline-size: 0.25rem;
+    background: var(--ui-border-control);
+  }
+
+  &.is-done::before,
+  &.is-done::after,
+  &.is-current::before {
+    background: var(--ui-brand);
+  }
+}
+
+.c-questionnaire-phase-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--ui-space-1) var(--ui-space-3);
+  inline-size: 100%;
+  padding: var(--ui-space-4);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-brand-subtle);
+  }
+
+  &.is-current {
+    border-color: var(--ui-brand);
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+    cursor: default;
+  }
+
+  &.is-done .c-questionnaire-phase-option__title {
+    color: var(--ui-text-muted);
+  }
+}
+
+.c-questionnaire-phase-option__title {
+  font-weight: var(--ui-weight-semibold);
+}
+
+.c-questionnaire-phase-option__state {
+  color: var(--ui-success-on-subtle);
+}
+
+.c-questionnaire-phase-option__description {
+  grid-column: 1 / -1;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+}
+
+.c-questionnaire-plugin-panel {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+// A plugin's panel is its own, edge to edge. Built of the SDK's components —
+// its root a Stack, inside the box the SDK mounts in its element — it is padded
+// as our panels are, with nothing asked of the plugin; any other root (its own
+// element) is left as drawn, so a plugin that wants no padding has none.
+.c-questionnaire-plugin-panel > * > * > .ui-stack {
+  padding: var(--ui-space-4) var(--ui-workspace-gutter) var(--ui-space-5);
+}
+
+.c-questionnaire-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
+  // Wider than a settings form (`--ui-measure-form`): a question's row carries
+  // its actions beside its title, and a follow-up three deep has lost a good
+  // part of the width to its indentation.
+  max-inline-size: 56rem;
+  min-inline-size: 0;
+  margin-inline: auto;
+  padding-block: var(--ui-space-6) var(--ui-space-8);
+}
+
+// CHAPTER
+
+.c-questionnaire-chapter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  border-radius: var(--ui-radius-control);
+}
+
+.c-questionnaire-chapter__title {
+  margin: 0;
+}
+
+.c-questionnaire-chapter__text {
+  color: var(--ui-text-muted);
+}
+
+// The chapters either side: two large buttons sharing the width (one alone takes
+// all of it), the direction in a lighter line above the chapter's name, the arrow
+// at the outer edge and the words towards the middle.
+.c-questionnaire-chapter-links {
+  display: flex;
+  gap: var(--ui-space-3);
+  padding-block-start: var(--ui-space-6);
+}
+
+.c-questionnaire-chapter-link {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+  padding: var(--ui-space-5) var(--ui-space-8);
+  border: 0;
+  border-radius: var(--ui-radius-large);
+  background: var(--ui-frame);
+  color: var(--ui-text);
+  font: inherit;
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-surface-sunken);
+  }
+
+  .ui-icon {
+    position: absolute;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    color: var(--ui-text-muted);
+    font-size: 1.5rem;
+  }
+}
+
+.c-questionnaire-chapter-link--previous {
+  align-items: flex-end;
+  text-align: end;
+
+  .ui-icon {
+    inset-inline-start: var(--ui-space-5);
+  }
+}
+
+.c-questionnaire-chapter-link--next {
+  align-items: flex-start;
+  text-align: start;
+
+  .ui-icon {
+    inset-inline-end: var(--ui-space-5);
+  }
+}
+
+.c-questionnaire-chapter-link__label {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+.c-questionnaire-chapter-link__title {
+  font-weight: var(--ui-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+// THE LIST
+
+.c-questionnaire-list {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.c-questionnaire-node {
+  min-inline-size: 0;
+}
+
+.c-questionnaire-nest {
+  min-inline-size: 0;
+}
+
+// Deeper: a follow-up is indented under a line — the subtle border at an
+// accent's width, a grouping rather than a boundary a control is found by.
+.c-questionnaire-nest--follow-up {
+  padding-inline-start: var(--ui-space-5);
+  border-inline-start: 3px solid var(--ui-border-subtle);
+}
+
+// An item is a card: its header on top (`.c-questionnaire-item`), its questions
+// on the page's own white between two side borders, and its footer with Collapse
+// closing it at the bottom. The border is the elevated one, a step stronger than
+// the subtle rules inside, so on white the card's edge is where the item is. The
+// nodes are siblings in the flat list, so each draws its part of the card — the
+// header the top, every node inside the sides, the footer the bottom — and
+// together they read as one box.
+.c-questionnaire-nest--item {
+  padding-inline: var(--ui-space-4);
+  border-inline: 1px solid var(--ui-border-elevated);
+  background: var(--ui-surface);
+}
+
+// QUESTION
+
+.c-questionnaire-question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding-block: var(--ui-space-5);
+  border-radius: var(--ui-radius-control);
+  // Target of a scroll: the sticky page header must not cover the question it
+  // was scrolled to (WCAG 2.4.11).
+  scroll-margin-block: var(--ui-space-8);
+  transition: var(--ui-transition-state);
+
+}
+
+// Just scrolled to — for three seconds, then gone, as in the wizard: a tint that
+// fades from the top of the question to nothing at its bottom, held for half the
+// time and then faded out. Only its opacity animates. A tint and nothing more:
+// where the reader is was already said by the scroll and the focus.
+.c-questionnaire-chapter,
+.c-questionnaire-question {
+  position: relative;
+  isolation: isolate;
+
+  // Its own stacking context keeps an integration's hints inside it, so the
+  // question that has them open is raised over the ones after it.
+  &:has(.c-questionnaire-type-hints) {
+    z-index: 1;
+  }
+
+  &.is-highlighted::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset-block: 0;
+    inset-inline: calc(var(--ui-space-3) * -1);
+    border-radius: var(--ui-radius-control) var(--ui-radius-control) 0 0;
+    background: linear-gradient(to bottom, var(--ui-brand-subtle), transparent);
+    animation: c-questionnaire-highlight 3s ease-in-out forwards;
+    pointer-events: none;
+  }
+}
+
+@keyframes c-questionnaire-highlight {
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c-questionnaire-chapter.is-highlighted::before,
+  .c-questionnaire-question.is-highlighted::before {
+    animation: none;
+  }
+}
+
+.c-questionnaire-question__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+}
+
+.c-questionnaire-question__heading {
+  display: flex;
+  flex: 1 1 20rem;
+  align-items: baseline;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+// What a move to a question scrolls to (`Questionnaire.focusSelector`): the
+// title, kept clear of the top edge like the question round it.
+.c-questionnaire-chapter__title,
+.c-questionnaire-question__title,
+.c-questionnaire-item__title {
+  scroll-margin-block: var(--ui-space-8);
+}
+
+// A little larger than the text round it, and in the state's color with the
+// number, as in the wizard: green once answered, red while wanted now, muted
+// when it can wait. The color is never alone — the number's icon and its words
+// say the same.
+.c-questionnaire-question__title {
+  font-size: var(--ui-text-subtitle);
+  font-weight: var(--ui-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.c-questionnaire-question__title--answered {
+  color: var(--ui-success-on-subtle);
+}
+
+.c-questionnaire-question__title--desirable {
+  color: var(--ui-danger-on-subtle);
+}
+
+.c-questionnaire-question__title--later {
+  color: var(--ui-text-muted);
+}
+
+.c-questionnaire-question__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-1);
+}
+
+.c-questionnaire-question__text {
+  color: var(--ui-text-muted);
+}
+
+// One kind of extra a line — desirable in, links, related questions, experts —
+// as in the wizard.
+//
+// Its lines are small, muted and set close together, so the block reads as one
+// dense thing and needs more room round it than the question's own rhythm gives
+// it; otherwise it sits against the answers as if it belonged to them.
+.c-questionnaire-question__extra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  margin-block-start: var(--ui-space-2);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+// Where the question is answered, always the same distance from what explains
+// it — the description, or the extras when there are any. A margin on top of
+// the question's gap, because that distance has to be the same whichever of
+// the two comes last, and flex gap is the same between every pair.
+.c-questionnaire-question__inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  margin-block-start: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+// The state and number of a question: answered, wanted in the current phase, or
+// able to wait. Color with an icon and a word (the word off-screen), never
+// color alone (WCAG 1.4.1).
+.c-questionnaire-state {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-1) var(--ui-space-3);
+  border-radius: var(--ui-radius-pill);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.c-questionnaire-question__heading > .ui-tooltip {
+  flex-shrink: 0;
+}
+
+.c-questionnaire-state--answered {
+  background: var(--ui-success-subtle);
+  color: var(--ui-success-on-subtle);
+}
+
+.c-questionnaire-state--desirable {
+  background: var(--ui-danger-subtle);
+  color: var(--ui-danger-on-subtle);
+}
+
+.c-questionnaire-state--later {
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+}
+
+.c-questionnaire-extra {
+  display: block;
+}
+
+.c-questionnaire-extra__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+  font-weight: var(--ui-weight-medium);
+}
+
+// A TODO on the question: a badge in the warning tint, as tall as the actions
+// beside it because its cross is one of them.
+.c-questionnaire-todo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+  padding-inline-start: var(--ui-space-3);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-warning-subtle);
+  color: var(--ui-warning-on-subtle);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+
+  .ui-button {
+    color: inherit;
+  }
+}
+
+// ANSWERS
+
+// An answer that opens follow-ups: a faint mark after its label, said in words to
+// a screen reader and in a tooltip on hover.
+.c-questionnaire-follow-ups-indicator {
+  display: inline-flex;
+  margin-inline-start: var(--ui-space-4);
+  color: var(--ui-text-muted);
+  opacity: 0.55;
+}
+
+.c-questionnaire-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-1);
+}
+
+// A metric an answer scores, colored by how well it scores it on the
+// red–yellow–green scale (`Ui.ValueScale` puts the step on the element as
+// `--ui-value-tone`; this is what reads it).
+//
+// The tone is a wash behind the words and the full color around them, not the
+// color of the words: a step is a fill, guaranteed to stand out from a ground
+// at 3:1, and several of them — yellow above all — cannot carry text at 4.5:1
+// (1.4.3). The wash is mixed with the surface rather than faded with opacity,
+// so it comes out of the dark theme dark.
+//
+// The color is never the only signal: the metric is named in the pill, and
+// says its value where the view setting asks for it (1.4.1).
+.c-questionnaire-metric {
+  display: inline-flex;
+  gap: var(--ui-space-1);
+  // A pill's ends curve in on its first and last letter, so it needs more room
+  // than a square badge of the same size would. The same padding as the
+  // question's number, which is the other pill in this component at this size.
+  padding: var(--ui-space-1) var(--ui-space-3);
+  border-radius: var(--ui-radius-pill);
+  background: color-mix(in oklab, var(--ui-value-tone, var(--ui-value-50)) 22%, var(--ui-surface));
+  box-shadow: inset 0 0 0 1px var(--ui-value-tone, var(--ui-value-50));
+  font-size: var(--ui-text-label);
+
+  // The answer the reader is choosing, or has chosen, is where its metrics
+  // matter; on the rest they are reference. The wizard faded them to half and
+  // brought them back on that option, which under a color that has to stay
+  // legible is a deeper wash rather than a change of opacity.
+  .ui-choice:hover &,
+  .ui-choice.is-selected & {
+    background: color-mix(in oklab, var(--ui-value-tone, var(--ui-value-50)) 42%, var(--ui-surface));
+  }
+}
+
+.c-questionnaire-metric__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.c-questionnaire-advice {
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-inline-start: 3px solid var(--ui-info-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-info-subtle);
+}
+
+// The follow-ups' control (`Question.viewFollowUpsCollapse`), drawn with the
+// follow-ups' own line so that it is the top of their section: open, Collapse
+// sits above them on the line; folded, the line stays, over a light ground with
+// "Expand 3 follow up questions".
+.c-questionnaire-follow-ups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+  margin-block-start: var(--ui-space-3);
+  padding: var(--ui-space-1) var(--ui-space-4) var(--ui-space-1) var(--ui-space-3);
+  border-inline-start: 3px solid var(--ui-border-subtle);
+  color: var(--ui-text-muted);
+}
+
+.c-questionnaire-follow-ups--collapsed {
+  border-radius: 0 var(--ui-radius-control) var(--ui-radius-control) 0;
+  background: var(--ui-frame);
+}
+
+// Open, the control runs straight into the follow-ups below: the question it
+// ends gives up the space under it, so the line is unbroken.
+.c-questionnaire-question:has(> .c-questionnaire-question__inputs > .c-questionnaire-follow-ups:not(.c-questionnaire-follow-ups--collapsed):last-child) {
+  padding-block-end: 0;
+}
+
+.c-questionnaire-items-collapse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+}
+
+.c-questionnaire-value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+// A field fills the column it is in; a button is as wide as what it says.
+// "Upload file" stretched the width of the answer reads as a drop zone rather
+// than as the one button it is.
+.c-questionnaire-value > .ui-button {
+  align-self: flex-start;
+}
+
+// A value that cannot be changed and is formatted: a text answer, an
+// integration's chosen reply. In the shape of a field, on the disabled ground —
+// which means the field's whole box, not just its border: the width and the
+// floor under its height as well, or an answer with nothing in it comes out a
+// thin strip the width of its own padding where an empty input would be a box.
+.c-questionnaire-read-only-text {
+  inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface-sunken);
+}
+
+.c-questionnaire-item-link {
+  display: flex;
+}
+
+.c-questionnaire-file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+.c-questionnaire-file__icon {
+  display: inline-flex;
+  color: var(--ui-icon-subtle);
+}
+
+// INTEGRATION
+
+.c-questionnaire-integration {
+  position: relative;
+}
+
+// The hints under an integration question's input, on the raised ground every
+// popup in the system uses.
+.c-questionnaire-type-hints {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + var(--ui-space-1));
+  z-index: 20;
+  max-block-size: 20rem;
+  overflow-y: auto;
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+}
+
+.c-questionnaire-type-hints__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  margin: 0;
+  padding: var(--ui-space-2);
+  list-style: none;
+}
+
+.c-questionnaire-type-hints__status {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  color: var(--ui-text-muted);
+}
+
+.c-questionnaire-type-hint {
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-text);
+  cursor: pointer;
+
+  // One cursor for the pointer and the arrow keys, drawn as the combobox's
+  // highlighted option is.
+  &.is-highlighted {
+    background: var(--ui-state-hover);
+    outline: 2px solid var(--ui-border-control);
+    outline-offset: -2px;
+  }
+}
+
+// AFTER THE INPUTS
+
+.c-questionnaire-clear {
+  display: flex;
+}
+
+.c-questionnaire-answered-by {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+// An action in a sentence that stays on the page — "Go to item", a related
+// question: a button that reads as a link.
+.c-questionnaire-text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-link);
+  font: inherit;
+  text-align: start;
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.125em;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ui-link-hover);
+    text-decoration-thickness: max(2px, 0.125em);
+  }
+}
+
+// ITEMS
+
+.c-questionnaire-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  margin-block-start: var(--ui-space-3);
+  padding: var(--ui-space-2) var(--ui-space-2) var(--ui-space-2) var(--ui-space-4);
+  border: 1px solid var(--ui-border-elevated);
+  border-block-end-color: var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control) var(--ui-radius-control) 0 0;
+  // The lightest gray: enough to say where an item starts, not a band of it.
+  background: var(--ui-frame);
+  scroll-margin-block: var(--ui-space-8);
+
+  // Folded, the header is the whole card.
+  &.is-collapsed {
+    border-block-end-color: var(--ui-border-elevated);
+    border-radius: var(--ui-radius-control);
+  }
+}
+
+.c-questionnaire-item__toggle {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-block-size: var(--ui-hit-min);
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-link);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.c-questionnaire-item__title {
+  overflow: hidden;
+  color: var(--ui-text);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.c-questionnaire-item__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+
+  // The item select questions using the item: question titles, often long, so
+  // as wide as they are up to a cap that stays in the window, wrapping past it,
+  // and the header on one line.
+  .ui-menu__list {
+    inline-size: max-content;
+    min-inline-size: min(20rem, calc(100vw - 2 * var(--ui-space-4)));
+    max-inline-size: min(32rem, calc(100vw - 2 * var(--ui-space-4)));
+  }
+
+  .ui-menu__header {
+    white-space: nowrap;
+  }
+}
+
+// The item select questions using an item, in the dialog removing it: the
+// bullets inside the dialog's content, not hanging off its edge.
+.c-questionnaire-item-usages {
+  padding-inline-start: var(--ui-space-5);
+  list-style: disc;
+}
+
+.c-questionnaire-item-empty {
+  padding-block: var(--ui-space-3);
+}
+
+.c-questionnaire-item-footer {
+  border: 1px solid var(--ui-border-elevated);
+  border-block-start: 0;
+  border-radius: 0 0 var(--ui-radius-control) var(--ui-radius-control);
+  background: var(--ui-surface);
+}
+
+.c-questionnaire-item-footer__bar {
+  display: flex;
+  padding: var(--ui-space-1) var(--ui-space-2);
+  border-block-start: 1px solid var(--ui-border-subtle);
+}
+
+// Expand and collapse all on a line, Add below it — close under the items (or
+// the list question, when there are none) and well clear of the next question,
+// so that Add is plainly the list's.
+.c-questionnaire-items-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ui-space-3);
+  padding-block: var(--ui-space-3) var(--ui-space-6);
+}
+
+// A list question keeps its items close: the space under it is the small step to
+// its first item or to its Add, not the gap between two questions.
+// (A node holds one question, however deeply nested its boxes.)
+.c-questionnaire-node:has(+ .c-questionnaire-node :is(.c-questionnaire-item, .c-questionnaire-items-end)) .c-questionnaire-question {
+  padding-block-end: var(--ui-space-3);
+}

@@ -1,0 +1,25 @@
+// The composites built on the design system. They are arrangement of Ui parts,
+// so most of them need no stylesheet at all; a partial exists only where a
+// composite has layout no Ui primitive provides. Classes are prefixed `.c-`
+// until the tier is renamed.
+
+@import 'components/external-login';
+@import 'components/tour';
+@import 'components/item-summary';
+@import 'components/app-frame';
+@import 'components/public-frame';
+@import 'components/about-modal';
+@import 'components/news-modal';
+@import 'components/markdown';
+
+// The shared pages, which have layout of their own: the questionnaire
+// and its panels, the editors, the comparison, and the rest.
+@import 'features/public';
+@import 'features/dashboard';
+@import 'features/projects';
+@import 'features/questionnaire';
+@import 'features/questionnaire-panels';
+@import 'features/km-comparison';
+@import 'features/km-editor';
+@import 'features/dt-editor';
+@import 'features/settings';

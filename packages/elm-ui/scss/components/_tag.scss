@@ -1,0 +1,116 @@
+// TAGS
+//
+// A word somebody chose, on a pill. Its own ground and a hairline rather than a
+// tint: a tag says nothing about state, so it takes none of the status colors a
+// badge uses, and the hairline keeps it a shape on a sunken well where the ground
+// alone would vanish into the well.
+
+.ui-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  list-style: none;
+}
+
+.ui-tag-list__item {
+  display: flex;
+  min-inline-size: 0;
+}
+
+.ui-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  // The pill holds a 24px remove button when there is one, so the plain tag is
+  // given the same floor and the two sit level in a row.
+  min-block-size: var(--ui-hit-min);
+  padding-block: var(--ui-space-1);
+  padding-inline: var(--ui-space-4);
+
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+}
+
+// The button brings its own room on the end side.
+.ui-tag--removable {
+  padding-inline-end: var(--ui-space-1);
+}
+
+// Long tags wrap rather than being cut: an ellipsis hides the part of a word
+// that tells two similar tags apart, and no text region here has a fixed size
+// (1.4.12).
+.ui-tag__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+// Decoration. The words carry the name on the tag's own ground, whatever color
+// a tenant chose; the hairline keeps a pale color visible as a dot at all.
+.ui-tag__swatch {
+  flex-shrink: 0;
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-pill);
+}
+
+.ui-tag__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // 24px however small the glyph (2.5.8). Round, so the focus ring follows the
+  // pill it sits in.
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-danger-subtle);
+    color: var(--ui-danger-on-subtle);
+  }
+
+  &:active {
+    background: var(--ui-state-active);
+  }
+}
+
+// TAG INPUT
+//
+// Ui.Field's shell, with a row for the text and the add button, and the chosen
+// tags under it.
+
+.ui-tag-input__entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+
+  // The text takes the row; at 320px or 200% the button goes under it rather
+  // than squeezing the input to nothing.
+  .ui-tag-input__text {
+    flex: 1 1 12rem;
+    min-inline-size: 0;
+  }
+}
+
+.ui-tag-input__tags {
+  min-inline-size: 0;
+}

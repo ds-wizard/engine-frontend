@@ -1,0 +1,53 @@
+module Common.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing
+    ( SetProjectData
+    , decoder
+    )
+
+import Common.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
+import Common.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Common.Api.Models.Permission as Permission exposing (Permission)
+import Common.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing)
+import Common.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility)
+import Dict exposing (Dict)
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Pipeline as D
+import Uuid exposing (Uuid)
+
+
+type alias SetProjectData =
+    { name : String
+    , description : Maybe String
+    , projectTags : List String
+    , isTemplate : Bool
+    , visibility : ProjectVisibility
+    , sharing : ProjectSharing
+    , documentTemplateUuid : Maybe Uuid
+    , documentTemplate : Maybe DocumentTemplateSuggestion
+    , formatUuid : Maybe Uuid
+    , format : Maybe DocumentTemplateFormat
+    , documentTemplateLanguage : Maybe String
+    , permissions : List Permission
+    , labels : Dict String (List String)
+    , unresolvedCommentCounts : Dict String (Dict String Int)
+    , resolvedCommentCounts : Dict String (Dict String Int)
+    }
+
+
+decoder : Decoder SetProjectData
+decoder =
+    D.succeed SetProjectData
+        |> D.required "name" D.string
+        |> D.required "description" (D.nullable D.string)
+        |> D.required "projectTags" (D.list D.string)
+        |> D.required "isTemplate" D.bool
+        |> D.required "visibility" ProjectVisibility.decoder
+        |> D.required "sharing" ProjectSharing.decoder
+        |> D.required "documentTemplateUuid" (D.nullable Uuid.decoder)
+        |> D.required "documentTemplate" (D.nullable DocumentTemplateSuggestion.decoder)
+        |> D.required "formatUuid" (D.nullable Uuid.decoder)
+        |> D.required "format" (D.nullable DocumentTemplateFormat.decoder)
+        |> D.required "documentTemplateLanguage" (D.nullable D.string)
+        |> D.required "permissions" (D.list Permission.decoder)
+        |> D.required "labels" (D.dict (D.list D.string))
+        |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))
+        |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))

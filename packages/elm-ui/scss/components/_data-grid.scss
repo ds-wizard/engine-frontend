@@ -1,0 +1,322 @@
+// A table the reader shapes (Ui.DataGrid): fixed column widths, a header that
+// stays at the top of its own scrolling region and row numbers that stay at its
+// start.
+
+.ui-data-grid-wrapper {
+  display: grid;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+// A grid that fills its container (withFill): edge to edge, as tall as what is
+// left of the page, scrolling between the toolbar above and the footer below.
+.ui-data-grid-wrapper--fill {
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0;
+  block-size: 100%;
+  min-block-size: 0;
+
+  .ui-data-grid {
+    max-block-size: none;
+    border: 0;
+    border-radius: 0;
+  }
+}
+
+// The region scrolls both ways, so it is a tab stop (the grid's own tabindex)
+// and carries the clearance every scroll container here does, so a focused
+// separator's ring is not clipped by it.
+.ui-data-grid {
+  --ui-data-grid-number-size: 4rem;
+
+  position: relative;
+  overflow: auto;
+  max-block-size: max(24rem, calc(100vh - 22rem));
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-surface);
+
+  &.is-dragging {
+    cursor: col-resize;
+    user-select: none;
+  }
+}
+
+.ui-data-grid__table {
+  // Fixed layout: the widths are the reader's, not the content's.
+  table-layout: fixed;
+  inline-size: calc(var(--ui-data-grid-width, 0px) + var(--ui-data-grid-number-size));
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--ui-text-body-sm);
+}
+
+.ui-data-grid__number-col {
+  inline-size: var(--ui-data-grid-number-size);
+}
+
+.ui-data-grid__th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+  border-block-end: 1px solid var(--ui-border-strong);
+  border-inline-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+  text-align: start;
+  white-space: nowrap;
+}
+
+// A header cell is a layer of its own, as every one of them is, so a tooltip
+// from a control in it would be painted under the next cell. The one being
+// pointed at or worked in comes up over its neighbors, the corner included.
+.ui-data-grid__th:hover,
+.ui-data-grid__th:focus-within {
+  z-index: 4;
+}
+
+// A header cell with a menu open in it comes up over every other one: the list
+// hangs below the header row, over the cells of the row next to it.
+.ui-data-grid__th:has(.ui-menu.is-open) {
+  z-index: 5;
+}
+
+// The label, and the column's own controls at the end edge (withHeaderActions).
+.ui-data-grid__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+
+  > .ui-data-grid__heading,
+  > .ui-data-grid__sort {
+    flex: 1;
+  }
+}
+
+.ui-data-grid__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--ui-space-1);
+}
+
+// A list opened from a header reads as the page does, not as the header: none
+// of the header's small, muted, unwrapped type.
+.ui-data-grid__th .ui-menu__list {
+  color: var(--ui-text);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-regular);
+  white-space: normal;
+}
+
+// The corner: over the header row and over the number column both.
+.ui-data-grid__th--number {
+  inset-inline-start: 0;
+  z-index: 3;
+  text-align: center;
+}
+
+.ui-data-grid__heading,
+.ui-data-grid__sort {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+}
+
+.ui-data-grid__sort {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  > .ui-tooltip {
+    flex: none;
+  }
+}
+
+// A column that can be sorted says so before it is, with a faint double arrow,
+// so the headers that sort can be told from the ones that do not. Its tooltip
+// says what the arrow means, on hover and on the button's keyboard focus.
+.ui-data-grid__sort-glyph {
+  inline-size: 0.75rem;
+
+  &::before {
+    content: '\2195';
+    opacity: 0.45;
+  }
+}
+
+.ui-data-grid__sort:focus-visible .ui-tooltip__bubble {
+  opacity: 1;
+  transition-delay: 400ms;
+}
+
+// Direction is carried by a glyph as well as by position (WCAG 1.4.1).
+[aria-sort='ascending'] .ui-data-grid__sort-glyph::before { content: '\2191'; opacity: 1; }
+[aria-sort='descending'] .ui-data-grid__sort-glyph::before { content: '\2193'; opacity: 1; }
+
+.ui-data-grid__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ui-data-grid__filtered {
+  flex: none;
+  color: var(--ui-brand-strong);
+}
+
+// The column's trailing edge. Eight pixels wide astride the border, as
+// Ui.Resizer's is; its cell is the positioned parent.
+.ui-data-grid__resize {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -4px;
+  inline-size: 8px;
+  z-index: 1;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline: 3px;
+    background: var(--ui-border-strong);
+    opacity: 0;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
+  }
+
+  &:hover::before,
+  &:focus-visible::before {
+    opacity: 1;
+  }
+
+  &.is-dragging::before {
+    background: var(--ui-brand);
+    opacity: 1;
+  }
+
+  // Inset, so the scrolling region does not clip it at the table's edge.
+  &:focus-visible {
+    outline-offset: calc(-1 * var(--ui-focus-width));
+  }
+}
+
+// After the last row, at the start edge of the region however far the rows
+// are scrolled sideways, and as wide as the region's visible part rather than
+// as the rows, so what is centered in it — an empty state — is centered in
+// what the reader sees.
+.ui-data-grid__footer {
+  position: sticky;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  inline-size: 100%;
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+}
+
+.ui-data-grid__td {
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  border-inline-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface);
+  vertical-align: middle;
+  transition: var(--ui-transition-state);
+}
+
+.ui-data-grid__row:hover .ui-data-grid__td {
+  background-image: linear-gradient(var(--ui-state-hover), var(--ui-state-hover));
+}
+
+.ui-data-grid__td--number {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+// A row the reader sized is that tall, and its cells are clipped to it. The
+// full value of every cell is in the export and on the detail page.
+.ui-data-grid__row--sized {
+  block-size: var(--ui-data-grid-row-size, auto);
+}
+
+.ui-data-grid__row--sized .ui-data-grid__cell {
+  max-block-size: calc(var(--ui-data-grid-row-size, 100rem) - 2 * var(--ui-space-2));
+  overflow: hidden;
+}
+
+.ui-data-grid__cell {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+// The handle under a row's number: the pointer's way to one row's height.
+.ui-data-grid__row-handle {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -4px;
+  block-size: 8px;
+  z-index: 1;
+  cursor: row-resize;
+  touch-action: none;
+  user-select: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block: 3px;
+    background: var(--ui-border-strong);
+    opacity: 0;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
+  }
+
+  &:hover::before,
+  &.is-dragging::before {
+    opacity: 1;
+  }
+}
+
+.ui-data-grid.is-busy tbody {
+  opacity: 0.5;
+}
+
+// The spinner over the dimmed rows, in the middle of what is in view. It waits
+// before it shows, as a loading button's does: most pages are back before
+// anyone could read it, and a spinner there for a few frames is a flicker.
+.ui-data-grid-wrapper {
+  position: relative;
+}
+
+.ui-data-grid__busy {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  color: var(--ui-text-muted);
+  font-size: 1.5rem;
+  opacity: 0;
+  pointer-events: none;
+  animation: ui-data-grid-busy var(--ui-duration-fast) var(--ui-ease-in) 300ms forwards;
+}
+
+@keyframes ui-data-grid-busy {
+  to { opacity: 1; }
+}

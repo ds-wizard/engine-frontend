@@ -1,0 +1,572 @@
+// A card is white on a white page in light mode — there is nothing above white
+// — so the elevation does what a lighter surface cannot: its faint unoffset
+// ring draws the edge on all four sides and its short shadow lifts it. In dark
+// mode there is room to keep climbing and the ground carries it alone, which is
+// why both are roles rather than literals: one pair of declarations, two
+// mechanisms.
+//
+// No hairline. It used to be the edge, and once the elevation carried a ring of
+// its own the two together drew every card twice as firmly as a section of a
+// page wants — settings, detail panels, all of them.
+
+.ui-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-5);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-elevation-1-surface);
+  box-shadow: var(--ui-elevation-1);
+}
+
+// A card of fields spaces them as a stack of fields does (see .ui-stack): wider
+// than the label, control and hint inside each one, so the fields stay apart.
+.ui-card:has(> .ui-field, > .ui-list-field, > .ui-form-nested) {
+  gap: var(--ui-space-7);
+}
+
+// A title led by an icon (Card.viewWithIconTitleLevel): on the title's line,
+// centered on it, with the gap a button leaves between its icon and its label.
+.ui-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  padding-block: var(--ui-space-1);
+  padding-inline: var(--ui-space-3);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+  // A pill holds one line, so it takes none of the body's leading. Inheriting
+  // it made a badge taller than the text beside it, which showed up as a tab
+  // with a count sitting a pixel lower than its neighbors.
+  line-height: 1;
+  white-space: nowrap;
+}
+
+// A badge that is a link keeps the badge's colors; the underline on hover is
+// what says it can be followed. The focus ring is the global one.
+.ui-badge--link {
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+// A badge that does something. A `button` brings the browser's own font, border
+// and background with it, so those are put back to the badge's; what is left is
+// the pointer and the underline, which say it can be pressed.
+.ui-badge--action {
+  border: 0;
+  font: inherit;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
+}
+
+.ui-badge--success { background: var(--ui-success-subtle); color: var(--ui-success-on-subtle); }
+.ui-badge--warning { background: var(--ui-warning-subtle); color: var(--ui-warning-on-subtle); }
+.ui-badge--danger { background: var(--ui-danger-subtle); color: var(--ui-danger-on-subtle); }
+.ui-badge--info { background: var(--ui-info-subtle); color: var(--ui-info-on-subtle); }
+.ui-badge--private { background: var(--ui-private-subtle); color: var(--ui-private-on-subtle); }
+
+// The page's ink and ground swapped, which is the one badge that reads the same
+// on every ground the system has.
+.ui-badge--inverse { background: var(--ui-surface-inverse); color: var(--ui-text-inverse); }
+
+.ui-alert {
+  display: flex;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-5);
+  border-radius: var(--ui-radius-surface);
+  border-inline-start: 3px solid var(--ui-info-border);
+  background: var(--ui-info-subtle);
+  color: var(--ui-info-on-subtle);
+}
+
+.ui-alert--success { border-inline-start-color: var(--ui-success-border); background: var(--ui-success-subtle); color: var(--ui-success-on-subtle); }
+.ui-alert--warning { border-inline-start-color: var(--ui-warning-border); background: var(--ui-warning-subtle); color: var(--ui-warning-on-subtle); }
+.ui-alert--danger { border-inline-start-color: var(--ui-danger-border); background: var(--ui-danger-subtle); color: var(--ui-danger-on-subtle); }
+.ui-alert--private { border-inline-start-color: var(--ui-private-border); background: var(--ui-private-subtle); color: var(--ui-private-on-subtle); }
+
+.ui-alert__icon { flex-shrink: 0; }
+.ui-alert__content { display: flex; flex-direction: column; gap: var(--ui-space-2); }
+
+// A list of the alert's own: its markers sit outside the items, so without the
+// indent prose gives its lists they would hang over the icon.
+.ui-alert__content > :is(ul, ol) { padding-inline-start: var(--ui-space-6); }
+.ui-alert__content > ul { list-style: disc; }
+.ui-alert__content > ol { list-style: decimal; }
+
+// Dialog — the native element, so the backdrop and top layer are the browser's.
+.ui-dialog {
+  padding: 0;
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-large);
+  background: var(--ui-elevation-3-surface);
+  color: var(--ui-text);
+  box-shadow: var(--ui-elevation-3);
+  max-inline-size: min(34rem, calc(100vw - var(--ui-space-7)));
+  inline-size: 100%;
+
+  // Taller than the window, the browser scrolls the whole dialog and takes the
+  // title and the buttons off the screen with it. The dialog keeps its height
+  // instead and only its body scrolls, so what this is and what can be done
+  // about it are always in view.
+  max-block-size: calc(100dvh - var(--ui-space-8));
+  overflow: hidden;
+
+  // Opening and closing are animated through the discrete properties, which is
+  // the only way to animate an element that is being added to and removed from
+  // the top layer: `display` and `overlay` hold their old value for the length
+  // of the transition instead of flipping at the start of it. Browsers without
+  // it get the dialog immediately, which is what they do today.
+  opacity: 0;
+  transform: translateY(0.5rem) scale(0.98);
+
+  transition:
+    opacity var(--ui-duration-base) var(--ui-ease-out),
+    transform var(--ui-duration-base) var(--ui-ease-out),
+    overlay var(--ui-duration-base) allow-discrete,
+    display var(--ui-duration-base) allow-discrete;
+
+  // The column that makes the body the only part that scrolls. The direction
+  // is always set; `display` only while it is open, because on a closed dialog
+  // it would override the browser's own `none` and leave it on the page.
+  //
+  // Not both under `[open]`: closing, `display` holds its flex for the length
+  // of the transition, but a direction set only while open falls back to a row
+  // the moment the attribute goes — and the header and the body sat side by
+  // side for the whole of the fade.
+  flex-direction: column;
+
+  &[open] {
+    display: flex;
+
+    opacity: 1;
+    transform: none;
+  }
+
+  // The state it animates *from* on the way in. Without this the dialog simply
+  // appears at its open state, because there is no previous value to move from.
+  @starting-style {
+    &[open] {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+  }
+
+  &::backdrop {
+    background: var(--ui-surface-backdrop);
+    opacity: 0;
+    transition:
+      opacity var(--ui-duration-base) var(--ui-ease-out),
+      overlay var(--ui-duration-base) allow-discrete,
+      display var(--ui-duration-base) allow-discrete;
+  }
+
+  &[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    &[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
+.ui-dialog__header {
+  // The title, and at the end of its line an action of the header's own
+  // (`Modal.withHeaderAction`) — under it when the two do not fit.
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2) var(--ui-space-4);
+  padding: var(--ui-space-5) var(--ui-space-6);
+}
+
+// The scrolling part. min-block-size, or a flex item refuses to be shorter
+// than its content and the dialog grows past the window again.
+.ui-dialog__body {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  // The block padding is the room a focus ring needs, and nothing more: the
+  // header and the footer give the body its air. Without it this scroll
+  // container clips the ring of whatever is first or last inside it — the ring
+  // is drawn outside the element, and an overflow container cuts at its edge.
+  padding: var(--ui-focus-clearance) var(--ui-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  // A body scrolled to its end does not carry on scrolling the page behind it.
+  overscroll-behavior: contain;
+}
+
+// A dialog whose content is all the caller's (`Modal.withContentOnly`).
+//
+// A dialog's body scrolls because it is a child of the dialog's own column: it is
+// `flex: 1 1 auto` with `min-block-size: 0`, so the column gives it what is left
+// and it scrolls inside that. The parts a plugin draws are not children of it —
+// they are inside the wrapper below, inside the plugin's custom element, inside
+// whatever that element mounts into, and how many boxes that is is the plugin's
+// business and changes with its framework.
+//
+// So the boxes in between are taken out of the layout rather than styled: the
+// wrapper, and everything in it that holds a body, becomes `display: contents`,
+// which leaves the header, the body and the footer as children of the dialog's
+// column — exactly where ours are, obeying exactly the rules ours obey, however
+// deep the plugin buried them.
+.ui-dialog__content-only,
+.ui-dialog__content-only :has(.ui-dialog__body) {
+  display: contents;
+}
+
+// A plugin that marks none of its content as the body gets the old behavior
+// made safe: its element is the column, and it scrolls itself rather than
+// growing past the dialog.
+.ui-dialog__content-only > *:not(:has(.ui-dialog__body)) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ui-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-6);
+}
+
+// A dialog with no actions at all (`Modal.withActions []`) keeps the element —
+// `ui-dialog` moves its children into the dialog when it connects, so the
+// number of them must not change while it is mounted — and gives up the room.
+// `Modal.withStartAction`: pushed to the start, the rest stay at the end.
+.ui-dialog__footer-start {
+  margin-inline-end: auto;
+}
+
+.ui-dialog__footer:empty {
+  display: none;
+}
+
+// A form modal wraps the body and the footer. It is a box like any other, so
+// the two keep the spacing they have without it — and it passes the dialog's
+// height through to them rather than growing with the form.
+.ui-dialog__form {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+// A field's popup — a combobox's search and list, a text field's suggestions —
+// would be cut off by the body, the part that scrolls, and by the dialog's
+// edge. Fixed to the window it reaches past both, over the backdrop, and
+// `packages/elm-ui/js/menu-fit.js` places it at its field.
+.ui-dialog :is(.ui-combobox__popup, .ui-suggest__list) {
+  position: fixed;
+  inset: auto;
+}
+
+// Wide is set on the host element, because the dialog is created in JS and
+// Elm's attributes never reach it. Still capped by the viewport, so a wide
+// dialog at 320px is the same width as a narrow one.
+ui-dialog[data-size='wide'] > .ui-dialog {
+  max-inline-size: min(56rem, calc(100vw - var(--ui-space-7)));
+}
+
+// A cover dialog (`Modal.withCover`) takes what the window has, for content
+// that is a page in its own right. The margin is what keeps it a dialog to the
+// eye rather than a second page: the one behind it is still visible at its edge.
+ui-dialog[data-size='cover'] > .ui-dialog {
+  inline-size: calc(100vw - var(--ui-space-7));
+  max-inline-size: calc(100vw - var(--ui-space-7));
+  block-size: calc(100dvh - var(--ui-space-7));
+  max-block-size: calc(100dvh - var(--ui-space-7));
+}
+
+// What a cover dialog holds is a page, and a page arranges its own scrolling —
+// a workspace scrolls its navigation, its work and its panel apart from each
+// other. So the body hands its height down instead of scrolling everything in
+// it as one long column, and the page inside gets a definite height to divide.
+ui-dialog[data-size='cover'] .ui-dialog__body {
+  overflow: hidden;
+  padding-block-end: var(--ui-space-6);
+
+  > * {
+    flex: 1 1 auto;
+    min-block-size: 0;
+  }
+}
+
+// Menu — one tab stop; arrows move within.
+.ui-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.ui-menu__list {
+  position: absolute;
+  inset-block-start: calc(100% + var(--ui-space-2));
+  inset-inline-start: 0;
+  z-index: 20;
+
+  min-inline-size: 12rem;
+  padding: var(--ui-space-2);
+  list-style: none;
+
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+  // Elevation is never the only signal that this is an overlay.
+  border: 1px solid var(--ui-border-subtle);
+}
+
+.ui-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-4);
+
+  border: none;
+  border-radius: var(--ui-radius-control);
+  background: none;
+  color: var(--ui-text);
+  font: inherit;
+  text-align: start;
+  // An item can be a link (Menu.linkItem). It is still a menu item to the eye:
+  // the role and the menu around it say what it is, and an underline in a
+  // column of commands would single it out as something different.
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { background: var(--ui-state-hover); }
+}
+
+.ui-menu__item--danger {
+  color: var(--ui-danger-on-subtle);
+
+  .ui-menu__item-icon { color: var(--ui-danger-on-subtle); }
+}
+
+// A fixed width, so labels line up whether or not every item has an icon.
+.ui-menu__item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1rem;
+  flex-shrink: 0;
+  color: var(--ui-text-muted);
+}
+
+// What leads an item in place of an icon (Menu.withLeading) — a workspace's
+// square, an avatar — takes the room it needs: in the icon's fixed width it
+// would run into the gap and up to the label.
+.ui-menu__item-icon--leading {
+  inline-size: auto;
+}
+
+// A label with a sentence under it (Menu.withDescription). One element, so the
+// sentence is part of the item's name; two lines, so it reads as secondary.
+.ui-menu__item-label {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.ui-menu__item-description {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+.ui-menu__item--danger .ui-menu__item-description {
+  color: inherit;
+}
+
+// Opens in a new tab (Menu.withNewTab): the icon at the end, quieter than the
+// label. The words are in the accessible name.
+.ui-menu__item-external {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+// A key cap: a thin outline round the keys, so they read as keys to press and
+// not as more of the label.
+.ui-menu__item-shortcut {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  padding-block: 0;
+  padding-inline: var(--ui-space-2);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: calc(var(--ui-radius-control) / 2);
+  color: var(--ui-text-muted);
+  font-family: inherit;
+  font-size: var(--ui-text-label);
+  line-height: var(--ui-leading-tight);
+  white-space: nowrap;
+}
+
+.ui-menu__separator {
+  block-size: 1px;
+  margin-block: var(--ui-space-2);
+  background: var(--ui-border-subtle);
+}
+
+// Kebab trigger: borderless, so a column of them in a list reads as a column of
+// affordances rather than a column of buttons.
+.ui-menu__kebab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+
+  border: none;
+  border-radius: var(--ui-radius-pill);
+  background: none;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+}
+
+// Content the menu shows rather than offers: the signed-in user at the top of
+// an account menu, an empty state under a search.
+.ui-menu__note {
+  padding: var(--ui-space-3) var(--ui-space-4);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+// The items, inside the popup (`.ui-menu__list`) and under its search box: the
+// popup is what is placed and framed, the list only lists.
+.ui-menu__items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-menu__search {
+  padding: var(--ui-space-2) var(--ui-space-3);
+
+  .ui-input {
+    inline-size: 100%;
+  }
+}
+
+// A row of choices instead of a column of them.
+.ui-menu__segmented {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-2) var(--ui-space-4);
+}
+
+.ui-menu__segmented-label {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+.ui-menu__segmented-options {
+  display: inline-flex;
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-1);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface-sunken);
+}
+
+.ui-menu__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-block-size: var(--ui-hit-min);
+  min-inline-size: var(--ui-hit-min);
+
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font: inherit;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { color: var(--ui-text); }
+
+  // Selected is carried by ground and color together, and by aria-checked,
+  // which is the part that is actually read out.
+  &.is-selected {
+    background: var(--ui-elevation-1-surface);
+    box-shadow: var(--ui-elevation-1);
+    color: var(--ui-link);
+  }
+}
+
+// A label for the group under it. Not a target, so it takes the label type
+// rather than the item's.
+.ui-menu__header {
+  padding: var(--ui-space-2) var(--ui-space-3);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+}
+
+// Beside the trigger, bottom-aligned: for a menu at the foot of the navigation,
+// where below is off the bottom of the screen and the room is to the side.
+.ui-menu__list--side-end {
+  inset-block-start: auto;
+  inset-block-end: 0;
+  inset-inline-start: calc(100% + var(--ui-space-3));
+}
+
+// Aligned to the end edge, for a menu at the end of a row that would otherwise
+// open off the page.
+.ui-menu__list--end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+// The trigger's own tooltip would sit over the open menu.
+.ui-menu.is-open .ui-tooltip__bubble {
+  opacity: 0;
+}

@@ -1,0 +1,122 @@
+// The box you type where you are going into.
+//
+// It is the dialog element the modals use, so it is in the top layer, over
+// whatever is already there — including an open modal — with the background
+// inert and Escape and the focus trap the browser's own. What is different is
+// where it sits and what it holds: near the top of the window, because a list
+// that grows downwards should not walk the box off the screen, and wide enough
+// for a page's name without being a page of its own.
+ui-dialog[data-variant='palette'] .ui-dialog {
+  max-inline-size: min(36rem, calc(100vw - var(--ui-space-7)));
+  // Away from the center: the first thing to read is the field, and a box
+  // pinned to the top puts it where the eye already is after the keys.
+  margin-block-start: 12vh;
+  margin-block-end: auto;
+}
+
+.ui-command-palette {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.ui-command-palette__search {
+  position: relative;
+  padding: var(--ui-space-4);
+  border-block-end: 1px solid var(--ui-border-subtle);
+}
+
+.ui-command-palette__search-icon {
+  position: absolute;
+  inset-block-start: 50%;
+  // The field's own inline padding, plus the padding of the box around it.
+  inset-inline-start: calc(var(--ui-space-4) + var(--ui-space-4));
+  translate: 0 -50%;
+
+  // A box of a known width, so the space between the glyph and the text is the
+  // gap it is given rather than whatever the glyph happens to measure.
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-search-glyph);
+  // Above the field it sits on. A focused control is lifted — the reset gives
+  // `:focus-visible` `position: relative; z-index: 1`, so the ring is not
+  // painted over by whatever comes next — and a glyph left at the default
+  // stacking disappeared under the input the moment it took focus, leaving an
+  // indent with nothing in it.
+  z-index: 2;
+  color: var(--ui-text-muted);
+  pointer-events: none;
+}
+
+.ui-command-palette__input {
+  // Room for the glyph at the front, and no more: its own width and one gap.
+  padding-inline-start: calc(var(--ui-space-4) + var(--ui-search-glyph) + var(--ui-space-3));
+}
+
+.ui-command-palette__list {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  max-block-size: min(24rem, 50vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: var(--ui-space-3);
+  list-style: none;
+}
+
+.ui-command-palette__section {
+  & + & {
+    margin-block-start: var(--ui-space-3);
+  }
+}
+
+.ui-command-palette__section-name {
+  display: block;
+  padding: var(--ui-space-2) var(--ui-space-3);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+}
+
+.ui-command-palette__section-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-command-palette__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-2) var(--ui-space-3);
+  border-radius: var(--ui-radius-control);
+  cursor: pointer;
+
+  // Pointer and keyboard share one cursor, as they do in the combobox, and the
+  // line is what carries it: the ground is a few per cent, and this is the only
+  // thing saying what Enter takes while focus stays in the field (1.4.11).
+  &.is-highlighted {
+    background: var(--ui-state-hover);
+    outline: 2px solid var(--ui-border-control);
+    outline-offset: -2px;
+  }
+}
+
+.ui-command-palette__item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-space-6);
+  color: var(--ui-text-muted);
+}
+
+.ui-command-palette__empty,
+.ui-command-palette__loading {
+  padding: var(--ui-space-5) var(--ui-space-6);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}

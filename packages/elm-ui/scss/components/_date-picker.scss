@@ -1,0 +1,269 @@
+// Date, date-and-time and time fields.
+//
+// Two halves: the field itself, which is an input with two buttons sitting in
+// its trailing end, and the calendar, which is flatpickr's markup wearing the
+// system's roles. The library ships a theme of its own with hard-coded blues
+// and grays; everything below either replaces one of those or gives flatpickr a
+// value it had no opinion about.
+
+.ui-date-picker {
+  display: block;
+}
+
+.ui-date-picker__field {
+  position: relative;
+  display: block;
+}
+
+.ui-date-picker__input {
+  inline-size: 100%;
+  // Room for whichever of the two sits at the end, so a long value does not run
+  // underneath it.
+  padding-inline-end: calc(var(--ui-hit-min) + var(--ui-space-2));
+}
+
+// One slot, two occupants: the glyph while the field is empty, the clear button
+// once it is not. Neither is a way to open the calendar — focusing or clicking
+// the input is, and a button that repeats that is a second thing to reach.
+.ui-date-picker__icon,
+.ui-date-picker__clear {
+  position: absolute;
+  inset-inline-end: var(--ui-space-2);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  // Above the field it sits on. A focused control is lifted — the reset gives
+  // `:focus-visible` `position: relative; z-index: 1`, so the ring is not
+  // painted over by whatever comes next — and a glyph left at the default
+  // stacking disappeared under the input the moment it took focus, leaving an
+  // indent with nothing in it.
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // The hit target is the 24px floor whatever the visual is (WCAG 2.5.8).
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+
+  color: var(--ui-text-muted);
+}
+
+.ui-date-picker__icon {
+  // Decoration. It says what kind of field this is and does nothing when
+  // pressed, so it must not intercept the press that opens the calendar.
+  pointer-events: none;
+}
+
+.ui-date-picker__clear {
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover:not(:disabled) {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+
+  &:disabled {
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+// THE CALENDAR
+//
+// It is appended to the body, so it is not inside anything of ours — which is
+// why every rule here is anchored on flatpickr's own class names rather than on
+// a wrapper of ours. `.ui-flatpickr` is added by the element on the way up.
+
+// A calendar opened from inside a modal dialog is shown as a popover, which
+// puts it in the top layer: the dialog is a scrolling box and would otherwise
+// clip it, and the top layer is also what the dialog itself is painted in. The
+// browser dresses a popover as a box of its own — everything it says that the
+// calendar does not already answer for itself is taken back here.
+.ui-flatpickr:popover-open {
+  // Absolute, and so measured from the page — which is what flatpickr writes
+  // into it. A top-layer box takes the initial containing block, so the page's
+  // coordinates land where they would without the dialog. Said here rather
+  // than left to flatpickr's own stylesheet, because the browser's `fixed`
+  // would put the calendar somewhere else entirely.
+  position: absolute;
+  inset: auto;
+  margin: 0;
+  overflow: visible;
+}
+
+.flatpickr-calendar {
+  background: var(--ui-elevation-2-surface);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+  box-shadow: var(--ui-elevation-2);
+  color: var(--ui-text);
+  font-family: var(--ui-font-ui);
+  font-size: var(--ui-text-body-sm);
+
+  // No arrow. It is drawn as two borders on a pair of pseudo-elements, which
+  // cannot be given a themed color without hard-coding one — and the system's
+  // other popovers do without one (§6).
+  &::before,
+  &::after {
+    display: none;
+  }
+}
+
+.flatpickr-months {
+  padding-block: var(--ui-space-2);
+
+  // No block-size here. flatpickr positions the month and year label
+  // absolutely inside this element, so anything but its own fixed height
+  // collapses the row and the label disappears with it.
+  .flatpickr-month {
+    color: var(--ui-text);
+    fill: var(--ui-text);
+  }
+
+  .flatpickr-prev-month,
+  .flatpickr-next-month {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-inline-size: var(--ui-hit-min);
+    min-block-size: var(--ui-hit-min);
+    padding: 0;
+
+    border-radius: var(--ui-radius-pill);
+    color: var(--ui-text-muted);
+    fill: var(--ui-text-muted);
+
+    transition: var(--ui-transition-state);
+
+    &:hover {
+      background: var(--ui-state-hover);
+
+      svg path {
+        fill: var(--ui-text);
+      }
+    }
+  }
+}
+
+.flatpickr-current-month {
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+
+  .flatpickr-monthDropdown-months {
+    background: transparent;
+    color: var(--ui-text);
+    font-weight: var(--ui-weight-medium);
+
+    &:hover { background: var(--ui-state-hover); }
+  }
+
+  .flatpickr-monthDropdown-month {
+    background: var(--ui-elevation-2-surface);
+    color: var(--ui-text);
+  }
+
+  input.cur-year {
+    color: var(--ui-text);
+    font-weight: var(--ui-weight-medium);
+  }
+}
+
+.flatpickr-weekdays {
+  background: transparent;
+}
+
+span.flatpickr-weekday {
+  background: transparent;
+  color: var(--ui-text-subtle);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+  text-transform: uppercase;
+}
+
+.flatpickr-day {
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-text);
+
+  transition: var(--ui-transition-state);
+
+  &:hover,
+  &:focus {
+    background: var(--ui-state-hover);
+    border-color: transparent;
+    color: var(--ui-text);
+  }
+
+  // Today is a ring rather than a fill, so it cannot be confused with the
+  // selected day — and it survives being selected, where a fill would be lost.
+  &.today {
+    border-color: var(--ui-border-strong);
+  }
+
+  &.selected,
+  &.selected:hover,
+  &.startRange,
+  &.endRange,
+  &.selected.prevMonthDay,
+  &.selected.nextMonthDay {
+    background: var(--ui-brand-strong);
+    border-color: var(--ui-brand-strong);
+    color: var(--ui-text-on-brand);
+  }
+
+  &.inRange {
+    background: var(--ui-brand-subtle);
+    border-color: var(--ui-brand-subtle);
+    color: var(--ui-link);
+    box-shadow: none;
+  }
+
+  &.prevMonthDay,
+  &.nextMonthDay {
+    color: var(--ui-text-subtle);
+  }
+
+  &.flatpickr-disabled,
+  &.flatpickr-disabled:hover {
+    color: var(--ui-text-disabled);
+  }
+}
+
+// THE TIME FIELDS
+.flatpickr-time {
+  border-block-start: 1px solid var(--ui-border-subtle);
+
+  input,
+  .flatpickr-time-separator,
+  .flatpickr-am-pm {
+    background: transparent;
+    color: var(--ui-text);
+    font-size: var(--ui-text-body);
+  }
+
+  input:hover,
+  input:focus,
+  .flatpickr-am-pm:hover,
+  .flatpickr-am-pm:focus {
+    background: var(--ui-state-hover);
+  }
+}
+
+.numInputWrapper {
+  &:hover { background: var(--ui-state-hover); }
+
+  span {
+    border-color: var(--ui-border-subtle);
+
+    &:hover { background: var(--ui-state-hover); }
+
+    &.arrowUp::after { border-block-end-color: var(--ui-text-muted); }
+    &.arrowDown::after { border-block-start-color: var(--ui-text-muted); }
+  }
+}

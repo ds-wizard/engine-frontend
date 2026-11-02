@@ -1,0 +1,181 @@
+// CodeMirror, wearing the system's roles.
+//
+// Everything here is scoped to .ui-code-editor so it outweighs CodeMirror's own
+// base theme, which is injected into the head as generated two-class rules.
+// Ours arrives later in the document, so equal specificity is enough — but only
+// equal, not less.
+//
+// The class is not .ui-code: that belongs to inline code, and for a while both
+// had it — so a few words of code in a sentence were given the editor's border,
+// its radius and its overflow, with no padding inside any of them.
+
+ui-code-editor {
+  display: block;
+}
+
+.ui-code-editor {
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  overflow: hidden;
+
+  transition: var(--ui-transition-state);
+
+  &.is-invalid {
+    border-color: var(--ui-danger-border);
+  }
+}
+
+.ui-code-editor .cm-editor {
+  background: transparent;
+  color: var(--ui-text);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-code);
+}
+
+// The ring goes round the whole control, not round the text.
+//
+// CodeMirror puts the focus on its content element, which sits beside the
+// gutter inside the scroller — so the reset's :focus-visible ring drew a box
+// around the text and left the line numbers outside it, which reads as a
+// mistake rather than as focus. The gutter is part of the editor; the editor is
+// what is focused.
+//
+// WCAG 2.4.7 ring moved: to .ui-code-editor, one element out. Nothing is removed —
+// the two inner rings would otherwise be drawn inside the one below.
+.ui-code-editor .cm-content:focus-visible,
+.ui-code-editor .cm-editor.cm-focused {
+  outline: none;
+}
+
+.ui-code-editor:focus-within {
+  outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-ring-offset);
+
+  // As the reset does: a ring drawn outside the box would otherwise be painted
+  // over by whatever comes next.
+  position: relative;
+  z-index: 1;
+}
+
+.ui-code-editor .cm-scroller {
+  line-height: var(--ui-leading-normal);
+  max-block-size: 25rem;
+}
+
+.ui-code-editor .cm-content {
+  padding-block: var(--ui-space-3);
+  caret-color: var(--ui-text);
+}
+
+.ui-code-editor .cm-gutters {
+  border-inline-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-subtle);
+}
+
+.ui-code-editor .cm-activeLine {
+  background: var(--ui-state-hover);
+}
+
+.ui-code-editor .cm-activeLineGutter {
+  background: var(--ui-state-hover);
+  color: var(--ui-text);
+}
+
+.ui-code-editor .cm-cursor,
+.ui-code-editor .cm-dropCursor {
+  border-inline-start-color: var(--ui-text);
+}
+
+.ui-code-editor .cm-selectionBackground,
+.ui-code-editor .cm-content ::selection,
+.ui-code-editor.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
+  background: var(--ui-brand-subtle);
+}
+
+.ui-code-editor .cm-matchingBracket,
+.ui-code-editor .cm-nonmatchingBracket {
+  background: var(--ui-brand-subtle);
+  color: var(--ui-link);
+}
+
+// The search panel and the completion popup are part of the editor and are
+// styled by nothing else.
+.ui-code-editor .cm-panels {
+  border-color: var(--ui-border-subtle);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text);
+}
+
+.ui-code-editor .cm-panel input,
+.ui-code-editor .cm-panel button {
+  font: inherit;
+}
+
+.cm-tooltip {
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+  color: var(--ui-text);
+}
+
+.cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
+  background: var(--ui-brand-subtle);
+  color: var(--ui-link);
+}
+
+// Read-only code is content, not a control, and the system already has a way of
+// saying that: a control sits on the page's ground behind a control border,
+// while something you can only read sits in a well behind a hairline. Left
+// alone the two are identical, which invites clicking into one and waiting for
+// a cursor.
+//
+// It keeps the focus ring and the line numbers: it can still be entered,
+// selected and copied from, which is the difference between showing code and
+// showing a picture of it.
+.ui-code-editor--static,
+.ui-code-editor.is-disabled {
+  border-color: var(--ui-border-subtle);
+  background: var(--ui-surface-sunken);
+}
+
+// The gutter's own tint would be a second well inside the first.
+.ui-code-editor--static .cm-gutters,
+.ui-code-editor.is-disabled .cm-gutters {
+  background: transparent;
+}
+
+// No active line: nothing is being written, so there is no line being written
+// on — and a highlight that follows the cursor around reads as an invitation.
+.ui-code-editor--static .cm-activeLine,
+.ui-code-editor--static .cm-activeLineGutter,
+.ui-code-editor.is-disabled .cm-activeLine,
+.ui-code-editor.is-disabled .cm-activeLineGutter {
+  background: transparent;
+}
+
+// A caret in something that cannot be typed into is the most direct way to
+// promise editing that will not happen. The selection still shows, which is
+// what the keyboard needs for copying.
+.ui-code-editor--static .cm-cursor,
+.ui-code-editor.is-disabled .cm-cursor {
+  display: none;
+}
+
+// SYNTAX
+//
+// Named by what they are, not by what they look like. The highlight style in
+// code-editor.js hands out these classes; the values are roles, so dark mode
+// needs no second theme and Ui.Theme.Check verifies all five on both of the
+// grounds code sits on.
+.ui-syntax-comment {
+  color: var(--ui-syntax-comment);
+  font-style: italic;
+}
+
+.ui-syntax-keyword { color: var(--ui-syntax-keyword); }
+.ui-syntax-string { color: var(--ui-syntax-string); }
+.ui-syntax-number { color: var(--ui-syntax-number); }
+.ui-syntax-name { color: var(--ui-syntax-name); }

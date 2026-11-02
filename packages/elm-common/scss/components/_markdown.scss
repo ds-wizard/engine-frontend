@@ -1,0 +1,5 @@
+// A link in a sentence of markdown (`Common.Components.Markdown.inline`): a
+// text link wherever the sentence is put, with the hover of any other.
+.c-markdown-link {
+  @include ui-text-link;
+}

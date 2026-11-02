@@ -1,0 +1,337 @@
+// SEPARATOR
+
+.ui-separator {
+  border: 0;
+  margin: 0;
+}
+
+// A rule across a page carries room of its own, on top of whatever gap the
+// column it sits in gives it: a line with the same space around it as the
+// things it parts reads as one more of them.
+hr.ui-separator {
+  block-size: 1px;
+  margin-block: var(--ui-space-5);
+  background: var(--ui-border-subtle);
+}
+
+// A rule with something written in it. The lines are pseudo-elements so the
+// label can sit between them without being wrapped in anything.
+.ui-separator--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-4);
+
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1 1 0;
+    block-size: 1px;
+    background: var(--ui-border-subtle);
+  }
+}
+
+.ui-separator--vertical {
+  display: inline-block;
+  inline-size: 1px;
+  block-size: 1em;
+  background: var(--ui-border-subtle);
+}
+
+// AVATAR GROUP
+//
+// Overlapping, because the row is one thing — how many people, roughly who —
+// rather than a list to read across. Each face keeps a ring in the page's own
+// ground so the overlap reads as depth rather than as a smudge.
+.ui-avatars {
+  display: flex;
+  align-items: center;
+  list-style: none;
+}
+
+.ui-avatars__item {
+  display: inline-flex;
+
+  & + & {
+    margin-inline-start: calc(var(--ui-space-3) * -1);
+  }
+
+  // Later faces sit on top, which is the order they are read in.
+  &:hover,
+  &:focus-within {
+    z-index: 1;
+  }
+}
+
+// The ring that separates overlapping faces goes on the face, not on everything
+// in the tooltip wrapper: the tooltip's bubble is a child there too, and it took
+// the ring as a white border.
+.ui-avatars__item .ui-item-icon,
+.ui-avatars__more {
+  box-shadow: 0 0 0 2px var(--ui-surface);
+  border-radius: var(--ui-radius-pill);
+}
+
+.ui-avatars__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+}
+
+// PROGRESS
+//
+// A track and a fill, and the value is on the element rather than implied by the
+// width — a filled box is not something a screen reader reads.
+.ui-progress {
+  inline-size: 100%;
+  block-size: 0.5rem;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface-sunken);
+  overflow: hidden;
+}
+
+.ui-progress__fill {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--ui-radius-pill);
+
+  // Width is a layout property and does not animate (§6). A bar that jumps to
+  // its new value is honest about being a number that changed.
+  transition: var(--ui-transition-state);
+}
+
+.ui-progress__fill.is-brand { background: var(--ui-brand-strong); }
+.ui-progress__fill.is-success { background: var(--ui-success-base); }
+.ui-progress__fill.is-warning { background: var(--ui-warning-base); }
+.ui-progress__fill.is-danger { background: var(--ui-danger-base); }
+
+// Colored by how full it is, on the value scale (Ui.ValueScale). The edge is
+// what separates a light fill from the light track at 3:1; it is inset, so it
+// adds nothing to the width and an empty bar draws nothing at all, and it is
+// transparent in dark mode, where every step clears 3:1 by itself.
+.ui-progress__fill.is-value {
+  background: var(--ui-value-tone, var(--ui-value-50));
+  box-shadow: inset 0 0 0 1px var(--ui-value-edge);
+}
+
+// With its figure on it (toHtmlWithFigure), as a table's cell has it: taller,
+// the figure centered over the track, and the fill a pale tint of its tone —
+// mixed into the surface, so it is pale on the light theme and dark on the dark
+// one — which the figure reads on in the text's own color either way.
+.ui-progress--figure {
+  position: relative;
+  block-size: auto;
+
+  .ui-progress__fill {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    border-radius: 0;
+  }
+
+  .ui-progress__fill.is-brand { background: color-mix(in oklab, var(--ui-brand-strong) 30%, var(--ui-surface)); }
+  .ui-progress__fill.is-success { background: color-mix(in oklab, var(--ui-success-base) 35%, var(--ui-surface)); }
+  .ui-progress__fill.is-warning { background: color-mix(in oklab, var(--ui-warning-base) 35%, var(--ui-surface)); }
+  .ui-progress__fill.is-danger { background: color-mix(in oklab, var(--ui-danger-base) 35%, var(--ui-surface)); }
+
+  .ui-progress__fill.is-value {
+    background: color-mix(in oklab, var(--ui-value-tone, var(--ui-value-50)) 40%, var(--ui-surface));
+    box-shadow: none;
+  }
+}
+
+.ui-progress__figure {
+  position: relative;
+  display: block;
+  padding-block: var(--ui-space-1);
+  padding-inline: var(--ui-space-3);
+  color: var(--ui-text);
+  font-size: var(--ui-text-label);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--ui-leading-tight);
+  text-align: center;
+  white-space: nowrap;
+}
+
+// COPY
+//
+// The button is quiet until it is wanted. What it will do and what it did are
+// both in its tooltip, where the pointer and the focus already are; the same
+// words are repeated off-screen in a live region, because a tooltip is a
+// description and "Copied" is something to announce.
+.ui-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+.ui-copy--inline {
+  gap: var(--ui-space-3);
+}
+
+.ui-copy__value {
+  padding-block: var(--ui-space-1);
+  padding-inline: var(--ui-space-2);
+
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface-sunken);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-code);
+  overflow-wrap: anywhere;
+}
+
+// "Copy link", as a link reads (`Copy.textButtonWithWords`): the link color
+// and the underline under the words, not under the icon. It stands on its own
+// line rather than in a sentence, so it keeps the hit-target floor.
+//
+// The underline is the label's, not the button's. The button is a flex box,
+// and a decoration set on a flex box reaches every item in it — the icon
+// included, which an inline link's inline-block icon escapes.
+.ui-copy__text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-block-size: var(--ui-hit-min);
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+  color: var(--ui-link);
+  font: inherit;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    color: var(--ui-link-hover);
+  }
+
+  &:focus-visible {
+    border-radius: var(--ui-radius-control);
+  }
+}
+
+.ui-copy__text-button-label {
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.125em;
+
+  .ui-copy__text-button:hover & {
+    text-decoration-thickness: max(2px, 0.125em);
+  }
+}
+
+.ui-copy__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-inline-size: var(--ui-hit-min);
+  min-block-size: var(--ui-hit-min);
+
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+}
+
+// The glimpse of the value inside the button (`Ui.Copy.brief`): a few
+// characters of an identifier, monospaced because that is what it is, and
+// quiet because the button is the thing being offered.
+.ui-copy__button:has(.ui-copy__brief) {
+  gap: var(--ui-space-2);
+  padding-inline: var(--ui-space-2);
+  border-radius: var(--ui-radius-control);
+}
+
+.ui-copy__brief {
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-body-sm);
+}
+
+// A code block with something in its corner.
+.ui-code-block {
+  position: relative;
+}
+
+// A block that fills (`Ui.CodeBlock.fill`): what a column leaves it, never less
+// than 15rem, with the editor as tall as the block and scrolling inside it
+// rather than stopping at the usual height.
+.ui-code-block--fill {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 0;
+  min-block-size: 15rem;
+}
+
+.ui-code-block--fill .ui-code-editor {
+  min-block-size: 0;
+}
+
+.ui-code-block--fill .ui-code-editor .cm-editor {
+  block-size: 100%;
+}
+
+.ui-code-block--fill .ui-code-editor .cm-scroller {
+  max-block-size: none;
+}
+
+.ui-code-block__actions {
+  position: absolute;
+  inset-block-start: var(--ui-space-2);
+  inset-inline-end: var(--ui-space-2);
+
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+// CHART
+//
+// The element draws the picture; the caption names it and the table under it
+// holds the numbers, off the screen and in the accessibility tree.
+.ui-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.ui-chart__canvas {
+  display: block;
+  min-inline-size: 0;
+}
+
+// A radar is as tall as it is wide, so across a full column it would be taller
+// than the screen. Past a comfortable size it stops growing and is centered.
+.ui-chart--radar .ui-chart__canvas {
+  inline-size: 100%;
+  max-inline-size: 28rem;
+  margin-inline: auto;
+}
+
+.ui-chart__caption {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+  text-align: center;
+}

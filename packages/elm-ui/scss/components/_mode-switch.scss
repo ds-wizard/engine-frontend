@@ -1,0 +1,60 @@
+// A switch between two or three ways of looking at the same thing (`Ui.ModeSwitch`):
+// writing a document or reading it, a template or what it renders to.
+//
+// A pill of the surface with the options on it, the chosen one on the brand's
+// lightest tint. It is meant to sit on a recessed bar — a toolbar, the head of
+// an editor — which is what the ground is for: the switch is the one thing up
+// there that is lit rather than quiet.
+//
+// A radio group, not a row of buttons: the options are one choice with two
+// answers, and `aria-checked` is what says which — the tint is never the only
+// signal. Where it sits in its bar is the bar's business, not this block's.
+
+.ui-mode-switch {
+  display: inline-flex;
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-1);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface);
+
+  // On a plain surface the pill's own ground is the surface it stands on, so
+  // it takes the sunken one instead — otherwise there is no pill, only two
+  // words with one of them darker.
+  &--on-surface { background: var(--ui-surface-sunken); }
+}
+
+.ui-mode-switch__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-inline-size: var(--ui-hit-min);
+  min-block-size: var(--ui-hit-min);
+  padding-inline: var(--ui-space-3);
+
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font: inherit;
+  font-size: var(--ui-text-body-sm);
+  font-weight: var(--ui-weight-medium);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover:not(:disabled) {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+
+  &:disabled {
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+
+  &[aria-checked='true'] {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-link);
+  }
+}

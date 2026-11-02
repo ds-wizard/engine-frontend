@@ -1,0 +1,220 @@
+// A table whose rows are a tree (Ui.TreeTable): the first column indents each
+// row by its depth and holds its disclosure.
+
+.ui-tree-table-wrapper {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  overflow-x: auto;
+  padding: var(--ui-focus-clearance);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-surface);
+}
+
+.ui-tree-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--ui-text-body-sm);
+}
+
+.ui-tree-table__th {
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+  border-block-end: 1px solid var(--ui-border-strong);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.ui-tree-table__name,
+.ui-tree-table__td {
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  vertical-align: top;
+  text-align: start;
+  font-weight: var(--ui-weight-regular);
+  transition: var(--ui-transition-state);
+}
+
+.ui-tree-table__td {
+  inline-size: 12rem;
+}
+
+.ui-tree-table__row--top .ui-tree-table__name {
+  font-weight: var(--ui-weight-semibold);
+}
+
+// The depth, as indentation: one step per level, set from Elm.
+.ui-tree-table__name-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-1);
+  padding-inline-start: calc(var(--ui-tree-table-level, 0) * var(--ui-space-5));
+}
+
+.ui-tree-table__toggle,
+.ui-tree-table__spacer {
+  flex: none;
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+}
+
+.ui-tree-table__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--ui-radius-control);
+  background: none;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-state-hover);
+  }
+}
+
+.ui-tree-table__row:hover > * {
+  background: var(--ui-state-hover);
+}
+
+// The row something beside the table is about: a tint, and aria-current.
+.ui-tree-table__row.is-selected > * {
+  background: var(--ui-brand-subtle);
+}
+
+.ui-tree-table__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  block-size: var(--ui-hit-min);
+  color: var(--ui-icon-subtle);
+}
+
+// FILLING A REGION (withFill)
+//
+// The table is the region, and looks as the knowledge model editor's matrices
+// do: ruled cells in the page's own type, the header row and the names' column
+// staying put while the rest scrolls, each marked off by a heavier rule. The
+// names take half the width and the other columns share the rest.
+//
+// The two heavier rules are drawn by the cells rather than as borders: a
+// collapsed border belongs to the table and stays behind when the cell it was
+// drawn on sticks.
+
+.ui-tree-table-wrapper--fill {
+  block-size: 100%;
+  overflow: auto;
+  padding: 0;
+  border-radius: 0;
+
+  .ui-tree-table {
+    table-layout: fixed;
+    min-inline-size: 40rem;
+    font-size: inherit;
+  }
+
+  .ui-tree-table__th,
+  .ui-tree-table__name,
+  .ui-tree-table__td {
+    inline-size: auto;
+    padding-block: var(--ui-space-2);
+    padding-inline: var(--ui-space-3);
+    border: 1px solid var(--ui-border-subtle);
+    vertical-align: middle;
+  }
+
+  .ui-tree-table__th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 2;
+    background: var(--ui-surface);
+    color: var(--ui-text);
+    font-size: inherit;
+    font-weight: var(--ui-weight-regular);
+  }
+
+  .ui-tree-table__th:first-child {
+    inline-size: 50%;
+  }
+
+  .ui-tree-table__th:first-child,
+  .ui-tree-table__name {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    background: var(--ui-surface);
+  }
+
+  // The corner: over the header row and over the names both.
+  .ui-tree-table__th:first-child {
+    z-index: 3;
+  }
+
+  .ui-tree-table__th::before,
+  .ui-tree-table__th:first-child::after,
+  .ui-tree-table__name::after {
+    content: '';
+    position: absolute;
+    // A shade lighter than a control's edge: a rule between parts of one
+    // table, not the outline of something on top of it.
+    background: color-mix(in oklab, var(--ui-border-control) 55%, var(--ui-surface));
+  }
+
+  .ui-tree-table__th::before {
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 2px;
+  }
+
+  .ui-tree-table__th:first-child::after,
+  .ui-tree-table__name::after {
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 2px;
+  }
+
+  // The disclosure, the glyph and the name on one line, the name wrapping
+  // beside them rather than under them; the depth indents all three.
+  .ui-tree-table__name-inner {
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-tree-table__toggle,
+  .ui-tree-table__spacer {
+    inline-size: 1rem;
+    block-size: var(--ui-hit-min);
+  }
+
+  .ui-tree-table__icon {
+    block-size: auto;
+  }
+
+  // The chapters: the groups the rest is in, on the sunken ground and in the
+  // heavier weight, as the matrices' chapter rows are.
+  .ui-tree-table__row--top > * {
+    background: var(--ui-surface-sunken);
+  }
+
+  // Opaque, which the names' column needs: the rows slide under it.
+  .ui-tree-table__row:hover > * {
+    background: var(--ui-brand-subtle);
+  }
+
+  // A chapter is a label rather than a row of numbers: nothing lights it.
+  .ui-tree-table__row--top:hover > * {
+    background: var(--ui-surface-sunken);
+  }
+
+  .ui-tree-table__row.is-selected > * {
+    background: var(--ui-brand-subtle-selected);
+  }
+}

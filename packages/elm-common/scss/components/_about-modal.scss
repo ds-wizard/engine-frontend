@@ -1,0 +1,20 @@
+// The about dialog: one section per component, each a heading over a
+// description list.
+
+.c-about-modal,
+.c-about-modal__sections,
+.c-about-modal__section {
+  display: flex;
+  flex-direction: column;
+}
+
+.c-about-modal { gap: var(--ui-space-5); }
+.c-about-modal__sections { gap: var(--ui-space-6); }
+.c-about-modal__section { gap: var(--ui-space-3); }
+
+.c-about-modal__heading {
+  margin: 0;
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-semibold);
+  line-height: var(--ui-leading-tight);
+}

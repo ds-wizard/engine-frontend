@@ -1,0 +1,20 @@
+// The public frame's brand: the logo and the application's name. Not a link
+// (PublicFrame's docs say why), so it has no hover and no hit target.
+
+.c-public-frame__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  color: var(--ui-text);
+}
+
+.c-public-frame__logo {
+  display: block;
+  block-size: 2rem;
+  inline-size: auto;
+}
+
+.c-public-frame__title {
+  font-size: var(--ui-text-title);
+  font-weight: var(--ui-weight-semibold);
+}

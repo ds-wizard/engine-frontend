@@ -1,0 +1,89 @@
+// One thing from the API as a row (`Common.Components.ItemSummary`): the round
+// icon, then the name, the id and what the thing is. A type-hint draws its
+// suggestions and its chosen value with it, and a page draws a thing that was
+// chosen once and is now only to be read — so what was picked looks like what
+// was offered, and like what is shown afterwards.
+//
+// The icon is beside all three lines and aligned to the first of them, rather
+// than centered against a box whose height depends on how long the description
+// is.
+.c-item-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-4);
+  // A combobox's trigger is a flex row that centers what it holds; this row
+  // governs its own width so a long description wraps inside it rather than
+  // beside it.
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+// The three lines are one thing said three ways — a name, its id, what it is —
+// so they sit as close as the lines of a paragraph rather than as far apart as
+// the fields of a form.
+.c-item-summary__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+}
+
+// The badges' line: a flex column stretches what it holds, so without a row of
+// its own a badge would run the width of the row. The badges after the id keep
+// their size and let the id give way.
+.c-item-summary__code {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+
+  > .ui-badge {
+    flex: none;
+  }
+}
+
+// The id is one word and never wraps mid-word; a long one is cut by the row's
+// own width rather than pushing it open. A flex badge cannot end in an
+// ellipsis, so this one is a block in a box that can shrink.
+.c-item-summary__id {
+  display: flex;
+  min-inline-size: 0;
+
+  .ui-badge {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// The thing a dialog asks about (`EntityCard`): a framed box, set a step
+// further from the question over it than the body's gap, so it reads as the
+// thing the question is about. The name and the lines under it read as one
+// label, so they sit closer than a stack's parts do.
+.c-entity-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  margin-block-start: var(--ui-space-2);
+  padding-block: var(--ui-space-3);
+  padding-inline: var(--ui-space-4);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+}
+
+.c-entity-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+}
+
+// A description can run to paragraphs; the card says which thing this is, so
+// two lines of it are enough.
+.c-entity-card__text > .ui-text--muted {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}

@@ -1,0 +1,60 @@
+// The application frame: what Ui.SideNav leaves to the application — the
+// brand's logo and title, which sit in the navigation's own link styling, and the
+// notice at its foot.
+
+.c-app-frame__logo {
+  display: block;
+  block-size: 1.5rem;
+  inline-size: auto;
+  max-inline-size: 6rem;
+}
+
+.c-app-frame__title {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--ui-text-subtitle);
+  font-weight: var(--ui-weight-semibold);
+}
+
+.c-app-frame__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+}
+
+// Controls that change the frame (a panel toggle), one under another.
+.c-app-frame__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+// The notice needs words to mean anything, and the rail has no room for them.
+// Hidden rather than squeezed: the session dialog is the interrupting half of
+// the same warning and does not depend on the width of the navigation.
+.c-app-frame .ui-side-nav.is-collapsed .c-app-frame__notice {
+  display: none;
+}
+
+@media (max-width: 60rem) {
+  .c-app-frame__notice {
+    display: none;
+  }
+}
+
+// The session notice: the time left and the way to log in again.
+.c-session-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-4);
+
+  border: 1px solid var(--ui-warning-base);
+  border-inline-start-width: var(--ui-space-2);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-warning-subtle);
+  color: var(--ui-warning-on-subtle);
+}

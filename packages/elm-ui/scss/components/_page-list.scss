@@ -1,0 +1,26 @@
+// Listing page — Page.List. The header comes from the default page
+// (`.ui-page__header`); what this adds is the listing below it, whose parts sit
+// closer to each other than the page's sections do, because the toolbar, the
+// rows and the pagination are one thing.
+
+.ui-page-list__listing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+}
+
+.ui-page-list__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+}
+
+// The main heading takes programmatic focus on a route change (tabindex -1).
+// :focus-visible paints the ring when that follows a keyboard action; after a
+// click it stays quiet, as everywhere else.
+.ui-page-list__title {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,542 @@
+// Detail page: the header stays put and only the body scrolls. Losing the title
+// and the actions on the way down a long page is worse than the space they cost,
+// which is why the existing .detail is full-height and flush too.
+//
+// `--ui-page-gutter` is the page's inline margin — the header's, the tabs', the
+// body's, the footer's — and what a flush tab inside lines its own regions up
+// with (`Ui.Page.Workspace`), so the title, the tabs, a toolbar and the content
+// below all start on one edge.
+.ui-detail {
+  --ui-page-gutter: var(--ui-space-6);
+
+  display: grid;
+  // A row for the header, a row for everything under it and a row for the
+  // footer, and a column for the side panel when there is one. Placed
+  // explicitly below, because an absent optional region must not move the ones
+  // that remain — with no footer its row is empty and takes no height.
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.ui-detail__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+
+  grid-row: 1;
+  grid-column: 1 / -1;
+  padding: var(--ui-space-5) var(--ui-page-gutter) 0;
+  // Part of the page, not something on top of it — but opaque, because the
+  // content scrolls under it.
+  background: var(--ui-surface);
+  border-block-end: 1px solid var(--ui-border-subtle);
+}
+
+// The title's line: the title with its badges, the buttons, then the menu. A
+// grid with a named column per slot, so a page without buttons or without a
+// menu has no empty track. The title takes what is left and wraps inside its
+// own column rather than pushing the rest onto another line.
+.ui-detail__heading {
+  display: grid;
+  grid-template-columns: [title] minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--ui-space-3);
+  row-gap: var(--ui-space-3);
+}
+
+.ui-detail__heading:has(> .ui-detail__actions) {
+  grid-template-columns: [title] minmax(0, 1fr) [actions] auto;
+}
+
+.ui-detail__heading:has(> .ui-detail__menu) {
+  grid-template-columns: [title] minmax(0, 1fr) [menu] auto;
+}
+
+.ui-detail__heading:has(> .ui-detail__actions):has(> .ui-detail__menu) {
+  grid-template-columns: [title] minmax(0, 1fr) [actions] auto [menu] auto;
+}
+
+.ui-detail__title {
+  grid-row: 1;
+  grid-column: title;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.ui-detail__actions {
+  grid-row: 1;
+  grid-column: actions;
+  // Further from the title than from the menu beside it.
+  margin-inline-start: var(--ui-space-3);
+}
+
+.ui-detail__menu {
+  grid-row: 1;
+  grid-column: menu;
+}
+
+// With no buttons after it (`Detail.withActionsLeading` alone — the people in a
+// project someone opened by its link, who has no Share to press), the leading
+// content ends at the page's edge, and a tooltip centered under its last face
+// would run off the screen. So its tooltips open below and towards the start,
+// aligned to the face's end edge.
+.ui-detail__actions:not(:has(.ui-button)) .ui-tooltip__bubble {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  translate: none;
+  text-align: start;
+}
+
+// Tabs in the header own the line under it. Left to themselves they draw their
+// own inside the header's padding, which leaves two rules a few pixels apart
+// with a visible step where one stops — so they stretch to the header's edges
+// and the header gives its own up.
+.ui-detail__header:has(.ui-tabs) {
+  border-block-end: none;
+}
+
+// Without tabs there is nothing to fill the space under the title, so the
+// header takes it back: a title and its actions sitting straight on the rule
+// below them read as cut off rather than as a header.
+.ui-detail__header:not(:has(.ui-tabs)) {
+  padding-block-end: var(--ui-space-5);
+}
+
+.ui-detail__header .ui-tabs {
+  margin-inline: calc(var(--ui-page-gutter) * -1);
+  padding-inline: var(--ui-page-gutter);
+}
+
+// Not a box while the regions sit side by side: its children are grid items of
+// .ui-detail, each with its own scrolling. A plain div, so `contents` costs it no
+// role — which is the case where display: contents is safe.
+.ui-detail__scroll {
+  display: contents;
+}
+
+.ui-detail__body {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  grid-row: 2;
+  grid-column: 1;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+  padding: var(--ui-space-7) var(--ui-page-gutter);
+}
+
+.ui-detail__inner {
+  min-block-size: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ui-space-7);
+  inline-size: 100%;
+  max-inline-size: 64rem;
+  margin-inline: auto;
+}
+
+.ui-detail__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
+  min-inline-size: 0;
+}
+
+// Flush content (`Ui.Page.Detail.withFlushContent`): one surface, edge to edge,
+// between the line under the tabs and the bottom of the viewport. No padding,
+// no measure and no scrolling of the body's own — the surface scrolls itself,
+// and a body that scrolled too would be a second scrollbar beside it.
+//
+// Every level between the body and the surface is a single row of the whole
+// height, so the height reaches the surface without a percentage anywhere. In
+// the content the first row takes it and any later ones — an alert beside the
+// surface — size to what they hold. `stretch` is said rather than left to
+// `normal`, which for a replaced element such as an iframe means `start`, and
+// the frame would keep its default 150px.
+//
+// `clip`, not `hidden`: a box with `overflow: hidden` is still a scroll
+// container, and focusing something inside the surface, or scrolling it into
+// view, scrolls it — the surface slides up under the tabs and leaves an empty
+// band below. A clipped box cannot be scrolled at all.
+.ui-detail__body--flush {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: clip;
+  padding: 0;
+}
+
+.ui-detail__body--flush > .ui-detail__inner {
+  grid-template-rows: minmax(0, 1fr);
+  min-block-size: 0;
+  max-inline-size: none;
+}
+
+.ui-detail__body--flush .ui-detail__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-auto-rows: auto;
+  gap: 0;
+  min-block-size: 0;
+}
+
+.ui-detail__body--flush .ui-detail__content > * {
+  place-self: stretch;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+// Filled content (`Ui.Page.Detail.withFillContent`): padded as always, but with
+// no measure, and as tall as the body — each level a single row of its whole
+// height, as for flush content. The content is a column, in which a filling
+// code block, or the stack holding one, takes what the rest leaves. The body
+// keeps its scrolling for a window too short for the block's least height.
+.ui-detail__body--fill {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.ui-detail__body--fill > .ui-detail__inner {
+  grid-template-rows: minmax(0, 1fr);
+  min-block-size: 0;
+  max-inline-size: none;
+}
+
+.ui-detail__body--fill .ui-stack:has(> .ui-code-block--fill) {
+  flex: 1 1 0;
+}
+
+// Beside the content, not inside it: its own ground, its own scrolling, and its
+// own width. The change of surface is what says it is about the thing rather
+// than part of it — sharing the content's ground made it read as more page.
+.ui-detail__side {
+  position: relative;
+  // Down to the bottom edge, beside the footer as well as the body: the footer
+  // belongs to the content, and a panel stopping short of it would leave a
+  // notch of nothing under the panel.
+  grid-row: 2 / -1;
+  grid-column: 2;
+
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+
+  inline-size: var(--ui-detail-side-width, 20rem);
+  min-block-size: 0;
+  min-inline-size: 0;
+
+  background: var(--ui-frame);
+}
+
+.ui-detail__side-scroll {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+  padding: var(--ui-space-6);
+}
+
+// The footer (`Ui.Page.Detail.withFooter`) is SplitNav's: below the scroll
+// region, so whatever it holds is at the bottom of the screen without being
+// positioned there, and under the content's column only, so it never covers the
+// panel. No surface of its own: it is a band for something to float in, and an
+// empty one takes up no room rather than leaving a gap along the bottom.
+//
+// It does take the body's inline padding, so that what floats here lines up
+// with the content above it — without that, a narrow window puts the content
+// inside its padding and the unsaved bar hard against both edges.
+.ui-detail__footer {
+  grid-row: 3;
+  grid-column: 1;
+  min-inline-size: 0;
+  padding-inline: var(--ui-page-gutter);
+}
+
+// A plain list in a section — "Other versions" — keeps its bullets, and the
+// reset's zero padding would hang them outside the card's text. Indented by the
+// marker's width, so the bullets line up with the edge the heading and the rest
+// of the section start at. Lists with a class of their own (Ui.ListItem) have no
+// markers and are left alone.
+.ui-detail__side .ui-card :where(ul, ol):not([class]) {
+  padding-inline-start: var(--ui-space-5);
+}
+
+// Below the split the panel follows the content, and the two scroll as one under
+// a header that stays put.
+//
+// Stacked, the regions cannot each keep their own scrolling: the panel takes the
+// height its facts need and the content is left a strip. So the wrapper round
+// them becomes the scroll container — all of the content, then the panel — and
+// the header, with the title, the actions and the tabs, keeps its row above it.
+//
+// A container query on the page region rather than a media query on the window:
+// the same window leaves the page different widths with the navigation expanded
+// and collapsed, and it is the page's width that decides whether the panel fits.
+@container ui-main (max-width: 48rem) {
+  // The footer keeps its row under the scroll wrapper, so the bar stays on the
+  // bottom edge while the content and then the panel scroll above it.
+  .ui-detail {
+    --ui-page-gutter: var(--ui-space-5);
+
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  // The menu keeps the end of the title's line, where it is on a wide page;
+  // the buttons, which need the room, take a line of their own under the title.
+  // Visually the menu now comes before the buttons, the one departure from DOM
+  // order — focus still reaches the buttons first, then the menu.
+  .ui-detail__heading:has(> .ui-detail__actions) {
+    grid-template-columns: [title] minmax(0, 1fr);
+  }
+
+  .ui-detail__heading:has(> .ui-detail__actions):has(> .ui-detail__menu) {
+    grid-template-columns: [title] minmax(0, 1fr) [menu] auto;
+  }
+
+  .ui-detail__actions {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    margin-inline-start: 0;
+  }
+
+  // The tabs stretch to the header's edges, which have just moved in.
+
+
+  .ui-detail__scroll {
+    position: relative;
+    display: block;
+    grid-row: 2;
+    grid-column: 1;
+    min-block-size: 0;
+    overflow-y: auto;
+  }
+
+  .ui-detail__body {
+    overflow: visible;
+    padding: var(--ui-space-5);
+  }
+
+  // Flush content stays flush when stacked, and as tall as the region the
+  // wrapper scrolls: with no panel there is nothing to scroll, and with one the
+  // panel is below the surface, reached the way it always is.
+  .ui-detail__body--flush {
+    block-size: 100%;
+    overflow: clip;
+    padding: 0;
+  }
+
+  // Filled content too, so the block has a height to fill; what does not fit
+  // scrolls with the panel under it.
+  .ui-detail__body--fill {
+    block-size: 100%;
+  }
+
+  .ui-detail__side {
+    display: block;
+    inline-size: auto;
+
+    // Stacked, the panel's start edge meets the navigation, and both are on the
+    // frame's ground, so the two ran together into one gray block. A band of the
+    // content's own surface keeps them apart — the ground above, carried down
+    // the seam, so it reads as the content continuing rather than as a new edge.
+    // A gray rule was tried and drew exactly that edge. The surface is only
+    // 1.08:1 against the frame, which is why the band is wide rather than a
+    // hairline.
+    border-inline-start: var(--ui-space-2) solid var(--ui-surface);
+  }
+
+  .ui-detail__side-scroll {
+    overflow: visible;
+    padding: var(--ui-space-5);
+  }
+
+
+
+  // Nothing to drag when the panel is a band across the page.
+  .ui-detail__side .ui-resizer {
+    display: none;
+  }
+}
+
+.ui-public {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  padding: var(--ui-space-7) var(--ui-space-5);
+  // The one page with no frame, so the frame's ground is what it sits on —
+  // otherwise the white panel would float on white.
+  background: var(--ui-frame);
+}
+
+.ui-public__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-4);
+}
+
+// REGION (`Ui.Page.Public.region`): the header a bar across the top and the rest
+// of the window a region the page fills — `.ui-shell__main` without the shell.
+// The window never scrolls; the page inside does, where it wants to.
+.ui-public--region {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  block-size: 100vh;
+  min-block-size: 0;
+  padding: 0;
+  overflow: clip;
+
+  .ui-public__header {
+    padding: var(--ui-space-3) var(--ui-space-6);
+    border-block-end: 1px solid var(--ui-border-subtle);
+  }
+}
+
+.ui-public__region {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-block-size: 0;
+  min-inline-size: 0;
+  background: var(--ui-surface);
+  // The templates stack by the room they have, as in the shell.
+  container: ui-main / inline-size;
+
+  &:focus-visible {
+    outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+    outline-offset: calc(var(--ui-focus-ring-offset) * -1);
+  }
+}
+
+// Only links, no brand: the panel keeps the brand centered above it, and the
+// links sit at the end of the row where a header's links are expected.
+.ui-public__header--end {
+  justify-content: flex-end;
+}
+
+.ui-public__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// main grows so the panel inside it can still center itself on the page with
+// `margin: auto`, as it did when main was the whole page.
+.ui-public__main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  // The introduction goes beside the panel by the page's width, not the
+  // window's, like the other templates.
+  container: ui-public / inline-size;
+}
+
+// A page with its own template: the width of a page rather than of a form.
+.ui-public__content {
+  inline-size: 100%;
+  max-inline-size: 72rem;
+  margin-inline: auto;
+  padding-block-start: var(--ui-space-6);
+}
+
+.ui-public__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-6);
+  margin: auto;
+  inline-size: 100%;
+  max-inline-size: 26rem;
+}
+
+// With an introduction: brand, introduction, panel and aside in one column when
+// narrow — the document's order — and the introduction in a column of its own
+// beside the other three when there is room. The panel keeps the width it has
+// without one.
+.ui-public__inner--intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'brand'
+    'intro'
+    'panel'
+    'aside';
+  justify-items: center;
+  max-inline-size: 26rem;
+
+  > .ui-public__brand { grid-area: brand; }
+  > .ui-public__panel { grid-area: panel; }
+  > .ui-public__aside { grid-area: aside; }
+}
+
+.ui-public__intro {
+  grid-area: intro;
+  inline-size: 100%;
+}
+
+@container ui-public (min-width: 56rem) {
+  .ui-public__inner--intro {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      'intro brand'
+      'intro panel'
+      'intro aside';
+    column-gap: var(--ui-space-8);
+    align-items: start;
+    max-inline-size: 72rem;
+  }
+
+  .ui-public__intro {
+    align-self: center;
+  }
+}
+
+// The application's name is a title: it takes the display face, like the
+// panel's heading under it.
+.ui-public__brand {
+  display: flex;
+  justify-content: center;
+  font-family: var(--ui-font-display);
+}
+
+.ui-public__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+
+  inline-size: 100%;
+  padding: var(--ui-space-7);
+
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-large);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+}
+
+.ui-public__aside {
+  inline-size: 100%;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+  text-align: center;
+}
+
+.ui-public__footer {
+  margin-block-start: var(--ui-space-6);
+  text-align: center;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+}

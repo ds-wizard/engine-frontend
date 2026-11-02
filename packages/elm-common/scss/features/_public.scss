@@ -1,0 +1,10 @@
+// Public pages: log in, sign up and the rest of what is seen before signing in.
+
+// The sign-up form's honeypot: a checkbox a person never sees and a bot fills
+// in. Off-screen rather than `display: none`, which a bot can read as a sign
+// to skip it. It is also out of the tab order and hidden from assistive
+// technology in the markup.
+.c-public-honeypot {
+  position: absolute;
+  inset-inline-start: -10000px;
+}

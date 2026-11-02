@@ -1,0 +1,88 @@
+// Reset — the only place that styles bare elements.
+
+@layer reset, vendor, ui, app;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  // Explicit, so the page never borrows a host background.
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font-family: var(--ui-font-ui);
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-normal);
+}
+
+h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd {
+  margin: 0;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  display: block;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+// Focus — one treatment, everywhere, built on outline rather than box-shadow.
+// box-shadow is dropped in forced-colors mode; outline is preserved.
+:focus-visible {
+  outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-ring-offset);
+
+  // The ring is drawn outside the element, so a later sibling's background
+  // paints over the part that overlaps it — most visibly in a list where the
+  // rows touch. Lifting the focused element fixes it everywhere at once.
+  position: relative;
+  z-index: 1;
+}
+
+// System-moved focus always paints. :focus-visible keys off the last input
+// modality, so focus we move ourselves after a mouse click would otherwise
+// be silent. Ui.Focus applies this class and clears it on next interaction.
+.ui-focus-forced {
+  outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-ring-offset);
+  position: relative;
+  z-index: 1;
+}
+
+// The focused element must not hide under the sticky header (WCAG 2.4.11).
+:where(a, button, input, select, textarea, summary, [tabindex]) {
+  scroll-margin: var(--ui-space-6);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+// Reduced motion — one global rule, so no component author has to remember it.
+// 1ms rather than 0 so transitionend handlers still fire and nothing that
+// sequences off a transition breaks silently.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

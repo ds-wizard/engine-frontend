@@ -1,0 +1,18 @@
+// Icons are decorative by default; Ui.Icon emits aria-hidden unless labeled.
+.ui-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1em;
+  block-size: 1em;
+  flex-shrink: 0;
+}
+
+.ui-spinner {
+  display: inline-block;
+  animation: ui-spin 1s linear infinite;
+}
+
+@keyframes ui-spin {
+  to { transform: rotate(360deg); }
+}

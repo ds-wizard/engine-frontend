@@ -1,0 +1,9 @@
+// Dashboard — the call-to-action widgets (`Common.Pages.Dashboard.Widgets.CallToAction`).
+
+// The text takes the widget's spare height, so the links of two widgets side by
+// side sit on the same line whatever the length of their text.
+.c-dashboard-cta__text {
+  flex-grow: 1;
+  min-inline-size: 0;
+}
+

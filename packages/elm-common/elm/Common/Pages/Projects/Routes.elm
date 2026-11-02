@@ -1,0 +1,232 @@
+module Common.Pages.Projects.Routes exposing
+    ( Route(..)
+    , indexRouteIsTemplateFilterId
+    , indexRouteKnowledgeModelPackagesFilterId
+    , indexRouteProjectTagsFilterId
+    , indexRouteUserGroupsFilterId
+    , indexRouteUsersFilterId
+    , isAllowed
+    , parsers
+    , toUrl
+    )
+
+import Common.Data.Feature as Feature exposing (AppStateLike)
+import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator exposing (FilterOperator)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Pages.Projects.Detail.Routes as ProjectDetailRoute exposing (ProjectDetailRoute)
+import Common.Utils.UrlUtils exposing (queryParamsToString)
+import Flip exposing (flip)
+import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
+import Url.Parser.Extensions exposing (uuid)
+import Url.Parser.Query as Query
+import Url.Parser.Query.Extensions as Query
+import Uuid exposing (Uuid)
+
+
+type Route
+    = CreateRoute (Maybe Uuid) (Maybe Uuid)
+    | CreateMigrationRoute Uuid
+    | DetailRoute Uuid ProjectDetailRoute
+    | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator)
+    | ImportRoute Uuid String
+    | DocumentDownloadRoute Uuid Uuid
+    | FileDownloadRoute Uuid Uuid
+
+
+indexRouteUsersFilterId : String
+indexRouteUsersFilterId =
+    "userUuids"
+
+
+indexRouteUserGroupsFilterId : String
+indexRouteUserGroupsFilterId =
+    "userGroupUuids"
+
+
+indexRouteIsTemplateFilterId : String
+indexRouteIsTemplateFilterId =
+    "isTemplate"
+
+
+indexRouteProjectTagsFilterId : String
+indexRouteProjectTagsFilterId =
+    "projectTags"
+
+
+indexRouteKnowledgeModelPackagesFilterId : String
+indexRouteKnowledgeModelPackagesFilterId =
+    "knowledgeModelPackages"
+
+
+moduleRoot : String
+moduleRoot =
+    "projects"
+
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    let
+        -- Project documents
+        newDocumentRoute projectUuid mbEventUuid =
+            wrapRoute <| DetailRoute projectUuid <| ProjectDetailRoute.NewDocument mbEventUuid
+
+        -- Project create
+        projectCreateRoute selectedProjectTemplate selectedKnowledgeModel =
+            wrapRoute (CreateRoute selectedProjectTemplate selectedKnowledgeModel)
+
+        -- Project index
+        wrappedIndexRoute pqs mbTemplate mbUser mbUserOp mbUserGroups mbUserGroupsOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp =
+            wrapRoute <| IndexRoute pqs mbTemplate mbUser mbUserOp mbUserGroups mbUserGroupsOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp
+
+        indexRouteParser =
+            PaginationQueryString.parser9 (s moduleRoot)
+                (Query.string indexRouteIsTemplateFilterId)
+                (Query.string indexRouteUsersFilterId)
+                (FilterOperator.queryParser indexRouteUsersFilterId)
+                (Query.string indexRouteUserGroupsFilterId)
+                (FilterOperator.queryParser indexRouteUserGroupsFilterId)
+                (Query.string indexRouteProjectTagsFilterId)
+                (FilterOperator.queryParser indexRouteProjectTagsFilterId)
+                (Query.string indexRouteKnowledgeModelPackagesFilterId)
+                (FilterOperator.queryParser indexRouteKnowledgeModelPackagesFilterId)
+
+        projectDetailQuestionnaire projectUuid mbQuestionPath mbCommentThreadUuid =
+            wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid)
+
+        projectImportRoute uuid importerUrl =
+            wrapRoute <| ImportRoute uuid importerUrl
+
+        documentDownloadRoute projectUuid documentUuid =
+            wrapRoute <| DocumentDownloadRoute projectUuid documentUuid
+
+        fileDownloadRoute projectUuid documentUuid =
+            wrapRoute <| FileDownloadRoute projectUuid documentUuid
+
+        projectTabPluginRoute projectUuid pluginTabId =
+            wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Plugin pluginTabId)
+    in
+    [ map projectCreateRoute (s moduleRoot </> s "create" <?> Query.uuid "selectedProjectTemplate" <?> Query.uuid "selectedKnowledgeModel")
+    , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s "create-migration" </> uuid)
+    , map projectDetailQuestionnaire (s moduleRoot </> uuid <?> Query.string "questionPath" <?> Query.uuid "commentThreadUuid")
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
+    , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
+    , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.uuid "eventUuid")
+    , map (detailFilesRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "files"))
+    , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
+    , map (PaginationQueryString.wrapRoute9 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
+    , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
+    , map documentDownloadRoute (s moduleRoot </> uuid </> s "documents" </> uuid </> s "download")
+    , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
+    , map projectTabPluginRoute (s moduleRoot </> uuid </> s "plugin" </> string)
+    ]
+
+
+detailDocumentsRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
+detailDocumentsRoute wrapRoute projectUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute projectUuid << ProjectDetailRoute.Documents) (Just "createdAt,desc")
+
+
+detailFilesRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
+detailFilesRoute wrapRoute projectUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute projectUuid << ProjectDetailRoute.Files) (Just "createdAt,desc")
+
+
+toUrl : Route -> List String
+toUrl route =
+    case route of
+        CreateRoute selectedProjectTemplate selectedKnowledgeModel ->
+            let
+                queryString =
+                    queryParamsToString
+                        [ ( "selectedProjectTemplate", Maybe.map Uuid.toString selectedProjectTemplate )
+                        , ( "selectedKnowledgeModel", Maybe.map Uuid.toString selectedKnowledgeModel )
+                        ]
+            in
+            [ moduleRoot, "create" ++ queryString ]
+
+        CreateMigrationRoute uuid ->
+            [ moduleRoot, "create-migration", Uuid.toString uuid ]
+
+        DetailRoute uuid subroute ->
+            case subroute of
+                ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid ->
+                    let
+                        queryString =
+                            queryParamsToString
+                                [ ( "questionPath", mbQuestionPath )
+                                , ( "commentThreadUuid", Maybe.map Uuid.toString mbCommentThreadUuid )
+                                ]
+                    in
+                    [ moduleRoot, Uuid.toString uuid ++ queryString ]
+
+                ProjectDetailRoute.Preview ->
+                    [ moduleRoot, Uuid.toString uuid, "preview" ]
+
+                ProjectDetailRoute.Metrics ->
+                    [ moduleRoot, Uuid.toString uuid, "metrics" ]
+
+                ProjectDetailRoute.Documents paginationQueryString ->
+                    [ moduleRoot, Uuid.toString uuid, "documents" ++ PaginationQueryString.toUrl paginationQueryString ]
+
+                ProjectDetailRoute.NewDocument mbEventUuid ->
+                    case mbEventUuid of
+                        Just eventUuid ->
+                            [ moduleRoot, Uuid.toString uuid, "documents", "new", "?eventUuid=" ++ Uuid.toString eventUuid ]
+
+                        Nothing ->
+                            [ moduleRoot, Uuid.toString uuid, "documents", "new" ]
+
+                ProjectDetailRoute.Files paginationQueryString ->
+                    [ moduleRoot, Uuid.toString uuid, "files" ++ PaginationQueryString.toUrl paginationQueryString ]
+
+                ProjectDetailRoute.Settings ->
+                    [ moduleRoot, Uuid.toString uuid, "settings" ]
+
+                ProjectDetailRoute.Plugin pluginTabId ->
+                    [ moduleRoot, Uuid.toString uuid, "plugin", pluginTabId ]
+
+        IndexRoute paginationQueryString mbIsTemplate mbUserUuid mbUserOp mbUserGroupUuid mbUserGroupOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
+            let
+                params =
+                    PaginationQueryString.filterParams
+                        [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
+                        , ( indexRouteUsersFilterId, mbUserUuid )
+                        , FilterOperator.toUrlParam indexRouteUsersFilterId mbUserOp
+                        , ( indexRouteUserGroupsFilterId, mbUserGroupUuid )
+                        , FilterOperator.toUrlParam indexRouteUserGroupsFilterId mbUserGroupOp
+                        , ( indexRouteProjectTagsFilterId, mbProjectTags )
+                        , FilterOperator.toUrlParam indexRouteProjectTagsFilterId mbProjectTagsOp
+                        , ( indexRouteKnowledgeModelPackagesFilterId, mbPackages )
+                        , FilterOperator.toUrlParam indexRouteKnowledgeModelPackagesFilterId mbPackagesOp
+                        ]
+            in
+            [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]
+
+        ImportRoute uuid importerUrl ->
+            [ moduleRoot, "import", Uuid.toString uuid, importerUrl ]
+
+        DocumentDownloadRoute projectUuid documentUuid ->
+            [ moduleRoot, Uuid.toString projectUuid, "documents", Uuid.toString documentUuid, "download" ]
+
+        FileDownloadRoute projectUuid documentUuid ->
+            [ moduleRoot, Uuid.toString projectUuid, "files", Uuid.toString documentUuid, "download" ]
+
+
+isAllowed : Route -> AppStateLike a -> Bool
+isAllowed route appState =
+    case route of
+        CreateRoute _ _ ->
+            Feature.projectsCreate appState
+
+        DetailRoute _ _ ->
+            True
+
+        DocumentDownloadRoute _ _ ->
+            True
+
+        FileDownloadRoute _ _ ->
+            True
+
+        _ ->
+            Feature.projectsView appState

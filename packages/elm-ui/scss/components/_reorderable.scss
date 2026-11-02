@@ -1,0 +1,90 @@
+// A list whose order is part of what it means (`Ui.ReorderableList`).
+//
+// The row's own content takes the width; the move buttons sit at the end,
+// together and always in the same place, so they do not shuffle about as rows
+// are moved. Where a drag is offered, its handle is at the start.
+//
+// The rows sit on a light ground rather than on the form's own, because they
+// are things rather than fields: a list of places to go, inside a form of
+// inputs, and the eye needs to be told which is which. It is the navigation's
+// ground, which is the lightest the system has — these are rows to read past,
+// not blocks to stop at.
+//
+// The Add button keeps the same air under the rows as any other list of rows
+// in a form (`Ui.ListField`), so the two read as the same shape, and a row is
+// padded as that button is, so the two line up down their start edge.
+
+.ui-reorderable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+// The way to add another, under the rows and no wider than its own label.
+.ui-reorderable__add {
+  display: flex;
+}
+
+.ui-reorderable__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.ui-reorderable__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-frame);
+}
+
+.ui-reorderable__content {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.ui-reorderable__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+}
+
+// The drag handle. It is hidden from assistive technology — the move buttons
+// beside it say what it does — so what is left to say is said to the pointer:
+// the cursor over it is the one for moving something.
+.ui-reorderable__grip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-space-5);
+  color: var(--ui-text-subtle);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// The row being dragged fades in the place it is leaving, and the place it
+// would land opens as an empty frame between the rows it would land between.
+// Both are pointer feedback only: the move itself is announced when it happens.
+.ui-reorderable__item.is-dragging {
+  opacity: 0.4;
+}
+
+.ui-reorderable__slot {
+  block-size: var(--ui-hit-min);
+  border: 1px dashed var(--ui-brand);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-brand-subtle);
+}

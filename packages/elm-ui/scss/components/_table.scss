@@ -1,0 +1,113 @@
+// Tables keep their rules: a table rule is not a component boundary, so 1.4.11
+// does not apply and it is free to stay subtle.
+
+.ui-table-wrapper {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  // Wide content scrolls inside its own container; the page never scrolls
+  // sideways. The header cells' padding is what keeps this from clipping a
+  // sort button's focus ring.
+  overflow-x: auto;
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-surface);
+}
+
+.ui-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--ui-text-body);
+}
+
+.ui-table__caption {
+  padding: var(--ui-space-4) var(--ui-space-5);
+  text-align: start;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+}
+
+.ui-table__th {
+  padding: var(--ui-space-3) var(--ui-space-5);
+  text-align: start;
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+  color: var(--ui-text-muted);
+  background: var(--ui-surface-sunken);
+  white-space: nowrap;
+}
+
+.ui-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-block-size: var(--ui-hit-min);
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+  }
+
+  // The default outward ring, not an inset one: this button has no padding of
+  // its own, so an inset ring would draw through the label. The header cell's
+  // inline padding is four times the ring's reach, so the scrolling wrapper
+  // never clips it.
+}
+
+// Direction is carried by a glyph as well as by position (WCAG 1.4.1).
+[aria-sort='ascending'] .ui-table__sort::after { content: '\2191'; }
+[aria-sort='descending'] .ui-table__sort::after { content: '\2193'; }
+
+.ui-table__td {
+  padding: var(--ui-space-4) var(--ui-space-5);
+  border-block-start: 1px solid var(--ui-border-subtle);
+  transition: var(--ui-transition-state);
+}
+
+.ui-table__row:hover .ui-table__td {
+  background: var(--ui-state-hover);
+}
+
+// The actions column: the last one, at the end of the row, as narrow as its
+// buttons allow and never wrapping them onto a second line.
+.ui-table__th--actions,
+.ui-table__td--actions {
+  text-align: end;
+  inline-size: 1%;
+  white-space: nowrap;
+}
+
+.ui-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ui-space-2);
+}
+
+// The actions' tooltips — an icon's label, a disabled Delete's reason — open to
+// the start side of the button, centered on it, rather than above or below.
+//
+// The wrapper scrolls sideways, and a box that scrolls one way clips and scrolls
+// the other too. A bubble is only transparent while hidden, not gone, so one
+// below a button in the last row made the whole table scroll down to nothing,
+// and one above a button in the first row was cut off when it showed. Beside
+// the button it stays inside the row's height, and the table's width is to the
+// start side of the last column. An icon-only button draws its label itself
+// (`Button.withTooltip`, its `::after`), and it takes the same place. The gap
+// is `.ui-tooltip`'s, which a button's own label is not inside: without the
+// fallback the offset was invalid, and the label sat on the button.
+.ui-table__actions .ui-tooltip__bubble,
+.ui-table__actions .ui-button[data-ui-tooltip]::after {
+  inset-block-start: 50%;
+  inset-block-end: auto;
+  inset-inline-start: auto;
+  inset-inline-end: calc(100% + var(--ui-tooltip-gap, calc(var(--ui-focus-offset) + var(--ui-focus-width) + var(--ui-space-1))));
+  translate: 0 -50%;
+  text-align: start;
+}

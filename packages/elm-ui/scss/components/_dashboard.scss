@@ -1,0 +1,90 @@
+// DASHBOARD
+//
+// Widgets in two columns, or one when the page is narrow. The query is on the
+// page region, like the detail and settings templates: the same window leaves
+// the page two different widths with the navigation expanded and collapsed, and
+// it is the page that has to fit.
+
+.ui-dashboard {
+  display: grid;
+  // minmax(0, 1fr), never 1fr: a bare 1fr will not shrink below its widest
+  // content, and one wide table would push the whole dashboard sideways.
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ui-space-5);
+  min-inline-size: 0;
+
+  // No `dense` packing. It would fill a gap left by a full-width widget with a
+  // later half one, which puts the grid out of DOM order — and DOM order is the
+  // order the keyboard walks it in.
+}
+
+@container ui-main (max-width: 48rem) {
+  .ui-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// A widget is a slot raised off the page at elevation 1, with a header of its
+// own. No hairline: the shadow alone lifts it in light mode and the ground in
+// dark, so a page of widgets stays quieter than a page of cards.
+.ui-widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+  padding: var(--ui-space-5);
+
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-elevation-1-surface);
+  box-shadow: var(--ui-elevation-1);
+}
+
+.ui-widget--full {
+  grid-column: 1 / -1;
+}
+
+// The action wraps under the title rather than squeezing it, which is what a
+// long title in a half-width widget at 200% needs.
+.ui-widget__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+.ui-widget__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}
+
+.ui-widget__title {
+  font-size: var(--ui-text-subtitle);
+  font-weight: var(--ui-weight-semibold);
+  line-height: var(--ui-leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.ui-widget__description {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+.ui-widget__action {
+  display: flex;
+  flex-shrink: 0;
+}
+
+// The body grows so widgets side by side end on the same line, whatever each
+// one holds.
+.ui-widget__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}

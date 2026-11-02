@@ -1,0 +1,713 @@
+// The questionnaire's right panels (`Common.Components.Questionnaire.Panel.*`).
+//
+// The panel's heading, its close button and its scrolling belong to the
+// workspace's aside (`Ui.Page.Workspace`); what is here is what a panel puts
+// inside it. A chapter is a heading with its questions listed under it, and a
+// question is a button across the panel's width — the structure is stated in the
+// markup; these rules only draw it.
+
+.c-questionnaire-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+  // The panel has no chrome above it any more, so the list keeps itself off
+  // the top edge.
+  padding-block-start: var(--ui-space-4);
+  min-inline-size: 0;
+}
+
+// What a panel is showing, above what it shows: the toggle takes the gutter,
+// and the list under it keeps its own top spacing.
+.c-questionnaire-panel-filter {
+  display: flex;
+  flex-direction: column;
+  padding-block-start: var(--ui-space-4);
+
+  > :first-child {
+    padding-inline: var(--ui-workspace-gutter);
+  }
+}
+
+// Nothing to list: the empty state, at the top as in every other panel. It is
+// prose rather than a row, so it keeps the panel's gutter.
+.c-questionnaire-panel--empty {
+  padding-inline: var(--ui-workspace-gutter);
+}
+
+.c-questionnaire-panel__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+}
+
+.c-questionnaire-panel__chapter {
+  margin: 0;
+  padding-inline: var(--ui-workspace-gutter);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+  color: var(--ui-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.c-questionnaire-panel__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// A question: its mark, its name as a link, and whatever the panel puts after
+// it. The row holds the panel's one gutter — the aside itself is flush — and
+// the name wraps, because a panel is read and half a question is not the
+// question.
+.c-questionnaire-panel__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-3);
+  padding-inline: var(--ui-workspace-gutter);
+  min-inline-size: 0;
+}
+
+// The mark, centered on the first line of the name beside it. `.ui-icon` is a
+// box a glyph is centered in and has no baseline of its own, so lining it up
+// with text means giving it the line: the same height as one line of the link,
+// and the same padding above it.
+.c-questionnaire-panel__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1rem;
+  block-size: calc(var(--ui-text-body) * var(--ui-leading-normal));
+  margin-block-start: var(--ui-space-2);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+// A link, and a button (see Panel.Group). Its padding is what makes it a
+// comfortable thing to hit in a list of them (WCAG 2.5.8), and what gives the
+// row its height.
+//
+// No underline at rest. WCAG 1.4.1 asks for one where color alone would have
+// to say "link", which is a link inside a sentence; a column of them under a
+// chapter heading is a list of links wherever the eye lands, and underlining
+// every row turns the panel into a wall of lines. It underlines when the
+// pointer or the focus is on it, so what it is is never in doubt at the moment
+// of using it.
+.c-questionnaire-panel__link {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: var(--ui-space-2) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-normal);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+// SEARCH
+//
+// The box, then what it found: each result says what kind of thing it is and
+// shows the match in its surroundings, with the match itself in a `mark`.
+
+.c-questionnaire-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+}
+
+// The box is a control and keeps the panel's gutter; the results below it are
+// rows and run to both edges, with their own padding.
+.c-questionnaire-search__box {
+  padding: var(--ui-space-3) var(--ui-workspace-gutter) 0;
+}
+
+// What it found, and how many: the count keeps the gutter, the list does not.
+.c-questionnaire-search__results--message {
+  padding-inline: var(--ui-workspace-gutter);
+}
+
+.c-questionnaire-search__results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+.c-questionnaire-search__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding-inline: var(--ui-workspace-gutter);
+  list-style: none;
+
+  > li + li {
+    border-block-start: 1px solid var(--ui-border-subtle);
+  }
+}
+
+// A rule above each result but the first is what tells two of them apart,
+// since they are two lines of ordinary text each. The gutter is the list's, so
+// that a result's focus ring is drawn inside the panel rather than over its
+// edge.
+.c-questionnaire-search__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+
+  inline-size: 100%;
+  min-inline-size: 0;
+  // A little at the sides as well, so the rounded ends of the highlight the
+  // hover draws have something to round.
+  padding: var(--ui-space-3) var(--ui-space-2);
+
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text);
+  font: inherit;
+  font-size: var(--ui-text-body-sm);
+  text-align: start;
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+  }
+}
+
+.c-questionnaire-search__kind {
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-semibold);
+  color: var(--ui-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.c-questionnaire-search__result:hover .c-questionnaire-search__kind {
+  color: inherit;
+}
+
+.c-questionnaire-search__value {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+
+  mark {
+    padding-inline: 0.125rem;
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-warning-subtle);
+    color: var(--ui-warning-on-subtle);
+  }
+}
+
+// In the editor notes, what the reader acts on takes the private hue: the tab
+// that says where they are, the switch, the button that writes a note. The
+// brand roles are remapped for this subtree and nothing inside it knows —
+// which is what makes one rule enough, and what keeps every one of those
+// components the system's rather than this panel's.
+//
+// Hover and active move the base towards the page's ink: that darkens it on
+// the light theme and lightens it on the dark one, which is the direction each
+// theme's own brand states go.
+.c-questionnaire-comments.is-private {
+  --ui-brand: var(--ui-private-base);
+  --ui-brand-strong: var(--ui-private-base);
+  --ui-brand-hover: color-mix(in oklab, var(--ui-private-base) 88%, var(--ui-text));
+  --ui-brand-active: color-mix(in oklab, var(--ui-private-base) 78%, var(--ui-text));
+  --ui-brand-subtle: var(--ui-private-subtle);
+  --ui-brand-subtle-hover: color-mix(in oklab, var(--ui-private-subtle) 88%, var(--ui-private-base));
+  --ui-brand-subtle-selected: color-mix(in oklab, var(--ui-private-subtle) 80%, var(--ui-private-base));
+  --ui-brand-on-subtle: var(--ui-private-on-subtle);
+  --ui-text-on-brand: var(--ui-private-on);
+
+  // A ghost button is a link's ink, and so is a link in a note: both were
+  // still the brand's blue in a purple panel. The focus ring follows the link
+  // and so turns purple here too, which it can — it clears 3:1 on everything
+  // it lands on in this panel (5.8 on a note's tint, 6.3 on a thread's, 5.6 on
+  // the dark theme's).
+  --ui-link: var(--ui-private-base);
+  --ui-link-hover: color-mix(in oklab, var(--ui-private-base) 88%, var(--ui-text));
+}
+
+// COMMENTS
+//
+// A thread is a band across the panel with its comments inside it and a box to
+// reply in; what it is — resolved, assigned — is said above it in words.
+//
+// The panel has no padding of its own (see `Ui.Page.Workspace`): the bars, the
+// prose and the boxes take the gutter, and a thread takes the whole width so
+// that what separates two of them runs edge to edge.
+.c-questionnaire-comments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+}
+
+// What an editor note is: a thing of its own above the notes, not another line
+// of them.
+.c-questionnaire-comments__note {
+  padding-block: var(--ui-space-2);
+}
+
+// The way out of this question and the tabs, as one block that stays where it
+// is while the threads scroll under it: they are how you leave this question,
+// and hunting for them at the top of a long thread is how you lose your place.
+// One block rather than two sticky elements, so the tabs need no measurement of
+// the bar above them.
+.c-questionnaire-comments__head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--ui-surface);
+}
+
+// Which of the questions with comments this is, and the way to the next.
+.c-questionnaire-comments__navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-2) var(--ui-workspace-gutter);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-frame);
+}
+
+.c-questionnaire-comments__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+
+  // Everything in the body keeps the gutter; the threads are the band.
+  > *:not(.c-questionnaire-comments__threads) {
+    padding-inline: var(--ui-workspace-gutter);
+  }
+}
+
+// One band after another, a step apart so two threads are never one block.
+.c-questionnaire-comments__threads {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Inside a thread a rule separates one comment from the next: they are the
+// same shape, by different people, and a gap alone did not say where one
+// ended.
+.c-questionnaire-comments__comments {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  > li + li {
+    margin-block-start: var(--ui-space-3);
+    padding-block-start: var(--ui-space-3);
+    border-block-start: 1px solid var(--c-thread-edge, var(--ui-border-subtle));
+  }
+}
+
+// The reply box is ruled off from the last comment as the comments are from
+// each other; the thread's gap gives the space above the rule.
+.c-questionnaire-comments__comments + .c-questionnaire-comments__editor {
+  padding-block-start: var(--ui-space-3);
+  border-block-start: 1px solid var(--c-thread-edge, var(--ui-border-subtle));
+}
+
+// A thread's ground, edge and ink are named here and read everywhere inside it,
+// so that what it is — a comment, an editor's note, something settled — is said
+// once and the rule between its comments follows without being told.
+.c-questionnaire-comments__thread {
+  --c-thread-ground: var(--ui-frame);
+  --c-thread-edge: var(--ui-border-subtle);
+  --c-thread-ink: var(--ui-text);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-4) var(--ui-workspace-gutter);
+  // Its own ground, not the panel's: a rule alone left two threads looking
+  // like one long one, and this is what the wizard did.
+  border-block: 1px solid var(--c-thread-edge);
+  background: var(--c-thread-ground);
+  color: var(--c-thread-ink);
+  scroll-margin-block: var(--ui-space-6);
+
+  // An editor's note, which only the people who can edit the project can see.
+  // The hue is what says so at a glance — the tab and the note above the list
+  // say it in words — and it is the same one the wizard used for them.
+  &.is-private {
+    --c-thread-ground: var(--ui-private-subtle);
+    // A hairline in the note's hue, at the weight of the gray one it stands in
+    // for: the border role is a boundary, drawn to be seen at 3:1, and between
+    // two comments that was a heavy line where a comment has a faint one.
+    --c-thread-edge: color-mix(in oklab, var(--ui-private-base) 8%, var(--ui-border-subtle));
+    // The ink is the page's, as in a comment. A note is somewhere else, not
+    // something else: only its ground says so.
+  }
+
+  // Settled: still there to read, no longer asking for anything. It keeps the
+  // ground that says what it is and gives up the weight of its ink, which is
+  // how the wizard drew it. Muted rather than fainter still: a settled comment
+  // is read like any other, so it holds 4.5:1 — on the note's own tint as well
+  // (5.1 light, 7.7 dark). Last, so it has the final word over a note's ink.
+  // Settled. It has lost the color it had — a thread that is done is no more
+  // an editor's note than it is a comment — and its ink is muted. Nothing
+  // further: the badge in its header is what says so, and a second and third
+  // signal for the same fact only made the panel noisier.
+  &.is-resolved {
+    --c-thread-ground: var(--ui-frame);
+    --c-thread-edge: var(--ui-border-subtle);
+    --c-thread-ink: var(--ui-text-muted);
+  }
+}
+
+// The thread's own strip, across the top of it: what is to be done with the
+// thread at either end, and what state it is in between them. On a deeper
+// ground than the thread, so it reads as a label on the thread rather than as
+// its first line — in the brand tint when the reader is the one being waited
+// on, and in the success tint once it is settled.
+.c-questionnaire-comments__thread-header {
+  // What an icon button has around its glyph: it is a hit target (2.5.8) with
+  // the glyph centered in it, so the buttons at either end are pulled out by
+  // that slack and their glyphs land on the gutter the comments below them
+  // start at. The size is the one `.ui-button--icon.ui-button--sm` computes.
+  --c-icon-slack: calc(
+    (var(--ui-hit-min) - (var(--ui-text-body-sm) * var(--ui-leading-tight) + 2 * var(--ui-space-2) + 2px)) / 2
+  );
+
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+  margin: calc(var(--ui-space-4) * -1) calc(var(--ui-workspace-gutter) * -1) 0;
+  padding: var(--ui-space-1) var(--ui-workspace-gutter);
+  // The thread's own ground, a step down: a state overlay rather than a darker
+  // surface, because it has to darken on the light theme and lighten on the
+  // dark one — where every surface below the thread's *is* the thread's.
+  background: var(--ui-state-active);
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+
+  // Only a control is pulled out: what is pulled is the slack an icon button
+  // keeps around its glyph, and a badge or a line of text has none. A settled
+  // thread starts with its badge, which stands where the words do.
+  > button:first-child,
+  > .ui-menu:first-child {
+    margin-inline-start: calc(var(--c-icon-slack) * -1);
+  }
+
+  > button:last-child,
+  > .ui-menu:last-child {
+    margin-inline-end: calc(var(--c-icon-slack) * -1);
+  }
+
+  // The assign menu lists names, and a menu against an icon button has no
+  // width of its own to inherit. A long name wraps inside its item rather than
+  // setting every item on two lines. The thread's kebab keeps the menus' own.
+  .c-questionnaire-comments__assign ~ .ui-menu__list {
+    min-inline-size: 17rem;
+  }
+
+  &.is-mine {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+    font-weight: var(--ui-weight-medium);
+  }
+
+  // Settled says so in its words and its tick. It had worn the success tint,
+  // which beside an editor note's purple was two unrelated hues at once — and
+  // a thread being finished is not a thing that went right.
+  &.is-resolved {
+    color: var(--ui-text-muted);
+  }
+}
+
+// What the thread is, in words, between the actions at either end.
+.c-questionnaire-comments__thread-state {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  padding-inline: var(--ui-space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c-questionnaire-comments__comment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+.c-questionnaire-comments__header {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+}
+
+// Who, and when, one above the other: side by side, a long name pushed the
+// time off the line and then took a second line for itself.
+.c-questionnaire-comments__who {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+// A name is one line and is cut short: it identifies the person, and the whole
+// of it is not worth a second line in a panel this narrow.
+.c-questionnaire-comments__author {
+  overflow: hidden;
+  font-weight: var(--ui-weight-medium);
+  // The thread's ink, so a settled thread fades as one thing rather than
+  // fading round a name that stayed dark.
+  color: var(--c-thread-ink, var(--ui-text));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c-questionnaire-comments__when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ui-space-1) var(--ui-space-2);
+  min-inline-size: 0;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+}
+
+// The actions belong to the comment they are on: quiet until it is hovered or
+// something in it has focus, so a thread of ten is not a wall of buttons.
+.c-questionnaire-comments__buttons {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--ui-space-1);
+  opacity: 0.45;
+  transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
+}
+
+.c-questionnaire-comments__comment:hover .c-questionnaire-comments__buttons,
+.c-questionnaire-comments__comment:focus-within .c-questionnaire-comments__buttons {
+  opacity: 1;
+}
+
+// The gap is what keeps the box's focus ring off the buttons under it.
+.c-questionnaire-comments__editor,
+.c-questionnaire-comments__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+}
+
+// Editing a comment, the box is under its author's face: the comment's own gap
+// let the focus ring touch it, so the box keeps as far from the face as from Save.
+.c-questionnaire-comments__header + .c-questionnaire-comments__editor {
+  margin-block-start: calc(var(--ui-space-4) - var(--ui-space-3));
+}
+
+.c-questionnaire-comments__actions {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+// The version history: a day at a time, folded shut except today's. The fold is
+// a disclosure button (`aria-expanded`), so what it needs from here is only to
+// look like the band it opens.
+//
+// Like the comments, the panel has no padding of its own: a day is a bar across
+// it and the changes are indented under that bar.
+.c-questionnaire-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-inline-size: 0;
+}
+
+// What the history is showing, above it, as its own bar.
+.c-questionnaire-history__filter {
+  padding: var(--ui-space-3) var(--ui-workspace-gutter);
+}
+
+.c-questionnaire-history__day {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+// The day, as a band: it is what tells one day's changes from the next, so it
+// runs edge to edge and carries the rule between them.
+.c-questionnaire-history__toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ui-space-2);
+  inline-size: 100%;
+  padding: var(--ui-space-3) var(--ui-workspace-gutter);
+  border: 0;
+  border-block-start: 1px solid var(--ui-border-subtle);
+  background: var(--ui-frame);
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  > i {
+    flex: 0 0 auto;
+    inline-size: 1em;
+    font-size: var(--ui-text-body-sm);
+    color: var(--ui-text-muted);
+  }
+
+  &:hover {
+    background: var(--ui-surface-sunken);
+  }
+
+  &:focus-visible {
+    outline: var(--ui-focus-ring);
+    outline-offset: calc(var(--ui-focus-ring-offset) * -1);
+  }
+}
+
+.c-questionnaire-history__date {
+  margin: 0;
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+}
+
+.c-questionnaire-history__events {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-inline-size: 0;
+}
+
+// One change, in three parts, because a list of bare question names is a list
+// of things you have to remember: when it happened and what can be done with
+// it, then what was changed and what it was changed to, then who did it.
+.c-questionnaire-history__event {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3) var(--ui-workspace-gutter);
+  border-block-start: 1px solid var(--ui-border-subtle);
+  min-inline-size: 0;
+}
+
+.c-questionnaire-history__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-1) var(--ui-space-2);
+  min-inline-size: 0;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+
+  // The kebab keeps to the end of the line, however much is before it.
+  > :last-child {
+    margin-inline-start: auto;
+  }
+
+  // A menu is positioned against its trigger, which here is a kebab — so
+  // without a width of its own it shrinks to the longest word in it and sets
+  // every action on two lines.
+  .ui-menu__list {
+    min-inline-size: 15rem;
+  }
+}
+
+// What was changed, set in from the edge and on its own ground, so the change
+// itself is one thing to the eye and not three lines of loose text.
+.c-questionnaire-history__what {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-frame);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+// The question the change was to. It goes somewhere, so it is a link's color,
+// but it is a line of the change rather than a link in a sentence: no underline
+// until it is pointed at, and no weight of its own (the answer under it is what
+// it is there to introduce).
+.c-questionnaire-history__question {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ui-link);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+// What it was answered with, under a mark saying what kind of answer it is.
+.c-questionnaire-history__value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  font-size: var(--ui-text-body-sm);
+}
+
+.c-questionnaire-history__value-icon {
+  flex: 0 0 auto;
+  inline-size: 1rem;
+  color: var(--ui-text-muted);
+  text-align: center;
+}
+
+.c-questionnaire-history__value-text {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+// Who made the change, a step below it: they are not part of what changed.
+.c-questionnaire-history__who {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  margin-block-start: var(--ui-space-2);
+  min-inline-size: 0;
+  color: var(--ui-text-muted);
+}
+
+.c-questionnaire-history__more {
+  display: flex;
+  justify-content: center;
+  padding: var(--ui-space-4) var(--ui-workspace-gutter);
+  border-block-start: 1px solid var(--ui-border-subtle);
+}

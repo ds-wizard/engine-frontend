@@ -1,0 +1,260 @@
+// Breadcrumbs, pagination and button groups: the parts of a listing that are
+// about moving around it rather than about what is in it.
+
+.ui-breadcrumbs {
+  // Its own air: a trail pressed against the title reads as part of it.
+  margin-block-end: var(--ui-space-3);
+}
+
+.ui-breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+  list-style: none;
+  font-size: var(--ui-text-body-sm);
+}
+
+.ui-breadcrumbs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+
+  // The separator belongs to the item that follows it, and carries an empty
+  // alternative text: a screen reader reads "Projects, Folder 1" rather than
+  // "Projects slash Folder 1".
+  & + &::before {
+    content: '/' / '';
+    color: var(--ui-text-subtle);
+  }
+}
+
+.ui-breadcrumbs__link {
+  color: var(--ui-text-muted);
+  text-decoration: none;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    color: var(--ui-link);
+    text-decoration: underline;
+  }
+}
+
+// A crumb that is a control rather than a link (`Ui.Breadcrumbs.custom`): the
+// menu holding the middle of a trail too long to draw. It is a button, so it
+// needs a button's defaults taken off it before it reads as a crumb.
+button.ui-breadcrumbs__link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.ui-breadcrumbs__current {
+  color: var(--ui-text);
+  font-weight: var(--ui-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// PAGINATION
+
+.ui-pagination {
+  padding-block-start: var(--ui-space-5);
+}
+
+.ui-pagination__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-1);
+  list-style: none;
+}
+
+.ui-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+
+  min-block-size: var(--ui-hit-min);
+  min-inline-size: var(--ui-hit-min);
+  padding-inline: var(--ui-space-3);
+  justify-content: center;
+
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text);
+  font: inherit;
+  font-size: var(--ui-text-body-sm);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover:not(:disabled) { background: var(--ui-state-hover); }
+
+  &:disabled {
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+
+  // The current page is marked by weight and a tint together, never by color
+  // alone (WCAG 1.4.1) — and by aria-current, which is what actually says it.
+  &.is-current {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-link);
+    font-weight: var(--ui-weight-medium);
+  }
+}
+
+.ui-pagination__icon {
+  display: inline-flex;
+  color: var(--ui-text-muted);
+}
+
+.ui-pagination__ellipsis {
+  display: inline-flex;
+  justify-content: center;
+  min-inline-size: var(--ui-hit-min);
+  color: var(--ui-text-subtle);
+}
+
+// BUTTON GROUP
+//
+// One control with two parts. The borders overlap so the join is a single line,
+// and only the outer edges keep the pill — a pill in the middle would make two
+// controls again.
+.ui-button-group {
+  display: inline-flex;
+
+  > * + * {
+    margin-inline-start: -1px;
+  }
+
+  .ui-button {
+    border-radius: 0;
+  }
+
+  > :first-child .ui-button,
+  > .ui-button:first-child {
+    border-start-start-radius: var(--ui-radius-pill);
+    border-end-start-radius: var(--ui-radius-pill);
+    padding-inline-start: var(--ui-space-5);
+  }
+
+  > :last-child .ui-button,
+  > .ui-button:last-child {
+    border-start-end-radius: var(--ui-radius-pill);
+    border-end-end-radius: var(--ui-radius-pill);
+    padding-inline-end: var(--ui-space-5);
+  }
+
+  // An icon button is a fixed square with no padding. At an end, the pill's
+  // padding above went inside that square and pushed the icon against the
+  // join — the sort direction toggle had no space before its icon. Sized to its
+  // content instead: the pill side keeps the padding above, the join side gets
+  // its own, and the height stays the square's.
+  > :first-child .ui-button--icon,
+  > .ui-button--icon:first-child {
+    inline-size: auto;
+    padding-inline-end: var(--ui-space-4);
+  }
+
+  > :last-child .ui-button--icon,
+  > .ui-button--icon:last-child {
+    inline-size: auto;
+    padding-inline-start: var(--ui-space-4);
+  }
+}
+
+// DESCRIPTION LIST
+//
+// Stacked, not two columns: a value gets the panel's full width, and the label
+// sits directly above what it names.
+// No gap: an even rhythm down the list makes every line look equally related to
+// the one above it, so a label and its value read as two separate lines rather
+// than as a pair. The space belongs *between* pairs, not inside them.
+.ui-description-list {
+  min-inline-size: 0;
+}
+
+.ui-description-list__term {
+  margin-block-end: var(--ui-space-1);
+  color: var(--ui-text-subtle);
+  font-size: var(--ui-text-label);
+  // Semibold, and lighter than the value it names. Weight and color pulling in
+  // opposite directions is what makes a label read as a label: heavier says
+  // "heading", lighter says "not the content".
+  font-weight: var(--ui-weight-semibold);
+  // The one place in the system where a label is uppercased — at three points
+  // smaller the two still read as the same kind of text, and the change of case
+  // is what settles it. No tracking with it: uppercase at 12px is short enough
+  // that letter-spacing only makes it look spaced out.
+  text-transform: uppercase;
+}
+
+.ui-description-list__description {
+  margin: 0;
+  min-inline-size: 0;
+  font-size: var(--ui-text-body);
+  // A long identifier is one word to the browser; without this it pushes the
+  // panel wider than the column it was given.
+  overflow-wrap: anywhere;
+}
+
+.ui-description-list__description + .ui-description-list__term {
+  margin-block-start: var(--ui-space-5);
+}
+
+// Label beside value (`toHtmlColumns`): a quarter for the labels, the rest for
+// the values, so consecutive lists share their columns. Baseline-aligned, since
+// the label is smaller than its value. Each row is a subgrid of the list, so the
+// columns hold across rows, and its padding is pulled back out with a negative
+// margin so the text stays in line with what is above it while the hover
+// background reaches past it.
+.ui-description-list--columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  column-gap: var(--ui-space-4);
+  margin: 0 calc(-1 * var(--ui-space-2));
+
+  .ui-description-list__term,
+  .ui-description-list__description + .ui-description-list__term {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.ui-description-list--wide-terms {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+}
+
+.ui-description-list__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  padding: var(--ui-space-1) var(--ui-space-2);
+  border-radius: var(--ui-radius-control);
+
+  &:hover { background: var(--ui-state-hover); }
+}
+
+// Side by side (`toHtmlGrid`): as many pairs to a line as fit, and a pair that
+// does not fit goes to the next line whole. The rows are closer than the
+// columns, since a line of pairs reads as one row of figures.
+.ui-description-list--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: var(--ui-space-4) var(--ui-space-5);
+  margin: 0;
+}
+
+.ui-description-list__item {
+  min-inline-size: 0;
+}

@@ -1,0 +1,18 @@
+// VALUE SCALE
+//
+// One class per step, set by Ui.ValueScale.tone. Each only names the step's
+// color as --ui-value-tone and paints nothing: the component wearing it
+// decides what the color is for (a bar's fill, an answer's edge) and reads
+// var(--ui-value-tone) in its own stylesheet. The steps and why light mode
+// draws an edge round a fill are in _roles.scss.
+.ui-value-0 { --ui-value-tone: var(--ui-value-0); }
+.ui-value-10 { --ui-value-tone: var(--ui-value-10); }
+.ui-value-20 { --ui-value-tone: var(--ui-value-20); }
+.ui-value-30 { --ui-value-tone: var(--ui-value-30); }
+.ui-value-40 { --ui-value-tone: var(--ui-value-40); }
+.ui-value-50 { --ui-value-tone: var(--ui-value-50); }
+.ui-value-60 { --ui-value-tone: var(--ui-value-60); }
+.ui-value-70 { --ui-value-tone: var(--ui-value-70); }
+.ui-value-80 { --ui-value-tone: var(--ui-value-80); }
+.ui-value-90 { --ui-value-tone: var(--ui-value-90); }
+.ui-value-100 { --ui-value-tone: var(--ui-value-100); }

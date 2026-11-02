@@ -1,0 +1,255 @@
+// The markdown field: a toolbar, an editing area, and the markdown source
+// behind the same border.
+
+// A custom element is inline until it is told otherwise. It survives inside a
+// field only because a field is a flex column, which blockifies what is in it;
+// anywhere else — a fieldset, a row — an inline box shrinks to fit its content
+// and the field comes out the width of its own text.
+ui-markdown-editor {
+  display: block;
+}
+
+.ui-markdown {
+  display: flex;
+  flex-direction: column;
+  // The field is as wide as what holds it, in both modes. Neither box inside
+  // has a width of its own worth taking: the source is a `textarea`, whose
+  // intrinsic width is twenty columns of its monospace font, and the rich text
+  // is prose, whose intrinsic width is the longest line in it. Left to them the
+  // field changed width every time the mode was switched.
+  inline-size: 100%;
+  min-inline-size: 0;
+
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+
+  transition: var(--ui-transition-state);
+
+  &.is-invalid {
+    border-color: var(--ui-danger-border);
+  }
+
+  &.is-disabled {
+    background: var(--ui-surface-sunken);
+  }
+}
+
+// Focus is drawn round the whole field, outside its border, as on every other
+// input — in both modes alike. Ringing the editing area itself put an inward,
+// square-cornered ring inside a rounded border in rich text, and an outward one
+// over the border in markdown, so the two modes did not match each other or
+// the field. The toolbar's buttons keep their own rings.
+.ui-markdown:has(.ui-markdown__content:focus-visible, .ui-markdown__source:focus-visible) {
+  outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-ring-offset);
+}
+
+// WCAG 2.4.7 ring moved: onto the whole field (.ui-markdown, above), which is
+// what the editing area fills.
+.ui-markdown__content:focus-visible,
+.ui-markdown__source:focus-visible {
+  outline: none;
+}
+
+// The toolbar sits inside the field's border, so it takes the recessed ground
+// to separate itself from what is being written rather than another line.
+.ui-markdown__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-1);
+
+  padding: var(--ui-space-2);
+
+  border-block-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-sunken);
+  border-start-start-radius: var(--ui-radius-control);
+  border-start-end-radius: var(--ui-radius-control);
+}
+
+.ui-markdown__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-inline-size: var(--ui-hit-min);
+  min-block-size: var(--ui-hit-min);
+  padding-inline: var(--ui-space-2);
+
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text-muted);
+  font: inherit;
+  font-size: var(--ui-text-body-sm);
+  font-weight: var(--ui-weight-medium);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover:not(:disabled) {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+
+  &:disabled {
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+// Pressed is carried by ground and color together — and by aria-pressed,
+// which is the part that is actually announced.
+.ui-markdown__button[aria-pressed='true'] {
+  background: var(--ui-brand-subtle);
+  color: var(--ui-link);
+}
+
+.ui-markdown__separator {
+  inline-size: 1px;
+  block-size: 1rem;
+  margin-inline: var(--ui-space-1);
+  background: var(--ui-border-subtle);
+}
+
+// The switch between writing and reading is `Ui.ModeSwitch` — the same one the
+// knowledge model editor's template box uses. All this says is where it goes:
+// the end of the row, and the only thing there.
+.ui-markdown__toolbar .ui-mode-switch {
+  margin-inline-start: auto;
+}
+
+// The inline question a link or an image needs answering before it can be
+// inserted. It is a row inside the field rather than a window.prompt(), which
+// cannot be styled, cannot be described, and belongs to nothing.
+.ui-markdown__prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+
+  padding: var(--ui-space-3);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-sunken);
+
+  .ui-input {
+    flex: 1 1 12rem;
+    min-inline-size: 0;
+  }
+}
+
+.ui-markdown__prompt-label {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+}
+
+.ui-markdown__surface,
+.ui-markdown__source {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  min-block-size: 10rem;
+  max-block-size: 25rem;
+  overflow-y: auto;
+  // Room for the scrollbar whether or not there is one to show. The same text
+  // is longer as markdown than as rich text, so one mode could scroll while the
+  // other did not, and the words moved sideways on every switch.
+  scrollbar-gutter: stable;
+}
+
+// A column, so the editing area can grow to fill it. The area is what takes
+// focus and clicks, and as tall as its text it left the focus ring ending
+// halfway down the field and the space under the text dead to a click — while
+// the textarea of markdown mode filled the same border. `[hidden]` still wins
+// (the reset makes it important), so switching modes is unaffected.
+.ui-markdown__surface {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-markdown__source {
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: var(--ui-space-4);
+  border: 0;
+  border-end-start-radius: var(--ui-radius-control);
+  border-end-end-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text);
+  font-family: var(--ui-font-mono);
+  font-size: var(--ui-text-code);
+  resize: vertical;
+}
+
+.ui-markdown__content {
+  // Grows to the surface's height rather than `min-block-size: 100%`, which
+  // resolves to nothing against a parent with only a minimum height.
+  flex: 1 0 auto;
+  padding: var(--ui-space-4);
+
+  // What markdown produces, styled as the prose it is. Written once here
+  // because this is the only place in the system that renders it so far — when
+  // a reader for it lands, this moves out into its own primitive.
+  > * + * {
+    margin-block-start: var(--ui-space-4);
+  }
+
+  h2 {
+    font-family: var(--ui-font-display);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-weight-semibold);
+  }
+
+  h3 {
+    font-family: var(--ui-font-display);
+    font-size: var(--ui-text-subtitle);
+    font-weight: var(--ui-weight-semibold);
+  }
+
+  ul,
+  ol {
+    padding-inline-start: var(--ui-space-6);
+  }
+
+  li + li {
+    margin-block-start: var(--ui-space-2);
+  }
+
+  a {
+    @include ui-text-link;
+  }
+
+  code {
+    padding-inline: var(--ui-space-1);
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-surface-sunken);
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-text-code);
+  }
+
+  pre {
+    padding: var(--ui-space-4);
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-surface-sunken);
+    overflow-x: auto;
+
+    code {
+      padding: 0;
+      background: transparent;
+    }
+  }
+
+  blockquote {
+    padding-inline-start: var(--ui-space-4);
+    border-inline-start: 3px solid var(--ui-border-subtle);
+    color: var(--ui-text-muted);
+  }
+
+  img {
+    max-inline-size: 100%;
+    border-radius: var(--ui-radius-control);
+  }
+}

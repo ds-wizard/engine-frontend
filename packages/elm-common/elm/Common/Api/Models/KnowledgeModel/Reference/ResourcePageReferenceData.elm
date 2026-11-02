@@ -1,0 +1,41 @@
+module Common.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData exposing
+    ( ResourcePageReferenceData
+    , decoder
+    , equalContent
+    , toLabel
+    )
+
+import Common.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Common.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Pipeline as D
+
+
+type alias ResourcePageReferenceData =
+    { uuid : String
+    , resourcePageUuid : Maybe String
+    , annotations : List Annotation
+    }
+
+
+decoder : Decoder ResourcePageReferenceData
+decoder =
+    D.succeed ResourcePageReferenceData
+        |> D.required "uuid" D.string
+        |> D.required "resourcePageUuid" (D.maybe D.string)
+        |> D.required "annotations" (D.list Annotation.decoder)
+
+
+toLabel : List ResourcePage -> ResourcePageReferenceData -> String
+toLabel resourcePages data =
+    case List.head <| List.filter (\rp -> Just rp.uuid == data.resourcePageUuid) resourcePages of
+        Just resourcePage ->
+            resourcePage.title
+
+        Nothing ->
+            ""
+
+
+equalContent : ResourcePageReferenceData -> ResourcePageReferenceData -> Bool
+equalContent data1 data2 =
+    data1.resourcePageUuid == data2.resourcePageUuid

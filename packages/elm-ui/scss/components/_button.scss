@@ -1,0 +1,319 @@
+// Button — a pill, because compact controls you act on are pills.
+// Horizontal padding is ~1.25x the vertical rhythm so it clears the curve.
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-2);
+
+  min-block-size: var(--ui-hit-min);
+  padding-block: var(--ui-space-3);
+  padding-inline: var(--ui-space-5);
+
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-pill);
+
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+  line-height: var(--ui-leading-tight);
+  // Never underlined, in any state, including a link-button: the shape says it
+  // is pressable, and an underline would make it read as a text link.
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    var(--ui-transition-state),
+    opacity var(--ui-duration-fast) var(--ui-ease-out),
+    filter var(--ui-duration-fast) var(--ui-ease-out);
+
+  // A loading button is disabled so it cannot be pressed twice, but it is busy
+  // rather than unavailable — it keeps its own color and shows a spinner.
+  // Graying it out would say the action had gone away.
+  &:disabled:not(.ui-button--loading, .ui-button--done),
+  &[aria-disabled='true']:not(.ui-button--loading, .ui-button--done) {
+    cursor: not-allowed;
+    background: var(--ui-surface-sunken);
+    border-color: var(--ui-border-subtle);
+    color: var(--ui-text-disabled);
+  }
+
+  &.ui-button--loading { cursor: progress; }
+  &.ui-button--done { cursor: default; }
+}
+
+.ui-button--primary {
+  background: var(--ui-brand-strong);
+  color: var(--ui-text-on-brand);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-brand-hover); }
+  &:active:not(:disabled, [aria-disabled='true']) { background: var(--ui-brand-active); }
+}
+
+.ui-button--secondary {
+  background: var(--ui-surface);
+  border-color: var(--ui-border-control);
+  color: var(--ui-text);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-state-hover); }
+  &:active:not(:disabled, [aria-disabled='true']) { background: var(--ui-state-active); }
+}
+
+.ui-button--danger {
+  background: var(--ui-danger-base);
+  color: var(--ui-danger-on);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { filter: brightness(0.92); }
+}
+
+// One destructive action among many (a Delete on every row): secondary's shape,
+// border and ground, with the danger role on the label and the icon, and a
+// danger tint on hover. `--ui-danger-on-subtle` clears 4.5:1 on the surface, on
+// a state layer, and on its own tint, so the label stays readable in every state.
+.ui-button--danger-secondary {
+  background: var(--ui-surface);
+  border-color: var(--ui-border-control);
+  color: var(--ui-danger-on-subtle);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-danger-subtle); }
+  &:active:not(:disabled, [aria-disabled='true']) { background: var(--ui-state-active); }
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: var(--ui-link);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-brand-subtle); }
+}
+
+// A toolbar's button (`Button.quiet`): no border and no fill, the text's own
+// ink, and the neutral state layer on hover.
+.ui-button--quiet {
+  background: transparent;
+  color: var(--ui-text);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-state-hover); }
+  &:active:not(:disabled, [aria-disabled='true']) { background: var(--ui-state-active); }
+}
+
+// A quiet destructive button: the danger ink, the danger tint on hover.
+.ui-button--quiet-danger {
+  color: var(--ui-danger-on-subtle);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-danger-subtle); }
+}
+
+// A quiet menu trigger (`Menu.quiet`) while its menu is open: on, like a
+// pressed toggle.
+.ui-button--quiet[aria-expanded='true'] {
+  background: var(--ui-brand-subtle-selected);
+  color: var(--ui-brand-on-subtle);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-brand-subtle-selected); }
+}
+
+// A toggle that is on (`Button.withPressed`): the selected tint and the ink that
+// goes with it, on any variant — the same pair the navigation marks the current
+// page with, so "this is on" looks the same wherever it is said.
+.ui-button[aria-pressed='true'] {
+  background: var(--ui-brand-subtle-selected);
+  color: var(--ui-brand-on-subtle);
+
+  &:hover:not(:disabled, [aria-disabled='true']) { background: var(--ui-brand-subtle-selected); }
+}
+
+// A badge in a button sits on the label's line, a little apart from it.
+.ui-button .ui-badge {
+  margin-inline-start: var(--ui-space-1);
+}
+
+.ui-button--sm {
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-4);
+  font-size: var(--ui-text-body-sm);
+}
+
+.ui-button--lg {
+  padding-block: var(--ui-space-4);
+  padding-inline: var(--ui-space-6);
+  font-size: var(--ui-text-subtitle);
+}
+
+// Icon-only: a circle, at every size. The side is what the labeled button of
+// the same size is tall — its line of text, its block padding and its border —
+// so an icon button sits in a row of labeled ones at the same height, and the
+// pill radius on a square makes it round. Set explicitly, because padding on an
+// icon narrower than its line would make an oval, and a small button's thinner
+// block padding would make a pill.
+//
+// The visual can be small; the hit target cannot (WCAG 2.5.8).
+.ui-button--icon {
+  --ui-button-icon-size: calc(var(--ui-text-body) * var(--ui-leading-tight) + 2 * var(--ui-space-3) + 2px);
+
+  inline-size: var(--ui-button-icon-size);
+  block-size: var(--ui-button-icon-size);
+  min-inline-size: var(--ui-hit-min);
+  padding: 0;
+
+  &.ui-button--sm {
+    --ui-button-icon-size: calc(var(--ui-text-body-sm) * var(--ui-leading-tight) + 2 * var(--ui-space-2) + 2px);
+  }
+
+  &.ui-button--lg {
+    --ui-button-icon-size: calc(var(--ui-text-subtitle) * var(--ui-leading-tight) + 2 * var(--ui-space-4) + 2px);
+  }
+}
+
+// An icon-only button's label on hover and keyboard focus (`Button.withTooltip`),
+// drawn by the button from its `data-ui-tooltip` rather than by a `Ui.Tooltip`
+// round it: two elements fewer per button, and a page of questions has thousands.
+// It is `.ui-tooltip__bubble--below` in every respect — below, where the system's
+// tooltips open; the look, the gap clear of the focus ring, the delay in and none
+// out, hoverable and dismissible (1.4.13) — and visual only, as that bubble is:
+// the label is already the button's name.
+.ui-button[data-ui-tooltip] {
+  position: relative;
+
+  &::after {
+    content: attr(data-ui-tooltip);
+    position: absolute;
+    z-index: 30;
+    inset-block-start: calc(100% + var(--ui-focus-offset) + var(--ui-focus-width) + var(--ui-space-1));
+    inset-inline-start: 50%;
+    translate: -50% 0;
+
+    inline-size: max-content;
+    max-inline-size: 16rem;
+    padding: var(--ui-space-2) var(--ui-space-3);
+
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-surface-inverse);
+    color: var(--ui-text-inverse);
+
+    font-size: var(--ui-text-body-sm);
+    font-weight: var(--ui-weight-regular);
+    line-height: var(--ui-leading-tight);
+    text-align: center;
+    white-space: normal;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
+    transition-delay: 0s;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+    transition-delay: 400ms;
+    pointer-events: auto;
+  }
+}
+
+// Above the button (`Button.withTooltipAt Above`), where below has no room; or
+// below and aligned to its end edge (`End`), for a button at the end of a row,
+// where centered would run off the side.
+.ui-button[data-ui-tooltip-placement='above']::after {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + var(--ui-focus-offset) + var(--ui-focus-width) + var(--ui-space-1));
+}
+
+.ui-button[data-ui-tooltip-placement='end']::after {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  translate: none;
+  text-align: start;
+}
+
+// The other side: for a button at the start of a row, where a centered bubble
+// runs off the start edge instead.
+.ui-button[data-ui-tooltip-placement='start']::after {
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  translate: none;
+  text-align: start;
+}
+
+// A menu's trigger (`Menu.withTriggerTooltipAt`) says nothing over its own open list.
+.ui-button[data-ui-tooltip][aria-expanded='true']::after,
+:root[data-tooltips-suppressed] .ui-button[data-ui-tooltip]::after {
+  opacity: 0;
+  pointer-events: none;
+}
+
+// Loading keeps its width so nothing after it shifts.
+//
+// The spinner waits before it shows: most saves are done before anyone could
+// read it, and a spinner that is there for a few frames reads as a flicker.
+// Until then the button keeps its label — still disabled and busy, so it cannot
+// be pressed twice. Then the label fades out, and only once it has gone does
+// the spinner fade in, so the two are never on the button together. The state
+// transition is off: it would fade the label from the moment loading began.
+.ui-button--loading {
+  --ui-button-busy-delay: 300ms;
+
+  position: relative;
+  transition: none;
+  animation: ui-button-busy var(--ui-duration-fast) var(--ui-ease-in) var(--ui-button-busy-delay) forwards;
+
+  .ui-button__spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-text-on-brand);
+    opacity: 0;
+    animation: ui-button-busy-spinner var(--ui-duration-base) var(--ui-ease-out) calc(var(--ui-button-busy-delay) + var(--ui-duration-fast)) forwards;
+  }
+}
+
+@keyframes ui-button-busy {
+  to { color: transparent; }
+}
+
+@keyframes ui-button-busy-spinner {
+  to { opacity: 1; }
+}
+
+.ui-button--loading.ui-button--secondary .ui-button__spinner,
+.ui-button--done.ui-button--secondary .ui-button__done { color: var(--ui-text); }
+
+.ui-button--loading.ui-button--danger-secondary .ui-button__spinner,
+.ui-button--done.ui-button--danger-secondary .ui-button__done { color: var(--ui-danger-on-subtle); }
+
+.ui-button--loading.ui-button--ghost .ui-button__spinner,
+.ui-button--done.ui-button--ghost .ui-button__done { color: var(--ui-link); }
+
+// Done: the label gives way to a check at once — it is the answer to the press,
+// so it does not wait as the spinner does — and the check pops in.
+.ui-button--done {
+  position: relative;
+  color: transparent;
+  transition: none;
+
+  .ui-button__done {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-text-on-brand);
+    animation: ui-button-done var(--ui-duration-base) var(--ui-ease-out);
+  }
+}
+
+@keyframes ui-button-done {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+// The new-tab mark on an external link-button. Smaller than a leading icon,
+// because it qualifies the label rather than naming the action.
+.ui-button__external {
+  display: inline-flex;
+  font-size: var(--ui-text-label);
+}

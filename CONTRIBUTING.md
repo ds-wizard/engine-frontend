@@ -5,8 +5,9 @@ method with the owners of this repository before making a change.
 
 ## Development and Code Style
 
-- Use [elm-format](https://elmprogramming.com/installation.html#installing-elm-format)
-- Use [elm-analyse](https://stil4m.github.io/elm-analyse/)
+- Use [elm-format](https://github.com/avh4/elm-format) 0.8.8 (CI runs `elm-format --validate`)
+- Run `npm test` before opening a pull request (Elm tests, repository checks, and UI tests)
+- American English spelling in code, comments, and strings
 - All changes must pass CI (both build and code style checks)
 
 ## Pull Request Process
@@ -18,27 +19,22 @@ method with the owners of this repository before making a change.
 4. Be ready to communicate about the Pull Request and make changes if required by reviewers.
 5. The Pull Request may be merged once it passes the review and automatic checks.
 
-## Gitflow Workflow
+## Branching
 
-We use the standard [Gitflow Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow):
+We use a trunk-based workflow:
 
-* __main__ branch is used only for releases (and eventually hotfixes), this branch is also protected on GitHub (pull
-  requests with review and all checks must pass)
-* __develop__ branch is used for development and as a base for following development branches of features, support
-  stuff, and as a base for releases
-* __feature/*__ (base develop, rebase-merged back to develop when done)
-* __chore/*__ (like the feature but semantically different, not the feature but some chore, e.g., cleanup or update of
-  Dockerfile)
-* __fix/*__ (like the feature but semantically different, not something new but fix of a non-critical bug)
-* __release/*__ (base develop, merged to main and develop when ready for release+tag)
-* __hotfix/*__ (base main, merged to main and develop)
+* __main__ is the main branch, protected on GitHub (pull requests with review and all checks must pass). Releases are
+  tagged from it.
+* __feature/*__, __chore/*__ and __fix/*__ branches are based on main and rebase-merged back to it when done
+  (a chore is a cleanup or a maintenance task, e.g., an update of a Dockerfile; a fix is a fix of a non-critical bug)
+* __hotfix/*__ branches are based on the release tag being fixed and merged to main
 
 Please note, that for tasks from [our Jira](https://ds-wizard.atlassian.net/projects/DSW/issues), we use such
 as `[DSW-XXX]` identifying the project and task number.
 
 ## Release Management
 
-For the release management we use (aside from the [Gitflow Workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)):
+For the release management we use:
 
 * [Semantic versioning](https://semver.org)
 * Release Candidates - X.Y.Z-rc.N should be created if don’t expect any problems (in that case use alpha or beta), and

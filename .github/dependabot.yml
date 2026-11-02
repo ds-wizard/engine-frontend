@@ -7,22 +7,7 @@ updates:
       day: "saturday"
       time: "08:00"
       timezone: "Europe/Prague"
-    target-branch: "develop"
-    assignees:
-      - "janslifka"
-    labels:
-      - "dependencies"
-
-  - package-ecosystem: "elm"
-    directory: "/review"
-    schedule:
-      interval: "weekly"
-      day: "saturday"
-      time: "08:00"
-      timezone: "Europe/Prague"
-    target-branch: "develop"
-    assignees:
-      - "janslifka"
+    target-branch: "main"
     labels:
       - "dependencies"
 
@@ -33,34 +18,19 @@ updates:
       day: "saturday"
       time: "08:00"
       timezone: "Europe/Prague"
-    target-branch: "develop"
-    assignees:
-      - "janslifka"
-    labels:
-      - "dependencies"
-
-  - package-ecosystem: "npm"
-    directory: "/wizard-style-builder"
-    schedule:
-      interval: "weekly"
-      day: "saturday"
-      time: "08:00"
-      timezone: "Europe/Prague"
-    target-branch: "develop"
-    assignees:
-      - "janslifka"
+    target-branch: "main"
     labels:
       - "dependencies"
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/node-setup"
     schedule:
       interval: "weekly"
       day: "saturday"
       time: "08:00"
       timezone: "Europe/Prague"
-    target-branch: "develop"
-    assignees:
-      - "MarekSuchanek"
+    target-branch: "main"
     labels:
       - "dependencies"

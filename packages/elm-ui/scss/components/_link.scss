@@ -1,0 +1,74 @@
+// Link — words you follow, inside a sentence or under a form.
+//
+// Underlined always, not only on hover: the link color against body text is
+// well short of 3:1, so without the underline a link is distinguished by hue
+// alone (WCAG 1.4.1). Hover changes the color *and* thickens the line, so the
+// state is not a hue change either.
+//
+// No minimum hit target. 2.5.8 exempts a target in a sentence, whose size is
+// set by the line of text it is in; a link standing on its own gets its room
+// from the row it sits in.
+
+// A text link, wherever it comes from: this component, or a link in content
+// the system did not write (rendered markdown, a hint) that it can only reach
+// by selector. Both look and behave the same, hover included.
+@mixin ui-text-link {
+  color: var(--ui-link);
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  // em rather than px: the offset belongs to the text it sits under.
+  text-underline-offset: 0.125em;
+  // A URL written out as its own label is one word to the browser.
+  overflow-wrap: anywhere;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    color: var(--ui-link-hover);
+    text-decoration-thickness: max(2px, 0.125em);
+  }
+}
+
+.ui-link {
+  @include ui-text-link;
+
+  // The focus ring follows the text, line by line, rather than boxing a
+  // wrapped link as one rectangle.
+  &:focus-visible {
+    border-radius: var(--ui-radius-control);
+  }
+}
+
+// Leads somewhere destructive — "Delete this account". The danger role on a
+// plain surface clears 4.5:1 even under a hover layer, which is what
+// -on-subtle is derived for; the underline still says it is a link.
+// A button that reads as a link (Ui.Link.action): the button's own box and
+// face are taken off, and what is left is the link.
+.ui-link--action {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ui-link--danger {
+  color: var(--ui-danger-on-subtle);
+
+  &:hover { color: var(--ui-danger-on-subtle); }
+}
+
+// Icons do not take the underline — they are inline-block — and sit a gap
+// away from the words so the line under the text does not look broken.
+.ui-link__icon {
+  display: inline-block;
+  margin-inline-end: 0.3em;
+  font-size: 0.875em;
+}
+
+.ui-link__external {
+  display: inline-block;
+  margin-inline-start: 0.3em;
+  font-size: 0.75em;
+}

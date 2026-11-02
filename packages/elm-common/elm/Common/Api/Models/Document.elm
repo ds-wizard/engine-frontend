@@ -1,0 +1,87 @@
+module Common.Api.Models.Document exposing
+    ( Document
+    , decoder
+    , encode
+    , isOwner
+    )
+
+import Common.Api.Models.BootstrapConfig exposing (BootstrapConfig)
+import Common.Api.Models.Document.DocumentState as DocumentState exposing (DocumentState)
+import Common.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
+import Common.Api.Models.DocumentTemplateInfo as DocumentTemplateInfo exposing (DocumentTemplateInfo)
+import Common.Api.Models.ProjectInfo as ProjectInfo exposing (ProjectInfo)
+import Common.Api.Models.Submission as Submission exposing (Submission)
+import Iso8601
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Extra as D
+import Json.Decode.Pipeline as D
+import Json.Encode as E
+import Json.Encode.Extra as E
+import Time
+import Uuid exposing (Uuid)
+
+
+type alias Document =
+    { uuid : Uuid
+    , name : String
+    , createdAt : Time.Posix
+    , project : Maybe ProjectInfo
+    , projectEventUuid : Maybe Uuid
+    , projectVersion : Maybe String
+    , documentTemplate : DocumentTemplateInfo
+    , format : DocumentTemplateFormat
+    , language : Maybe String
+    , state : DocumentState
+    , submissions : List Submission
+    , createdBy : Maybe Uuid
+    , fileSize : Maybe Int
+    , workerLog : Maybe String
+    , workspaceUuid : Maybe Uuid
+    }
+
+
+isOwner : { a | config : BootstrapConfig } -> Document -> Bool
+isOwner appState document =
+    appState.config.user
+        |> Maybe.map (.uuid >> Just >> (==) document.createdBy)
+        |> Maybe.withDefault False
+
+
+decoder : Decoder Document
+decoder =
+    D.succeed Document
+        |> D.required "uuid" Uuid.decoder
+        |> D.required "name" D.string
+        |> D.required "createdAt" D.datetime
+        |> D.optional "project" (D.maybe ProjectInfo.decoder) Nothing
+        |> D.required "projectEventUuid" (D.maybe Uuid.decoder)
+        |> D.required "projectVersion" (D.maybe D.string)
+        |> D.required "documentTemplate" DocumentTemplateInfo.decoder
+        |> D.required "format" DocumentTemplateFormat.decoder
+        |> D.required "language" (D.maybe D.string)
+        |> D.required "state" DocumentState.decoder
+        |> D.required "submissions" (D.list Submission.decoder)
+        |> D.required "createdBy" (D.maybe Uuid.decoder)
+        |> D.required "fileSize" (D.maybe D.int)
+        |> D.required "workerLog" (D.maybe D.string)
+        |> D.optional "workspaceUuid" (D.nullable Uuid.decoder) Nothing
+
+
+encode : Document -> E.Value
+encode document =
+    E.object
+        [ ( "uuid", Uuid.encode document.uuid )
+        , ( "name", E.string document.name )
+        , ( "createdAt", Iso8601.encode document.createdAt )
+        , ( "project", E.maybe ProjectInfo.encode document.project )
+        , ( "projectEventUuid", E.maybe Uuid.encode document.projectEventUuid )
+        , ( "projectVersion", E.maybe E.string document.projectVersion )
+        , ( "documentTemplate", DocumentTemplateInfo.encode document.documentTemplate )
+        , ( "format", DocumentTemplateFormat.encode document.format )
+        , ( "language", E.maybe E.string document.language )
+        , ( "state", DocumentState.encode document.state )
+        , ( "createdBy", E.maybe Uuid.encode document.createdBy )
+        , ( "fileSize", E.maybe E.int document.fileSize )
+        , ( "workerLog", E.maybe E.string document.workerLog )
+        , ( "workspaceUuid", E.maybe Uuid.encode document.workspaceUuid )
+        ]

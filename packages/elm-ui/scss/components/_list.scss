@@ -1,0 +1,288 @@
+// List view — the shape the product uses far more than tables.
+//
+// A row is icon, title, fragments, timestamp, actions. Rows separate with a
+// hairline rather than sitting in a bordered box, which is the same reasoning
+// as everywhere else: a border identifies a control, not a region.
+
+.ui-list {
+  list-style: none;
+  container-type: inline-size;
+}
+
+.ui-list__item {
+  position: relative;
+  padding: var(--ui-space-4) var(--ui-space-5);
+  border-radius: var(--ui-radius-control);
+  transition: var(--ui-transition-state);
+
+  // The rule between rows is drawn rather than bordered. A border on a box with
+  // a radius curves at its ends, and a hairline that curls up at both ends
+  // against the row's rounded hover looks like a mistake. Inset by the radius,
+  // so it starts where the corner stops.
+  & + &::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: var(--ui-radius-control);
+    block-size: 1px;
+    background: var(--ui-border-subtle);
+  }
+
+  &:hover { background: var(--ui-state-hover); }
+
+  &.is-highlighted { background: var(--ui-brand-subtle); }
+}
+
+// Rows as tiles (`ListItem.tiles`): each on the frame's ground — the quiet one
+// the side navigation sits on — with a gap where the rule was. The ground is the
+// row's at rest and under the pointer: these are rows to read or to act in, not
+// rows to follow, and a hover would promise a target that is not there.
+.ui-list--tiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+
+  .ui-list__item {
+    background: var(--ui-frame);
+
+    &:hover { background: var(--ui-frame); }
+
+    &.is-highlighted { background: var(--ui-brand-subtle); }
+  }
+
+  .ui-list__item + .ui-list__item::before {
+    content: none;
+  }
+}
+
+// The whole row follows the title's link (`ListItem.withRowLink`). The link's
+// hit area is stretched over the row by a pseudo-element positioned against the
+// item, so it stays one link named by the title; actions and links in the
+// fragments are lifted above it and remain their own targets.
+//
+// The title is one line, cut with an ellipsis: the row is a way into the thing,
+// not the place to read it, so a long comment does not make one row taller than
+// the rest. The stretched area is positioned against the item, outside the
+// title, so the clipping does not clip it.
+.ui-list__item--row-link {
+  .ui-list__title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // Never underlined, not even on hover: the whole row is the target and says
+  // so with its hover ground, and an underline under the title alone would
+  // point at a smaller one.
+  .ui-list__title a:not(.ui-button, .ui-badge) {
+    &,
+    &:hover { text-decoration: none; }
+  }
+
+  .ui-list__title a:not(.ui-badge) {
+    // Static even when focused: the global focus rule makes the focused element
+    // relative, which would pull the stretched area back onto the title.
+    position: static;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--ui-radius-control);
+    }
+
+    // WCAG 2.4.7 ring moved: onto the row below, which is what the link covers.
+    &:focus-visible {
+      position: static;
+      outline: none;
+    }
+  }
+
+  &:has(.ui-list__title a:not(.ui-badge):focus-visible) {
+    z-index: 1;
+    outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+    outline-offset: var(--ui-focus-ring-offset);
+  }
+
+  .ui-list__fragments a,
+  .ui-list__actions {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.ui-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-4);
+}
+
+.ui-list__icon { flex: 0 0 auto; }
+
+.ui-list__content {
+  // Without this a long title refuses to shrink and pushes the timestamp and
+  // actions off the row.
+  flex: 1 1 0;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+}
+
+.ui-list__title {
+  font-size: var(--ui-text-body);
+  // Medium, not bold. The title already separates from the fragments and the
+  // timestamp by size and by color, so weight only has to lift it — the
+  // existing listing uses full bold and reads heavier than it needs to.
+  font-weight: var(--ui-weight-medium);
+  color: var(--ui-text);
+  // A name with no spaces in it breaks rather than widening a narrow list.
+  overflow-wrap: anywhere;
+
+  // The title link. A link-button in the title keeps being a button, and a
+  // button is never underlined. A title that opens something beside the list
+  // instead of going somewhere (`Ui.Link.action`) is the same title: the same
+  // color and weight, underlined on hover like its neighbors in other lists.
+  a:not(.ui-button, .ui-badge),
+  .ui-link--action {
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// One line wherever there is room for one, so a row is its title and this line.
+// It still wraps, and a fragment longer than the whole line breaks inside
+// itself: a line that refused to wrap pushed its fragments out of the content
+// column — over the timestamp beside it, or past the list's edge into a
+// horizontal scrollbar once the list was narrow. Nothing here clips but the
+// description, so a link among the fragments keeps its whole focus ring.
+.ui-list__fragments {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-inline-size: 0;
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+}
+
+.ui-list__fragment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+
+  // The separator carries empty alternative text, so it is not announced. A
+  // middot read aloud between every fragment is noise.
+  & + &::before {
+    content: '·' / '';
+    margin-inline: var(--ui-space-3);
+    color: var(--ui-text-muted);
+  }
+}
+
+// The description takes the rest of the line and is cut with an ellipsis. A
+// zero basis is what keeps it on the line: wrapping is decided on the basis, so
+// a long description with its natural width as the basis would always drop to
+// a line of its own. It moves down only when less than its minimum is left,
+// and then takes that whole line, still cut short.
+//
+// Block rather than inline-flex, because an ellipsis is a block's: the
+// separator before it stays inline text in front of the words.
+.ui-list__fragment--description {
+  display: block;
+  flex: 1 1 0;
+  min-inline-size: min(8rem, 100%);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+}
+
+// A step lighter than the fragments: the time is the least of what a row says.
+// `text-subtle` clears 4.5:1 on every neutral surface under a state layer, and
+// on each brand's subtle tint a highlighted row takes (5.0:1 and up). In dark
+// mode it is the same value as muted — the ramp has no lighter step left.
+//
+// The extra space keeps a long description, cut short at the end of its line,
+// from running up against the time.
+.ui-list__timestamp {
+  flex: 0 0 auto;
+  margin-inline-start: var(--ui-space-3);
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-subtle);
+  white-space: nowrap;
+}
+
+.ui-list__actions { flex: 0 0 auto; }
+
+.ui-list__detail {
+  margin-block-start: var(--ui-space-3);
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+}
+
+// Narrow container: the timestamp drops under the content rather than
+// squeezing the title. Keyed to the list's own width, not the viewport, so a
+// list inside a right panel narrows even on a wide screen.
+//
+// A grid with named columns, one per part a row can have, so a row without an
+// icon or without actions has no empty track and no stray gap. The icon stays
+// beside the content and the actions stay in the top corner, where they are on
+// every other row; the timestamp takes a second line under the content, in its
+// column. Visually the actions now come before the timestamp, which is the one
+// departure from DOM order — the timestamp is not focusable, so focus order is
+// unchanged.
+@container (max-width: 34rem) {
+  .ui-list__row {
+    display: grid;
+    grid-template-columns: [content] minmax(0, 1fr);
+    column-gap: var(--ui-space-4);
+    row-gap: var(--ui-space-2);
+    align-items: center;
+  }
+
+  .ui-list__row:has(> .ui-list__icon) {
+    grid-template-columns: [icon] auto [content] minmax(0, 1fr);
+  }
+
+  .ui-list__row:has(> .ui-list__actions) {
+    grid-template-columns: [content] minmax(0, 1fr) [actions] auto;
+  }
+
+  .ui-list__row:has(> .ui-list__icon):has(> .ui-list__actions) {
+    grid-template-columns: [icon] auto [content] minmax(0, 1fr) [actions] auto;
+  }
+
+  .ui-list__icon {
+    grid-row: 1;
+    grid-column: icon;
+  }
+
+  .ui-list__content {
+    grid-row: 1;
+    grid-column: content;
+  }
+
+  .ui-list__timestamp {
+    grid-row: 2;
+    grid-column: content;
+    justify-self: start;
+    // On its own line, under the content's start edge.
+    margin-inline-start: 0;
+  }
+
+  .ui-list__actions {
+    grid-row: 1;
+    grid-column: actions;
+    align-self: start;
+  }
+}
+
+.ui-list__title-badge {
+  margin-inline-start: var(--ui-space-3);
+}

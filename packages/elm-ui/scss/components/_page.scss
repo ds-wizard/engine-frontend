@@ -1,0 +1,424 @@
+// Page templates. The template owns DOM order, the scroll container, landmarks
+// and the responsive collapse — none of which a page author should be deciding.
+
+// The page scrolls; the inner column is the measure and is centered in it.
+// Centering the scroll container instead would put the scrollbar in the middle.
+.ui-page {
+  // A scroll container is the containing block of what is positioned in it.
+  // Otherwise an absolute descendant — the off-screen live region of a copy
+  // button, any visually hidden text — is placed against the frame instead,
+  // where the content would have put it, and the whole page scrolls to it.
+  position: relative;
+  block-size: 100%;
+  overflow-y: auto;
+  padding: var(--ui-space-7);
+}
+
+.ui-page__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
+  inline-size: 100%;
+  max-inline-size: 64rem;
+  margin-inline: auto;
+
+  // At least the height of the scrollport, so anything with an auto leading
+  // margin — the unsaved-changes bar — is pushed to the bottom of the view
+  // rather than sitting wherever the content happens to end. The percentage
+  // resolves against the content box, so the container's padding is already
+  // excluded and this adds no scrollbar.
+  min-block-size: 100%;
+}
+
+.ui-page__inner--narrow { max-inline-size: 36rem; }
+// A settings form, as wide as the settings pages' — and as the unsaved-changes
+// bar, so a form on a tab and its bar line up.
+.ui-page__inner--form { max-inline-size: var(--ui-measure-form); }
+// A listing: wider than a page of prose, because its rows carry columns, and
+// still a measure, so a row on a wide screen is not read across the whole of it.
+.ui-page__inner--list { max-inline-size: var(--ui-measure-list); }
+.ui-page__inner--full { max-inline-size: none; }
+
+// A page template used as a region of another page — a tab of a detail page,
+// which owns the scrolling and the padding. The column and the measure are the
+// same; what goes is the scrollport height, since there is no scrollport here
+// and a region as tall as its container would push the rest of the tab off.
+.ui-page__inner--within { min-block-size: 0; }
+
+.ui-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+.ui-page__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+}
+
+.ui-page__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
+  min-inline-size: 0;
+}
+
+// Settings shape. Both existing implementations fix the column at 20rem, so
+// that number is inherited rather than invented — and in both, the navigation
+// stays put while only the content scrolls.
+.ui-split-nav {
+  display: grid;
+  grid-template-columns: 20rem minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.ui-split-nav__nav {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+
+  min-block-size: 0;
+  overflow-y: auto;
+  // Wider on the leading edge: this menu often sits directly against the
+  // application's own navigation, and two menus touching read as one.
+  padding: var(--ui-space-6) var(--ui-space-5) var(--ui-space-6) var(--ui-space-6);
+
+  // No ground of its own. This menu navigates *within* the page rather than
+  // around the application, so it belongs to the content: the frame's ground
+  // made it a second application sidebar, and two of those side by side is one
+  // column too many.
+  //
+  // The line is on the trailing edge for the same reason — what needs
+  // separating is the menu from the content it controls, not the menu from the
+  // navigation, which the change of surface already does.
+  border-inline-end: 1px solid var(--ui-border-subtle);
+}
+
+// A row for the compact menu, a row for the content, a row for the footer — and
+// every child placed, so the compact menu being display: none does not let the
+// content slide up into the auto row meant for it. That is the same bug that
+// once left the unsaved bar floating mid-page.
+.ui-split-nav__main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.ui-split-nav__compact {
+  grid-row: 1;
+  display: none;
+}
+
+.ui-split-nav__content {
+  position: relative;
+  grid-row: 2;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+  padding: var(--ui-space-7);
+}
+
+// The footer sits below the scroll region, so whatever it holds is at the
+// bottom of the screen without being positioned there. No surface of its own:
+// it is a band for something to float in, and an empty one should take up no
+// room rather than leaving a gap along the bottom.
+//
+// It does take the content's inline padding, so that what floats here lines up
+// with the form above it — without that, a narrow window puts the form inside
+// its padding and the unsaved bar hard against both edges.
+.ui-split-nav__footer {
+  grid-row: 3;
+  min-inline-size: 0;
+  padding-inline: var(--ui-space-7);
+}
+
+.ui-split-nav__inner {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: var(--ui-measure-form);
+  margin-inline: auto;
+  min-block-size: 100%;
+}
+
+.ui-split-nav__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+// A heading over one set of links, not a name given to a field: it stays at
+// the size of the menu's own furniture rather than growing with `.ui-label`.
+.ui-split-nav__group-label {
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+}
+
+.ui-split-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  list-style: none;
+}
+
+.ui-split-nav__link {
+  display: block;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-text);
+  text-decoration: none;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { background: var(--ui-state-hover); }
+
+  &.is-active {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-link);
+    font-weight: var(--ui-weight-medium);
+  }
+}
+
+// THE COMPACT MENU
+//
+// Below the width where a 20rem column and a form both fit, the column goes and
+// the same links become a disclosure naming the current section. Stacking the
+// column above the form instead gave a long settings menu the height and left
+// the form a strip.
+.ui-split-nav__disclosure {
+  border-block-end: 1px solid var(--ui-border-subtle);
+}
+
+.ui-split-nav__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-4) var(--ui-space-5);
+
+  color: var(--ui-text);
+  font-weight: var(--ui-weight-medium);
+  cursor: pointer;
+  list-style: none;
+
+  transition: var(--ui-transition-state);
+
+  &::-webkit-details-marker { display: none; }
+
+  &:hover { background: var(--ui-state-hover); }
+
+  // The ring goes inward: the summary runs edge to edge of a region that clips.
+  &:focus-visible {
+    outline-offset: calc(var(--ui-focus-ring-offset) * -1);
+  }
+}
+
+.ui-split-nav__current {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.ui-split-nav__chevron {
+  display: inline-flex;
+  color: var(--ui-text-muted);
+}
+
+// The chevron turns rather than being swapped: the same glyph, pointing the way
+// the list has gone. Transform only, so it costs no layout.
+.ui-split-nav__disclosure[open] .ui-split-nav__chevron {
+  transform: rotate(180deg);
+}
+
+.ui-split-nav__chevron {
+  transition: transform var(--ui-duration-fast) var(--ui-ease-out);
+}
+
+// Open, the list is capped and scrolls on its own, so a long menu still leaves
+// the page something to show under it.
+.ui-split-nav__compact-nav {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+
+  max-block-size: 50vh;
+  overflow-y: auto;
+  padding: var(--ui-space-2) var(--ui-space-5) var(--ui-space-5);
+}
+
+@container ui-main (max-width: 48rem) {
+  .ui-split-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ui-split-nav__nav {
+    display: none;
+  }
+
+  .ui-split-nav__compact {
+    display: block;
+  }
+
+  .ui-split-nav__content {
+    padding: var(--ui-space-5);
+  }
+
+  .ui-split-nav__footer {
+    padding-inline: var(--ui-space-5);
+  }
+}
+
+.ui-page-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-6);
+  padding-block: var(--ui-space-8);
+  text-align: center;
+  max-inline-size: 34rem;
+  margin-inline: auto;
+}
+
+// Inside a page that has its own heading — a detail tab with nothing to show.
+// The containing template's body is a column as tall as the region, and auto
+// margins in a column split what is left above and below, so the message sits
+// in the middle of the tab rather than under the tabs with the space below it.
+.ui-page-message--within {
+  margin-block: auto;
+}
+
+// The width is stated, not borrowed from the drawing. The column centers its
+// items, so a slot with only a maximum shrink-wraps its content — and an
+// illustration is a box with a background rather than an image with a size of
+// its own, so that came to nothing at all.
+.ui-page-message__illustration {
+  inline-size: 100%;
+  max-inline-size: 18rem;
+}
+
+// A log under the message (`withDetails`): lines too long for the sentence's
+// column, read from their start.
+.ui-page-message--details {
+  max-inline-size: 48rem;
+}
+
+.ui-page-message__details {
+  align-self: stretch;
+  text-align: start;
+}
+
+// The application frame. One <main>, landmarks in fixed DOM order.
+//
+// The shell owns height and nothing else: no padding, no scrolling. Each page
+// template owns its own, because only the template knows what should stay put
+// when the rest moves — a detail header, a settings menu. The originals divide
+// it the same way.
+.ui-shell {
+  display: grid;
+  // minmax(0, 1fr) rather than 1fr. A bare 1fr is minmax(auto, 1fr), and an
+  // auto minimum is the content's own width, so a wide table or a long
+  // identifier pushes the whole page sideways instead of scrolling inside its
+  // own container. This is where the stray horizontal scrollbars came from.
+  grid-template-columns: auto minmax(0, 1fr);
+  // Stated rather than implicit. An auto row usually stretches to the
+  // container, but only usually — and if it sizes to its content instead, every
+  // "100%" below it resolves against the content's height and each region ends
+  // where its content ends. That is what leaves a footer floating in the middle
+  // of a short page.
+  grid-template-rows: minmax(0, 1fr);
+  block-size: 100vh;
+  overflow: hidden;
+}
+
+.ui-shell__nav {
+  // The navigation inside owns its padding and its scrolling; adding them here
+  // as well is what put a second frame around the menu.
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.ui-shell__body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+// Placed explicitly. Auto-placement fills the first free cell, so with no
+// header the main region landed in the auto row meant for one and sized itself
+// to its content — and every region below it then ended where its content
+// ended. An absent optional slot must not move the ones that remain.
+.ui-shell__header {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+  // Frame, not content. No border under it: the step down to the canvas is the
+  // separation.
+  background: var(--ui-frame);
+}
+
+.ui-shell__main {
+  grid-row: 2;
+  grid-column: 1;
+  // Where the reading happens, so it is the paper: white in light mode, the
+  // lighter charcoal in dark. The frame around it recedes.
+  background: var(--ui-surface);
+  // A single stretched row, so whatever the template is fills the region
+  // without having to ask for 100% of a height it cannot see.
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-inline-size: 0;
+  min-block-size: 0;
+
+  // The templates inside decide when to stack by how much room *they* have, not
+  // by how wide the window is: the same window with the navigation expanded and
+  // collapsed leaves the page two different widths (§9, container queries).
+  // Inline size only, so the region's height still comes from the grid.
+  container: ui-main / inline-size;
+
+  // Focused programmatically on route change. The reset only styles
+  // :focus-visible, so a mouse-driven navigation never paints a stray ring —
+  // and the offset goes inward because an outward one would be clipped.
+  &:focus-visible {
+    outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+    outline-offset: calc(var(--ui-focus-ring-offset) * -1);
+  }
+}
+
+// The side panel's slot (`AppShell.withSidePanel`), there only while a panel is
+// open. The panel brings its own landmark and its own scrolling (`Ui.Drawer`);
+// the slot gives it the column and the height.
+.ui-shell__aside {
+  grid-row: 2;
+  grid-column: 2;
+  display: flex;
+  inline-size: 22rem;
+  min-block-size: 0;
+}
+
+// Narrow, the page keeps the width and the panel is laid over its end, as the
+// workspace's panel is. Its height is still the region's, under the header.
+@media (max-width: 48rem) {
+  .ui-shell__body {
+    position: relative;
+  }
+
+  .ui-shell__aside {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 2;
+    inline-size: min(22rem, calc(100% - var(--ui-space-8)));
+    box-shadow: var(--ui-elevation-3);
+  }
+}
