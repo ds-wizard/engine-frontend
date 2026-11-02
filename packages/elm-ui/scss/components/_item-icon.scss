@@ -1,0 +1,102 @@
+.ui-item-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--ui-radius-pill);
+  overflow: hidden;
+
+  background: var(--ui-surface-sunken);
+  color: var(--ui-neutral-900);
+  font-size: 1.125rem;
+  // Regular rather than medium: the initials stand in for a picture, and
+  // beside the name, which is the label, they should not be the strongest
+  // thing in the row.
+  font-weight: var(--ui-weight-regular);
+  line-height: 1;
+
+  img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+}
+
+// A place rather than a person: a rounded square, and its picture — a logo —
+// shown whole inside it.
+.ui-item-icon--square {
+  border-radius: var(--ui-radius-control);
+
+  img { object-fit: contain; }
+}
+
+// No generated color: the sunken ground the icon has anyway, and a glyph in
+// the muted text color, which follows the theme where the dark initials on a
+// generated tint do not need to.
+.ui-item-icon--plain {
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+}
+
+.ui-item-icon--sm {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  font-size: var(--ui-text-label);
+}
+
+.ui-item-icon--lg {
+  inline-size: 5rem;
+  block-size: 5rem;
+  font-size: 2rem;
+}
+
+// The generated background is a light tint, so the initials stay dark in both
+// modes rather than following --ui-text. Fixing the pair keeps the guarantee
+// the derivation makes: >=10:1 for every hue.
+.ui-item-icon__initials,
+.ui-item-icon__glyph {
+  color: var(--ui-neutral-900);
+}
+
+// The plain ground follows the theme, so its glyph has to as well.
+.ui-item-icon--plain .ui-item-icon__glyph {
+  color: var(--ui-text-muted);
+}
+
+// A primary button's ground and text, for a brand given to the icon itself
+// (ItemIcon.withBrandOf) rather than taken from the theme around it. Both modes'
+// grounds are on the element; which one applies follows the mode, as the
+// theme's own roles do.
+.ui-item-icon--brand {
+  background: var(--ui-item-icon-brand-light, var(--ui-brand-strong));
+  color: var(--ui-text-on-brand);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .ui-item-icon--brand {
+    background: var(--ui-item-icon-brand-dark, var(--ui-brand-strong));
+  }
+}
+
+:root[data-theme='dark'] .ui-item-icon--brand {
+  background: var(--ui-item-icon-brand-dark, var(--ui-brand-strong));
+}
+
+.ui-item-icon--brand .ui-item-icon__glyph {
+  color: var(--ui-text-on-brand);
+}
+
+// An image over the initials (ItemIcon.withImageOver): the whole circle, so
+// where it has a picture the initials are hidden and where it is transparent
+// they show.
+.ui-item-icon__over {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}

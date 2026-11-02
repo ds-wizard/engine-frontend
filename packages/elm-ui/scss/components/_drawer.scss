@@ -1,0 +1,67 @@
+// A panel down the end of the application frame (Ui.Drawer), in the shell's
+// side panel slot. Frame, not content: it sits on the same ground as the
+// navigation, so the page between them reads as the paper.
+//
+// It fills the slot's height and scrolls only its body: the title and the close
+// button stay where they are, and so does the footer — a message box stays
+// under the conversation it adds to.
+
+.ui-drawer {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+  inline-size: 100%;
+  background: var(--ui-frame);
+}
+
+.ui-drawer__header {
+  display: flex;
+  // A long title wraps; the close button stays at the top, by its first line,
+  // rather than drifting down to the middle of the title.
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  // The same inset as the panel beside a detail page (`.ui-detail__side-scroll`),
+  // so whatever is beside the content sits at one distance from its edges.
+  padding: var(--ui-space-6) var(--ui-space-6) var(--ui-space-4);
+}
+
+.ui-drawer__title {
+  min-inline-size: 0;
+  font-family: var(--ui-font-display);
+  font-size: var(--ui-text-subtitle);
+  font-weight: var(--ui-weight-semibold);
+
+  // Focused from script only, when there is nothing to type into; a ring
+  // round a heading the reader did not tab to says nothing.
+  &:focus:not(:focus-visible) {
+    outline-color: transparent;
+  }
+}
+
+.ui-drawer__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+// A scroll container clips an outward focus ring, so it keeps the ring's room
+// on every side (`--ui-focus-clearance`), on top of its own padding.
+.ui-drawer__body {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--ui-focus-clearance) var(--ui-space-6) var(--ui-space-6);
+}
+
+.ui-drawer__footer {
+  padding: var(--ui-space-3) var(--ui-space-6) var(--ui-space-6);
+}

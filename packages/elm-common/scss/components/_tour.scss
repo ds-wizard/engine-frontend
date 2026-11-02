@@ -1,0 +1,142 @@
+// Tour — driver.js's popover, dressed in the system's roles.
+//
+// driver.css is imported before the system (apps/dsw/scss/main.scss) and keeps
+// the layout — positioning, the overlay, pointer-events. Everything a reader sees
+// is replaced here, scoped to `.c-tour`, the popoverClass that
+// packages/elm-common/js/ports/tour.js passes. Nothing is a literal: dark mode is the
+// roles changing, not a second block.
+//
+// driver.css sets `all: unset` on the popover and its buttons, so the rules
+// below restate properties the system's own stylesheet would otherwise have
+// provided through inheritance or the reset.
+
+.driver-popover.c-tour {
+  // A floating surface, the way the menus and the combobox popup float: the
+  // shadow does the work in light mode and the ground in dark.
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-surface);
+  color: var(--ui-text);
+  font-family: var(--ui-font-ui);
+
+  padding: var(--ui-space-5);
+  min-width: 0;
+  max-width: none;
+  min-inline-size: min(18rem, calc(100vw - 2 * var(--ui-space-4)));
+  max-inline-size: min(24rem, calc(100vw - 2 * var(--ui-space-4)));
+
+  .driver-popover-title {
+    // Room for the close button at the end of the line.
+    padding-inline-end: var(--ui-space-7);
+    font-family: var(--ui-font-display);
+    font-size: var(--ui-text-subtitle);
+    font-weight: var(--ui-weight-semibold);
+    line-height: var(--ui-leading-tight);
+  }
+
+  .driver-popover-title[style*='block'] + .driver-popover-description {
+    margin-block-start: var(--ui-space-3);
+  }
+
+  .driver-popover-description {
+    font-size: var(--ui-text-body);
+    line-height: var(--ui-leading-normal);
+    color: var(--ui-text);
+  }
+
+  // Wraps rather than squeezes: at 200% zoom the progress and two buttons do
+  // not fit on one line of a 24rem box (1.4.10).
+  .driver-popover-footer {
+    flex-wrap: wrap;
+    gap: var(--ui-space-3);
+    margin: 0;
+    margin-block-start: var(--ui-space-5);
+  }
+
+  .driver-popover-progress-text {
+    font-size: var(--ui-text-body-sm);
+    color: var(--ui-text-muted);
+  }
+
+  .driver-popover-navigation-btns {
+    gap: var(--ui-space-2);
+  }
+
+  // driver.css spaces the buttons with a physical margin; the container's gap
+  // does it here.
+  .driver-popover-navigation-btns button + button {
+    margin: 0;
+  }
+
+  // The buttons carry Ui.Button's classes (added in tour.js). driver.css paints
+  // its own light gray on :hover and :focus at a higher specificity than the
+  // system's variants, which would put white text on near-white — so each
+  // variant's grounds are restated at this scope.
+  .driver-popover-footer-btn {
+    display: inline-flex;
+    box-sizing: border-box;
+    min-block-size: var(--ui-hit-min);
+    font-family: var(--ui-font-ui);
+    line-height: var(--ui-leading-tight);
+    text-shadow: none;
+    cursor: pointer;
+  }
+
+  .driver-popover-footer-btn.ui-button--primary {
+    background: var(--ui-brand-strong);
+    color: var(--ui-text-on-brand);
+
+    &:hover { background: var(--ui-brand-hover); }
+    &:active { background: var(--ui-brand-active); }
+    &:focus:not(:hover, :active) { background: var(--ui-brand-strong); }
+  }
+
+  .driver-popover-footer-btn.ui-button--secondary {
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-border-control);
+    color: var(--ui-text);
+
+    &:hover { background: var(--ui-state-hover); }
+    &:active { background: var(--ui-state-active); }
+    &:focus:not(:hover, :active) { background: var(--ui-surface); }
+  }
+
+  // "Previous" on the first step: driver.js dims it and leaves it in the tab
+  // order, which is a stop that does nothing. Gone is clearer than faded.
+  .driver-popover-footer .driver-popover-btn-disabled {
+    display: none;
+  }
+
+  .driver-popover-close-btn {
+    // The reset lifts focused elements with `position: relative`, which would
+    // drop this button out of its corner the moment a keyboard reached it.
+    position: absolute;
+    inset-block-start: var(--ui-space-3);
+    inset-inline-end: var(--ui-space-3);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--ui-hit-min);
+    block-size: var(--ui-hit-min);
+    border-radius: var(--ui-radius-pill);
+
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-subtitle);
+    transition: var(--ui-transition-state);
+
+    &:hover,
+    &:focus {
+      background: var(--ui-state-hover);
+      color: var(--ui-text);
+    }
+  }
+
+  // No arrow. Position and the highlighted element already say what the popover
+  // is about, which is the same decision Ui.Tooltip makes; an arrow would also
+  // need a color per side in driver.js's physical terms.
+  .driver-popover-arrow {
+    display: none;
+  }
+}

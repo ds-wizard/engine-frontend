@@ -1,0 +1,53 @@
+// The brand color: the wizard's #F15A24, over the system's plain blue
+// default. Set the way an application sets its brand — the brand and link
+// roles after the system's stylesheet, in the same scopes as _roles.scss, so an
+// explicit data-theme still wins in both directions.
+//
+// The values are Ui.Theme.Derive's for that seed, and they pass Ui.Theme.Check
+// in both modes. The seed itself is 3.37:1 on white, short of AA for text, so
+// it stays the identity role (`brand`) and the derivation darkens the roles
+// that carry text — filled buttons (`brand-strong`) and links — in light mode.
+//
+// The same as app-dsw's (`apps/dsw/scss/_brand.scss`): the registry has no
+// color of its own to set at runtime.
+
+@mixin registry-brand-light {
+  --ui-link: #ba3a00;
+  --ui-link-hover: #9e3000;
+  --ui-brand: #f15a24;
+  --ui-brand-strong: #c33d00;
+  --ui-brand-hover: #a93400;
+  --ui-brand-active: #932c00;
+  --ui-brand-subtle: #ffebe5;
+  --ui-brand-subtle-hover: #ffded4;
+  --ui-brand-subtle-selected: #ffd0c2;
+  --ui-brand-on-subtle: #ae3500;
+}
+
+@mixin registry-brand-dark {
+  --ui-link: #ffa082;
+  --ui-link-hover: #ffbea9;
+  --ui-brand: #fc6430;
+  --ui-brand-strong: #fc6430;
+  --ui-brand-hover: #ff8862;
+  --ui-brand-active: #ffa589;
+  --ui-brand-subtle: #501f0f;
+  --ui-brand-subtle-hover: #622a18;
+  --ui-brand-subtle-selected: #782c11;
+  --ui-brand-on-subtle: #ff9674;
+}
+
+:root,
+:root[data-theme='light'] {
+  @include registry-brand-light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include registry-brand-dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include registry-brand-dark;
+}

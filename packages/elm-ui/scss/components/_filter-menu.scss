@@ -1,0 +1,63 @@
+// Filter menu — a menu button that holds one filter of a listing.
+//
+// A filter whose value is set says so twice: by being filled rather than
+// outlined, and by naming the value in the button instead of the filter. The
+// fill is what a glance across a row of filters finds; the words are what
+// survives without color (WCAG 1.4.1) and what a screen reader reads.
+
+.ui-filter-menu {
+  display: inline-flex;
+  min-inline-size: 0;
+}
+
+.ui-filter-menu__trigger {
+  // A value can be longer than a filter's name. It truncates rather than
+  // pushing the toolbar wider than its container; the whole value is still the
+  // trigger's accessible name.
+  max-inline-size: 16rem;
+}
+
+// The choices are names, values and a search field: wider than a menu of
+// actions, 300px, and never wider than the window.
+.ui-filter-menu .ui-menu__list {
+  inline-size: 18.75rem;
+  max-inline-size: calc(100vw - 2rem);
+}
+
+.ui-filter-menu__value {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// The trigger only, by class and by child combinator, so nothing inside the open
+// menu — a note, a segmented row — is ever painted as an active filter.
+.ui-filter-menu--active > .ui-menu > .ui-filter-menu__trigger {
+  background: var(--ui-brand-subtle);
+  border-color: var(--ui-brand);
+  color: var(--ui-brand-on-subtle);
+
+  // The tinted ground has its own hover and pressed steps: a translucent ink
+  // over the tint would pull it towards gray rather than deepening it.
+  &:hover:not(:disabled) { background: var(--ui-brand-subtle-hover); }
+  &:active:not(:disabled),
+  &[aria-expanded='true'] { background: var(--ui-brand-subtle-selected); }
+
+  // A toolbar's quiet filter (toQuietHtml) has no outline to color.
+  &.ui-button--quiet { border-color: transparent; }
+}
+
+// A column's filter in the column's header (toHeaderHtml): the funnel alone,
+// quiet until the filter is on.
+.ui-filter-menu--header .ui-filter-menu__trigger {
+  color: var(--ui-text-muted);
+}
+
+// Laid over the table rather than inside it: the header is in the table's
+// scrolling region, which clips anything positioned in it. Fixed to the window,
+// no ancestor short of it clips the list; js/menu-fit.js puts it under the
+// funnel, end-aligned to it, and moves it with the table as that scrolls.
+.ui-filter-menu--header .ui-menu__list {
+  position: fixed;
+  inset: auto;
+}

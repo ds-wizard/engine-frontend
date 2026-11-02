@@ -1,0 +1,14 @@
+// What's new: a picture above the release notes.
+
+.c-news-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+}
+
+.c-news-modal__image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--ui-radius-control);
+}

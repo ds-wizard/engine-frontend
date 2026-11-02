@@ -1,0 +1,9 @@
+// The plugin settings (`Common.Pages.Settings.Plugins`).
+//
+// A column of plugins parted by rules. The rule brings its own room — that is
+// what tells a line between sections from a line that is one more item in a list
+// — so the column brings none: a gap of the column's above the margin of the
+// rule's is the same space counted twice, and it left the plugins a screen apart.
+.c-settings-plugins {
+  --ui-stack-gap: 0;
+}

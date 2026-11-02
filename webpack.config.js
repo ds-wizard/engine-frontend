@@ -6,34 +6,26 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require("terser-webpack-plugin")
 
-const component = `app-${process.env.COMPONENT}`
+const {component: findComponent} = require('./tools/build/components')
+const PotPlugin = require('./tools/build/pot-plugin')
 
-const components = {
-    'app-wizard': {
-        port: 8080,
-        extraEntries: [],
-        publicPath: '/wizard/'
-    },
-    'app-registry': {
-        port: 8081,
-        extraEntries: [],
-        publicPath: '/'
-    },
-}
+const name = process.env.COMPONENT
+const component = findComponent(name)
+const dir = component.dir
 
 
 module.exports = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
 
     entry: [
-        `./${component}/index.js`,
-        `./${component}/scss/main.scss`,
-    ].concat(components[component].extraEntries),
+        `./${dir}/index.js`,
+        `./${dir}/scss/main.scss`,
+    ],
 
     output: {
-        path: path.resolve(`${__dirname}/dist/${component}/`),
+        path: path.resolve(`${__dirname}/dist/${name}/`),
         filename: '[name].[chunkhash].js',
-        publicPath: components[component].publicPath
+        publicPath: component.publicPath
     },
 
     module: {
@@ -42,7 +34,17 @@ module.exports = {
                 test: /\.(scss|css)$/,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    'css-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            // A url() that starts with / is the application's own
+                            // public path — the logo, an illustration — and names a
+                            // file CopyPlugin puts there as it is. Resolving it here
+                            // would look for it on disk and emit a hashed copy, which
+                            // is the opposite of what a fixed, replaceable path is for.
+                            url: {filter: (url) => !url.startsWith('/')}
+                        }
+                    },
                     {
                         loader: 'sass-loader',
                         options: {
@@ -57,9 +59,10 @@ module.exports = {
             {
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
-                loader: require.resolve('./scripts/elm-loader.js'),
+                loader: require.resolve('./tools/build/elm-loader.js'),
                 options: {
-                    pathToElm: 'node_modules/.bin/elm',
+                    // ELM overrides it, for a node_modules shared with another platform.
+                    pathToElm: process.env.ELM || 'node_modules/.bin/elm',
                     optimize: process.env.NODE_ENV === 'production'
                 }
             },
@@ -76,8 +79,13 @@ module.exports = {
     },
 
     resolve: {
+        // Node modules the PO parser (po2json → gettext-parser) asks for in the
+        // browser: buffer (safe-buffer), string_decoder (iconv-lite) and util,
+        // each a declared dependency, so they do not depend on what else installs them.
         fallback: {
             "stream": false,
+            buffer: require.resolve("buffer/"),
+            string_decoder: require.resolve("string_decoder/"),
             util: require.resolve("util/"),
             "fs": false,
             "process": false
@@ -111,10 +119,30 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            template: `${component}/index.ejs`,
-            scriptLoading: 'blocking',
-            minimizeOptions: {
-                minifyCss: true
+            template: `${dir}/index.ejs`,
+            scriptLoading: 'module',
+            // The dsw and registry apps place the bundle's tags themselves, at the end of the body:
+            // a stylesheet in the head blocks the first paint, so the loading
+            // spinner written into the page cannot be seen until the whole
+            // stylesheet has arrived — which is exactly the wait it is there to
+            // cover. Everything before an in-body stylesheet paints without
+            // waiting for it. The other apps keep the injected head tags.
+            inject: !['dsw', 'registry'].includes(name),
+            // `minimizeOptions` was not an option the plugin has, so the
+            // production HTML was minified only by the plugin's own defaults
+            // and the inline style and pre-paint script were shipped as
+            // written. Spelled out here, and only for a production build —
+            // the development server keeps the page readable.
+            minify: process.env.NODE_ENV === 'production' && {
+                collapseWhitespace: true,
+                keepClosingSlash: true,
+                removeComments: true,
+                removeRedundantAttributes: true,
+                removeScriptTypeAttributes: true,
+                removeStyleLinkTypeAttributes: true,
+                useShortDoctype: true,
+                minifyCSS: true,
+                minifyJS: true
             }
         }),
         new MiniCssExtractPlugin({
@@ -122,23 +150,24 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                {from: `${component}/assets`, to: 'assets'},
-                {from: `${component}/robots.txt`, to: 'robots.txt', noErrorOnMissing: true}
+                {from: `${dir}/assets`, to: 'assets', noErrorOnMissing: true},
+                {from: `${dir}/favicon.ico`, to: 'favicon.ico', noErrorOnMissing: true}
             ]
         }),
         new webpack.DefinePlugin({
             'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG),
         }),
+        ...(name === 'dsw' ? [new PotPlugin(name)] : []),
     ],
 
     devServer: {
         historyApiFallback: {
             disableDotRule: true,
-            index: components[component].publicPath
+            index: component.publicPath
         },
-        port: components[component].port,
+        port: component.port,
         static: {
-            directory: (component === 'app-registry') ? __dirname : path.join(__dirname, component, 'static')
+            directory: (name === 'registry') ? __dirname : path.join(__dirname, dir, 'static')
         }
     }
 }

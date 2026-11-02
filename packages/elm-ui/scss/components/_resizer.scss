@@ -1,0 +1,46 @@
+// The separator between a panel and the content beside it.
+//
+// It sits astride the panel's edge rather than beside it, so the thing you grab
+// is the edge you see. Eight pixels wide with nothing else within twelve of it,
+// which is how WCAG 2.5.8 lets a target be under 24: by spacing rather than by
+// size. Its parent has to be position: relative.
+.ui-resizer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -4px;
+  inline-size: 8px;
+  z-index: 1;
+
+  cursor: col-resize;
+  // A drag that starts here is a resize, never a scroll.
+  touch-action: none;
+  user-select: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    // A 2px line down the middle of the 8px grab area.
+    inset-inline: 3px;
+
+    background: var(--ui-border-strong);
+    opacity: 0;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
+  }
+
+  &:hover::before,
+  &:focus-visible::before {
+    opacity: 1;
+  }
+
+  &.is-dragging::before {
+    background: var(--ui-brand);
+    opacity: 1;
+  }
+}
+
+// A panel at the end of the page is resized from its other edge.
+.ui-resizer--leading {
+  inset-inline-end: auto;
+  inset-inline-start: -4px;
+}

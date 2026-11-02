@@ -1,0 +1,90 @@
+module Common.Pages.Public.Routes exposing
+    ( Route(..)
+    , parsers
+    , toUrl
+    )
+
+import Common.Api.Models.BootstrapConfig exposing (BootstrapConfig)
+import Url exposing (percentEncode)
+import Url.Parser exposing ((</>), (<?>), Parser, map, s, string, top)
+import Url.Parser.Query as Query
+
+
+type Route
+    = ForgottenPasswordRoute
+    | ForgottenPasswordConfirmationRoute String String
+    | LoginRoute (Maybe String)
+    | LogoutSuccessful
+    | OpenIdCallback String (Maybe String) (Maybe String) (Maybe String) (Maybe String)
+    | SignupRoute
+    | SignupConfirmationRoute String String
+
+
+parsers : { b | config : BootstrapConfig } -> (Route -> a) -> List (Parser (a -> c) c)
+parsers appState wrapRoute =
+    let
+        signUpRoutes =
+            if appState.config.authentication.registrationEnabled then
+                [ map (wrapRoute <| SignupRoute) (s "signup")
+                , map (signupConfirmation wrapRoute) (s "signup" </> string </> string)
+                ]
+
+            else
+                []
+    in
+    [ map (openIdCallback wrapRoute) (s "open-id" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state" <?> Query.string "state")
+    , map (wrapRoute ForgottenPasswordRoute) (s "forgotten-password")
+    , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
+    , map (wrapRoute << LoginRoute) (top <?> Query.string "originalUrl")
+    , map (wrapRoute LogoutSuccessful) (s "logout-successful")
+    ]
+        ++ signUpRoutes
+
+
+openIdCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> a
+openIdCallback wrapRoute id error code sessionState state =
+    OpenIdCallback id error code sessionState state |> wrapRoute
+
+
+signupConfirmation : (Route -> a) -> String -> String -> a
+signupConfirmation wrapRoute userId hash =
+    SignupConfirmationRoute userId hash |> wrapRoute
+
+
+forgottenPasswordConfirmation : (Route -> a) -> String -> String -> a
+forgottenPasswordConfirmation wrapRoute userId hash =
+    ForgottenPasswordConfirmationRoute userId hash |> wrapRoute
+
+
+toUrl : Route -> List String
+toUrl route =
+    case route of
+        OpenIdCallback id error code sessionState state ->
+            [ "open-id"
+            , id
+            , "callback"
+            , "?error=" ++ Maybe.withDefault "" error ++ "&code=" ++ Maybe.withDefault "" code ++ "&session_state=" ++ Maybe.withDefault "" sessionState ++ "&state=" ++ Maybe.withDefault "" state
+            ]
+
+        ForgottenPasswordRoute ->
+            [ "forgotten-password" ]
+
+        ForgottenPasswordConfirmationRoute userId hash ->
+            [ "forgotten-password", userId, hash ]
+
+        LoginRoute mbOriginalUrl ->
+            case mbOriginalUrl of
+                Just originalUrl ->
+                    [ "/?originalUrl=" ++ percentEncode originalUrl ]
+
+                Nothing ->
+                    []
+
+        LogoutSuccessful ->
+            [ "logout-successful" ]
+
+        SignupRoute ->
+            [ "signup" ]
+
+        SignupConfirmationRoute userId hash ->
+            [ "signup", userId, hash ]

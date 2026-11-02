@@ -1,0 +1,25 @@
+// Which drawing goes in each of Ui.Illustration's boxes.
+//
+// The eight names are the situations, not the pictures: an application installs
+// its own set under the same names and nothing else changes. These are the
+// wizard's — unDraw's, with the accent baked to the wizard's orange
+// and the artboard padded to the box's 4:3 — and a customer's set replaces the
+// files without touching this list.
+//
+// SVG here because the drawings are flat vector art and stay sharp at any size
+// for a fifth of the weight. The format is this file's to choose: it names each
+// file, so a set of PNGs is the same list with a different extension.
+//
+// The path is the application's public one, as the logo's and the boot screen's
+// are: the files are copied to `assets/` as they are, so a customer can replace
+// one without a rebuild resolving it into a hashed copy of its own.
+:root {
+  --ui-illustration-empty: url('/assets/illustrations/empty.svg');
+  --ui-illustration-no-results: url('/assets/illustrations/no-results.svg');
+  --ui-illustration-error: url('/assets/illustrations/error.svg');
+  --ui-illustration-not-found: url('/assets/illustrations/not-found.svg');
+  --ui-illustration-not-allowed: url('/assets/illustrations/not-allowed.svg');
+  --ui-illustration-placeholder: url('/assets/illustrations/placeholder.svg');
+  --ui-illustration-download: url('/assets/illustrations/download.svg');
+  --ui-illustration-success: url('/assets/illustrations/success.svg');
+}

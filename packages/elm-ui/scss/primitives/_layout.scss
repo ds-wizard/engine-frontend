@@ -1,0 +1,131 @@
+// Layout primitives — intent-named, gap-based, logical properties only.
+
+.ui-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-stack-gap, var(--ui-space-4));
+}
+
+// A column of fields gets more room than a column of anything else. A field is
+// a label, a control and often a hint, spaced tightly so they read as one; the
+// space between fields has to be clearly wider than that, or a hint reads as
+// the next field's label. Only where the stack holds fields directly, so a stack
+// of cards keeps its own rhythm; an explicit --ui-stack-gap still wins. The same
+// rule is on .ui-card and .ui-form-nested.
+.ui-stack:has(> .ui-field, > .ui-list-field, > .ui-form-nested) {
+  gap: var(--ui-stack-gap, var(--ui-space-7));
+}
+
+// A button in a column is as wide as its label, as it is everywhere else. A
+// column stretches what it holds, which turned a lone button under a text into
+// a bar across the card. A button with a tooltip is the tooltip's wrapper here,
+// which also keeps the tooltip at the button's end rather than the column's.
+.ui-stack > .ui-button,
+.ui-stack > .ui-tooltip:has(> .ui-button) {
+  align-self: flex-start;
+}
+
+// A nested group (`Ui.Form.nested`) sits close under the switch it belongs to,
+// with the stack's whole gap after it: the same space on both sides made the
+// group look as much the next setting's as the switch's. The stack's gap is
+// taken back and a small one given, so the pull follows whatever gap it has.
+.ui-stack > .ui-form-nested {
+  margin-block-start: calc(var(--ui-space-3) - var(--ui-stack-gap, var(--ui-space-7)));
+}
+
+// A line between groups of fields (`Ui.Separator.line`) takes the column's gap
+// on each side and nothing more. With its own room on top of a field column's
+// gap it stood three rems off both groups, further from either than any two
+// fields are from each other, and the groups read as separate pages.
+.ui-stack:has(> .ui-field, > .ui-list-field, > .ui-form-nested) > hr.ui-separator {
+  margin-block: 0;
+}
+
+// A column whose parts are separate things rather than a list of like ones —
+// the button that acts on a table above the table itself. The ordinary gap
+// makes such a pair read as two rows of one list.
+.ui-stack--loose {
+  gap: var(--ui-stack-gap, var(--ui-space-6));
+}
+
+.ui-inline {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-inline-gap, var(--ui-space-3));
+}
+
+.ui-inline--between { justify-content: space-between; }
+.ui-inline--end { justify-content: flex-end; }
+.ui-inline--top { align-items: flex-start; }
+
+.ui-grid {
+  display: grid;
+  gap: var(--ui-grid-gap, var(--ui-space-5));
+  grid-template-columns: repeat(auto-fit, minmax(var(--ui-grid-min, 16rem), 1fr));
+}
+
+// Content and the facts beside it — the profile form and the picture of the
+// user, say. The content comes first and takes twice the room, which is the
+// col-8 / col-4 the pages were built to.
+//
+// The split is its own container, so the pair stacks on the width it is given
+// rather than the window's: the same window leaves it different widths with
+// the navigation expanded and collapsed. minmax(0, …) so a wide child scrolls
+// inside its column rather than widening it.
+//
+// It stacks at 30rem, and not a rem more: the settings body it is used in is
+// itself capped at 44rem, so a threshold anywhere near that width would leave
+// the columns stacked on every screen there is.
+.ui-split {
+  container: ui-split / inline-size;
+  display: grid;
+  gap: var(--ui-split-gap, var(--ui-space-6));
+  grid-template-columns: var(--ui-split-ratio, minmax(0, 2fr) minmax(0, 1fr));
+}
+
+// A line between the two, so what stands beside the content is plainly beside
+// it and not more of it. It sits in the gutter with the gap's own space on
+// either side, and runs the height of the row — the columns stretch, so the
+// line does not stop where the shorter of the two ends.
+.ui-split > * + * {
+  padding-inline-start: var(--ui-split-gap, var(--ui-space-6));
+  border-inline-start: 1px solid var(--ui-border-subtle);
+}
+
+@container ui-split (max-width: 30rem) {
+  // Stacked: every child takes the full width, and the line that divided the
+  // columns becomes the one above what follows.
+  .ui-split > * {
+    grid-column: 1 / -1;
+  }
+
+  .ui-split > * + * {
+    padding-block-start: var(--ui-split-gap, var(--ui-space-6));
+    padding-inline-start: 0;
+    border-block-start: 1px solid var(--ui-border-subtle);
+    border-inline-start: 0;
+  }
+}
+
+.ui-center {
+  box-sizing: content-box;
+  margin-inline: auto;
+  max-inline-size: var(--ui-center-max, 60rem);
+  padding-inline: var(--ui-space-6);
+}
+
+.ui-cover {
+  display: flex;
+  flex-direction: column;
+  min-block-size: var(--ui-cover-min, 100%);
+
+  > :nth-child(2) { margin-block: auto; }
+}
+
+// Container queries: components size to their container, not the viewport.
+// A card in a 350px panel must read as narrow on any screen.
+.ui-container {
+  container-type: inline-size;
+}

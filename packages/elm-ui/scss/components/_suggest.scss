@@ -1,0 +1,57 @@
+// The list of values a text field suggests without insisting on them
+// (`packages/elm-ui/js/suggest-input.js`). A popup under the field, the width of the
+// field, on the raised ground every other popup in the system uses — so it
+// reads as something offered rather than as part of the page under it.
+
+.ui-suggest {
+  display: block;
+  position: relative;
+}
+
+.ui-suggest__list {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + var(--ui-space-1));
+  z-index: 20;
+
+  margin: 0;
+  padding: var(--ui-space-2);
+  list-style: none;
+
+  // Long lists scroll rather than running down the page: the field is usually
+  // one of several, and the rest of the form has to stay reachable.
+  max-block-size: 14rem;
+  overflow-y: auto;
+
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+}
+
+.ui-suggest__option {
+  padding: var(--ui-space-2) var(--ui-space-3);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-text);
+  cursor: pointer;
+
+  // The pointer's hover and the keyboard's cursor are one state: what the mouse
+  // is over and what Enter would take are the same thing, so they are the same
+  // to look at. The ground is the listing's, as it is in the combobox.
+  &:hover,
+  &.is-active {
+    background: var(--ui-state-hover);
+  }
+
+  // What the arrow keys are on, which is what Enter takes. A wash of a few per
+  // cent is not something to find a cursor by, so the line is what says it
+  // (1.4.11) — and the pointer's hover does without, because the pointer is
+  // already where the reader is looking.
+  //
+  // The control border, the lightest role that clears 3:1 against the ground it
+  // is drawn on, as in the combobox.
+  &.is-active {
+    outline: 2px solid var(--ui-border-control);
+    outline-offset: -2px;
+  }
+}

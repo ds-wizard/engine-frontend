@@ -1,0 +1,31 @@
+.ui-text--muted { color: var(--ui-text-muted); }
+.ui-text--danger { color: var(--ui-danger-on-subtle); }
+.ui-text--success { color: var(--ui-success-on-subtle); }
+.ui-text--inverse { color: var(--ui-text-inverse); }
+
+// A sentence saying what went wrong with one thing (Ui.Text.error): a field's
+// error, outside a field. The mark is there so the error is not said by color
+// alone (1.4.1); its ground and ink are the danger pair, which clear 3:1.
+.ui-text-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-2);
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-danger-on-subtle);
+}
+
+.ui-text-error__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+  // On the first line of the sentence, however many it wraps to.
+  margin-block-start: 0.125em;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-danger-base);
+  color: var(--ui-danger-on);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-bold);
+  flex-shrink: 0;
+}

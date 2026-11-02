@@ -1,0 +1,118 @@
+// The bubble is a real element rather than pseudo-element content, so it is
+// exposed to assistive technology, and it appears on focus as well as hover.
+//
+// No arrow. Position carries the association on its own at this distance, and
+// an arrow would have to be aimed at the trigger independently of the bubble
+// whenever the bubble is edge-aligned — two things to keep in sync for
+// something that adds no information. It would also have to be re-aimed if
+// placement ever becomes dynamic.
+//
+// The gap is derived from the focus ring rather than picked off the spacing
+// scale: the tooltip appears on focus, so anything smaller than the ring's
+// reach would sit underneath it.
+
+.ui-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.ui-tooltip__bubble {
+  position: absolute;
+  z-index: 30;
+
+  inline-size: max-content;
+  max-inline-size: 16rem;
+  padding: var(--ui-space-2) var(--ui-space-3);
+
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface-inverse);
+  color: var(--ui-text-inverse);
+
+  font-size: var(--ui-text-body-sm);
+  font-weight: var(--ui-weight-regular);
+  line-height: var(--ui-leading-tight);
+  text-align: center;
+  white-space: normal;
+
+  opacity: 0;
+  // Hidden from the pointer while invisible, so it cannot swallow a click.
+  pointer-events: none;
+
+  transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
+  // No delay leaving. A transition takes its timing from the state it is moving
+  // *to*, so a delay declared here is the delay on the way out — which is what
+  // made a tooltip linger after the pointer had gone. The wait before it appears
+  // is on the shown state instead.
+  transition-delay: 0s;
+}
+
+// Clear of the focus ring, with a little air beyond it.
+.ui-tooltip {
+  --ui-tooltip-gap: calc(var(--ui-focus-offset) + var(--ui-focus-width) + var(--ui-space-1));
+}
+
+// Default placement: below, centered.
+.ui-tooltip__bubble,
+.ui-tooltip__bubble--below {
+  inset-block-start: calc(100% + var(--ui-tooltip-gap));
+  inset-inline-start: 50%;
+  translate: -50% 0;
+}
+
+.ui-tooltip__bubble--above {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + var(--ui-tooltip-gap));
+  inset-inline-start: 50%;
+  translate: -50% 0;
+}
+
+// Start and end keep the bubble inside the viewport when the trigger sits near
+// an edge — the fixed variants the current codebase already uses.
+.ui-tooltip__bubble--start {
+  inset-block-start: calc(100% + var(--ui-tooltip-gap));
+  inset-inline-start: 0;
+  translate: none;
+  text-align: start;
+}
+
+.ui-tooltip__bubble--end {
+  inset-block-start: calc(100% + var(--ui-tooltip-gap));
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  translate: none;
+  text-align: start;
+}
+
+// Beside the trigger rather than under it, vertically centered on it. For an
+// icon-only control in a column of them — the collapsed navigation — where
+// below is the next control.
+.ui-tooltip__bubble--trailing {
+  inset-block-start: 50%;
+  inset-inline-start: calc(100% + var(--ui-tooltip-gap));
+  translate: 0 -50%;
+  text-align: start;
+}
+
+// Hover and focus both reveal it — but focus-*visible*, not focus-within.
+//
+// A button keeps focus after being clicked, so :focus-within left the tooltip up
+// after the pointer had moved on, and a copy button's bubble sat there saying
+// "Copied", reverted to "Click to copy" two seconds later, and only went when
+// something else was clicked. The same rule that keeps the focus ring off a
+// mouse click applies here: show it when the keyboard is what arrived.
+.ui-tooltip:hover .ui-tooltip__bubble,
+.ui-tooltip:has(:focus-visible) .ui-tooltip__bubble {
+  opacity: 1;
+  // A beat before it appears, and none before it goes.
+  transition-delay: 400ms;
+
+  // Hoverable, per 1.4.13: the pointer can move onto the bubble without it
+  // disappearing.
+  pointer-events: auto;
+}
+
+// Dismissible, per 1.4.13.
+:root[data-tooltips-suppressed] .ui-tooltip__bubble {
+  opacity: 0;
+  pointer-events: none;
+}

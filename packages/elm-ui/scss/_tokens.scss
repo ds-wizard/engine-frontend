@@ -1,0 +1,161 @@
+// Tokens — the raw scales.
+//
+// Every value in the design system starts here. Nothing below this file may
+// name a color, a pixel value or a font size directly: components consume
+// roles (_roles.scss), roles consume tokens, tokens consume nothing.
+
+:root {
+  // Space — in rem, so the whole scale follows the reader's own font size.
+  //
+  // A user who raises their browser default from 16px to 24px is asking for a
+  // larger interface, not a larger interface with the same cramped padding.
+  // Anything that should track text is rem; the exceptions are marked below and
+  // each has a reason.
+  //
+  // Spacing is applied as `gap` on containers, never as margins on children.
+  --ui-space-1: 0.125rem;
+  --ui-space-2: 0.25rem;
+  --ui-space-3: 0.5rem;
+  --ui-space-4: 0.75rem;
+  --ui-space-5: 1rem;
+  --ui-space-6: 1.5rem;
+  --ui-space-7: 2rem;
+  --ui-space-8: 3rem;
+
+  // Radius — encodes what a thing is, not how big it is.
+  // Compact control you act on: pill. Holds content: moderate. Spans the viewport: none.
+  // A sentinel rather than a measurement: any value past half the height gives
+  // a pill, so it does not scale.
+  --ui-radius-pill: 999px;
+  --ui-radius-control: 0.5rem;
+  --ui-radius-surface: 0.75rem;
+  --ui-radius-large: 1rem;
+  --ui-radius-none: 0;
+
+  // Type — semantic roles, not numbered sizes.
+  --ui-text-display: 1.75rem;
+  --ui-text-page-title: 1.5rem;
+  --ui-text-title: 1.25rem;
+  --ui-text-subtitle: 1rem;
+  --ui-text-body: 0.875rem;
+  --ui-text-body-sm: 0.8125rem;
+  --ui-text-label: 0.75rem;
+  --ui-text-code: 0.8125rem;
+
+  // The box a search field's magnifying glass sits in. A width of its own, so
+  // the gap between it and the text is a decision rather than a leftover.
+  --ui-search-glyph: 1rem;
+
+  --ui-weight-regular: 400;
+  --ui-weight-medium: 500;
+  --ui-weight-semibold: 600;
+  --ui-weight-bold: 700;
+
+  --ui-leading-tight: 1.25;
+  --ui-leading-normal: 1.5;
+  --ui-leading-relaxed: 1.7;
+
+  // Fonts — the system stack, everywhere, by default.
+  //
+  // --ui-font-display is the one an application is expected to override: it is
+  // where a brand face goes, on titles and headings only, and the rest of the
+  // interface keeps the system stack, which is what dense tables, identifiers and
+  // numerals want. The system itself ships no webfont — a face it
+  // named but did not load would render only for the people who happen to have
+  // it installed, which is the same as not choosing one: an application that
+  // sets it loads the face itself.
+  --ui-font-ui: ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    'Segoe UI Variable Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Noto Color Emoji';
+  --ui-font-display: var(--ui-font-ui);
+  --ui-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Consolas,
+    'Liberation Mono', Menlo, monospace;
+
+  // Motion — only opacity and transform ever animate.
+  --ui-duration-instant: 0ms;
+  --ui-duration-fast: 120ms;
+  --ui-duration-base: 200ms;
+  --ui-duration-slow: 320ms;
+  // A thing that should arrive without being noticed arriving — a loading
+  // indicator after its delay. Long on purpose: a spinner that snaps in reads
+  // as something having gone wrong.
+  --ui-duration-reveal: 1000ms;
+  --ui-ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  // What every interactive thing settles with. Paint properties only — color,
+  // border, shadow — so a hover costs the compositor a repaint and never a
+  // layout. Fast, because a hover that takes its time reads as lag rather than
+  // as polish, and the global reduced-motion rule cuts it to nothing.
+  --ui-transition-state:
+    background-color var(--ui-duration-fast) var(--ui-ease-out),
+    border-color var(--ui-duration-fast) var(--ui-ease-out),
+    color var(--ui-duration-fast) var(--ui-ease-out),
+    box-shadow var(--ui-duration-fast) var(--ui-ease-out);
+  --ui-ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  // Focus — px on purpose. 2.4.13 states the minimum in absolute terms, and a
+  // ring that grew with the font would be a thick band at large sizes without
+  // being any easier to see.
+  --ui-focus-width: 2px;
+  --ui-focus-offset: 2px;
+
+  // How far the ring reaches beyond its element. Any scroll container needs at
+  // least this much padding or it clips the ring of whatever it holds.
+  --ui-focus-clearance: calc(var(--ui-focus-offset) + var(--ui-focus-width));
+
+  // Hit target floor — px on purpose, and this one matters. 2.5.8 specifies 24
+  // CSS px absolutely; in rem, a reader who *lowers* their font size would drag
+  // the floor below the requirement and fail it.
+  --ui-hit-min: 24px;
+
+  // The width of a settings form: the column the settings pages give their
+  // forms, a form on a detail page's tab, and the unsaved-changes bar under
+  // either. One value, because the bar is read as belonging to the form above it
+  // only when the two line up, and two literals that happened to agree drifted
+  // apart the first time a form was put somewhere new.
+  --ui-measure-form: 44rem;
+  --ui-measure-list: 80rem;
+
+  // State layers. A translucent ink rather than a named surface, because hover
+  // has to move *away* from whatever it sits on — darker in light, lighter in
+  // dark — and a fixed role cannot do that on three different surfaces.
+  --ui-state-hover: rgb(0 0 0 / 0.06);
+  --ui-state-active: rgb(0 0 0 / 0.10);
+
+  // Neutral ramp — OKLCH hue 250, chroma 0.006. Light mode.
+  --ui-neutral-0: #ffffff;
+  --ui-neutral-25: #f7fafe;
+  --ui-neutral-50: #f3f6fa;
+  --ui-neutral-100: #ebeff2;
+  --ui-neutral-200: #e0e3e7;
+  --ui-neutral-300: #d0d3d6;
+  --ui-neutral-400: #b3b6b9;
+  --ui-neutral-500: #818487;
+  // Between 500 and 600, and it exists for one reason: it is the lightest step
+  // that still clears 4.5:1 on every surface a text role has to survive,
+  // including a pressed one. Anything lighter is a border color, not a text
+  // color.
+  --ui-neutral-550: #63666a;
+  --ui-neutral-600: #5b5e61;
+  --ui-neutral-700: #4d5053;
+  --ui-neutral-800: #36383b;
+  --ui-neutral-900: #222427;
+  --ui-neutral-1000: #0f1113;
+
+  // Charcoal ramp — OKLCH hue 250, chroma 0.010. Dark mode is its own palette,
+  // with larger steps at the dark end because the eye separates them poorly.
+  --ui-charcoal-0: #070a0e;
+  --ui-charcoal-25: #0e1216;
+  --ui-charcoal-50: #161a1e;
+  --ui-charcoal-100: #1f2327;
+  --ui-charcoal-200: #2a2e33;
+  --ui-charcoal-300: #383c41;
+  --ui-charcoal-400: #4e5358;
+  --ui-charcoal-500: #91969b;
+  --ui-charcoal-600: #b3b8be;
+  --ui-charcoal-700: #a6abb1;
+  --ui-charcoal-800: #c3c8ce;
+  --ui-charcoal-900: #dce2e8;
+  --ui-charcoal-1000: #f2f7fd;
+}

@@ -1,0 +1,140 @@
+// Prose — the typographic scope for content the system did not write: a
+// rendered README, an announcement, a news item.
+//
+// Everything else in the system styles its own classes. Rendered markdown has
+// none, so this is the one component that styles bare descendants, and it only
+// does so inside `.ui-prose`, where nothing else lives.
+//
+// Headings are a step below the page's own title, which is set in
+// `page-title`; a document's largest heading is set in `title`, so a README can
+// never look like the page it is on. The *level* is the caller's to demote —
+// see Ui.Prose — so a document's `##` usually arrives here as an h3. Every
+// level is bold, and none is smaller than the body text.
+
+.ui-prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-inline-size: 0;
+
+  font-size: var(--ui-text-body);
+  line-height: var(--ui-leading-relaxed);
+  overflow-wrap: break-word;
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--ui-font-display);
+    font-weight: var(--ui-weight-bold);
+    line-height: var(--ui-leading-tight);
+  }
+
+  h1, h2 { font-size: var(--ui-text-title); }
+  h3 { font-size: var(--ui-text-subtitle); }
+  h4, h5, h6 { font-size: var(--ui-text-body); }
+
+  // A heading belongs to what follows it, so it is set further from what came
+  // before. The container's gap is the rhythm; this is the one break in it.
+  // A margin on a child, deliberately: flex gap cannot be different on one
+  // side of one kind of element.
+  > :is(h1, h2, h3, h4, h5, h6):not(:first-child) {
+    margin-block-start: var(--ui-space-4);
+  }
+
+  ul, ol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+    padding-inline-start: var(--ui-space-6);
+  }
+
+  ul { list-style: disc; }
+  ol { list-style: decimal; }
+
+  // An item has to stay `display: list-item` to keep its marker, and a flex
+  // container is not one — so a loose list's paragraphs are spaced by the
+  // later one's margin rather than by a gap on the item.
+  li > * + * {
+    margin-block-start: var(--ui-space-2);
+  }
+
+  blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+    padding-inline-start: var(--ui-space-5);
+    border-inline-start: 3px solid var(--ui-border-subtle);
+    color: var(--ui-text-muted);
+  }
+
+  // Text links only: a link-button inside rendered content stays a button, and
+  // a button is never underlined.
+  a:not(.ui-button) {
+    @include ui-text-link;
+  }
+
+  // Inline code takes the same ground as `.ui-code`.
+  code {
+    padding-block: 0.125em;
+    padding-inline: 0.3em;
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-surface-sunken);
+    font-family: var(--ui-font-mono);
+    font-size: var(--ui-text-code);
+    overflow-wrap: anywhere;
+  }
+
+  // A block of code scrolls in its own box, and pads for the ring because a
+  // scroller can take focus.
+  pre {
+    padding: var(--ui-space-4);
+    border-radius: var(--ui-radius-surface);
+    background: var(--ui-surface-sunken);
+    overflow-x: auto;
+    line-height: var(--ui-leading-normal);
+
+    code {
+      padding: 0;
+      background: transparent;
+      overflow-wrap: normal;
+    }
+  }
+
+  hr {
+    block-size: 1px;
+    border: 0;
+    margin: 0;
+    background: var(--ui-border-subtle);
+  }
+
+  img {
+    max-inline-size: 100%;
+    block-size: auto;
+    border-radius: var(--ui-radius-control);
+  }
+
+  // A table scrolls sideways in its own box rather than pushing the page.
+  // Markdown gives no wrapper to scroll, so the table becomes the box: its rows
+  // still lay out as a table inside an anonymous table box. The padding is for
+  // the focus ring of a link in the first or last cell.
+  table {
+    display: block;
+    max-inline-size: 100%;
+    overflow-x: auto;
+    padding: var(--ui-focus-clearance);
+    border-collapse: collapse;
+    font-size: var(--ui-text-body-sm);
+    line-height: var(--ui-leading-normal);
+  }
+
+  th, td {
+    padding-block: var(--ui-space-3);
+    padding-inline: var(--ui-space-4);
+    border-block-end: 1px solid var(--ui-border-subtle);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: var(--ui-weight-semibold);
+    border-block-end-color: var(--ui-border-strong);
+  }
+}

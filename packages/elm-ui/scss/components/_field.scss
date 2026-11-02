@@ -1,0 +1,1430 @@
+// Fields — outlined, never filled. A 1px border at >=3:1 is what identifies a
+// control (WCAG 1.4.11); on a page that has lost every decorative border it
+// reads as precise rather than heavy.
+
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+// Body size, not the smaller label role: the label is what a form is scanned by,
+// and set smaller than the value typed under it and the hint below that it was
+// the hardest thing in the field to read. Weight lifts it above the hint.
+.ui-field__label {
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+  color: var(--ui-text);
+}
+
+// A badge after the label's text (`Ui.Field.withLabelBadge`), on its line.
+.ui-field__label-badge {
+  display: inline-flex;
+  margin-inline-start: var(--ui-space-3);
+  vertical-align: middle;
+}
+
+.ui-field__required {
+  margin-inline-start: var(--ui-space-1);
+  color: var(--ui-danger-on-subtle);
+}
+
+.ui-input {
+  inline-size: 100%;
+  min-block-size: var(--ui-hit-min);
+  padding-block: var(--ui-space-3);
+  padding-inline: var(--ui-space-4);
+
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+
+  // The page's own ground, not a raised one: an input is identified by its
+  // border, not by being a lighter box (§5 — no filled inputs).
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font-size: var(--ui-text-body);
+
+  transition: var(--ui-transition-state);
+
+  &::placeholder { color: var(--ui-text-muted); }
+
+  &:hover:not(:disabled) { border-color: var(--ui-border-strong); }
+
+  &:disabled {
+    background: var(--ui-surface-sunken);
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+
+  // Error is carried by border, message and icon together — never color alone.
+  &.is-invalid { border-color: var(--ui-danger-border); }
+}
+
+// A select draws its own chevron. The native arrow is placed by each browser —
+// against the edge in some — and ignores the input's padding, so it is turned off
+// and replaced by one that sits the input's own inline padding in from the end.
+// A mask filled with a role, so it follows the theme and needs no literal color;
+// the select's end padding leaves room for it.
+.ui-select {
+  --ui-select-chevron: 0.875rem;
+
+  position: relative;
+  display: block;
+  min-inline-size: 0;
+
+  > .ui-input {
+    appearance: none;
+    padding-inline-end: calc(var(--ui-space-4) + var(--ui-select-chevron) + var(--ui-space-3));
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: var(--ui-space-4);
+    inline-size: var(--ui-select-chevron);
+    block-size: var(--ui-select-chevron);
+    translate: 0 -50%;
+    // Above the control it is drawn on: a focused control is lifted to
+    // `z-index: 1` so its ring is not painted over (see `_reset.scss`), and an
+    // opaque select would otherwise cover its own chevron the moment it took
+    // focus. Anything drawn over a control has to clear that lift.
+    z-index: 2;
+    background-color: var(--ui-text-muted);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 6 8 10.5 12.5 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  &:has(> .ui-input:disabled)::after {
+    background-color: var(--ui-text-disabled);
+  }
+
+  // Unavailable with a reason (`Field.withDisabledReason`): a button in the
+  // select's shape, looking as a disabled select does — it cannot be opened —
+  // but focusable, so the reason in its tooltip reaches a keyboard.
+  &.ui-select--unavailable {
+    > .ui-input {
+      background: var(--ui-surface-sunken);
+      color: var(--ui-text-disabled);
+      text-align: start;
+      cursor: not-allowed;
+
+      &:hover { border-color: var(--ui-border-control); }
+    }
+
+    &::after { background-color: var(--ui-text-disabled); }
+  }
+
+  // A mask's fill is a background, which forced colors would leave to the page;
+  // the chevron takes the text color so it stays visible.
+  @media (forced-colors: active) {
+    &::after { background-color: CanvasText; }
+  }
+}
+
+.ui-input--multiline {
+  // Enough to see a short paragraph without scrolling or dragging the corner,
+  // which is what most of these hold: a chapter's text, a metric's
+  // description, an annotation's value.
+  min-block-size: 9rem;
+  resize: vertical;
+  // No fixed height: users may impose 1.5x line-height (WCAG 1.4.12).
+}
+
+// A box whose height is a number of lines (`Field.withRows`) says so itself;
+// the default floor would otherwise hold a two-line box open at six.
+.ui-input--rows {
+  min-block-size: 0;
+}
+
+.ui-field__check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-block-size: var(--ui-hit-min);
+  cursor: pointer;
+
+  .ui-input {
+    inline-size: 1rem;
+    block-size: 1rem;
+    min-block-size: 0;
+    padding: 0;
+    accent-color: var(--ui-brand-strong);
+  }
+}
+
+// A checkbox's or a switch's label names the field as a label above an input
+// does, so it is set as one — the same size, color and weight.
+.ui-field__check-label {
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+  color: var(--ui-text);
+}
+
+.ui-field__hint {
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+
+  // A hint may be written in markdown — a name in code, an emphasis, a link.
+  // Inline code takes the same ground as `.ui-code`, but keeps the hint's own
+  // size: a step down from a size that is already the small one is a size
+  // nobody can read.
+  code {
+    padding-block: 0.125em;
+    padding-inline: 0.3em;
+
+    border-radius: var(--ui-radius-control);
+    background: var(--ui-surface-sunken);
+
+    font-family: var(--ui-font-mono);
+    // A token name is one word to the browser, and one that would otherwise
+    // push its field sideways.
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    @include ui-text-link;
+  }
+}
+
+.ui-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-danger-on-subtle);
+}
+
+.ui-field__error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-danger-base);
+  color: var(--ui-danger-on);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-bold);
+  flex-shrink: 0;
+}
+
+// What the value will do, where the value itself is fine (`withWarning`): the
+// error's shape in the warning's colors, since what it is about is the same —
+// a consequence of what is in the field. The mark says as much as the color
+// does, so neither is carrying it alone (WCAG 1.4.1).
+.ui-field__warning {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-warning-on-subtle);
+}
+
+.ui-field__warning-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-warning-base);
+  color: var(--ui-warning-on);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-bold);
+  flex-shrink: 0;
+}
+
+.ui-async {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+}
+
+// Invisible at first, and faded in only once the wait is long enough to be a
+// wait — the wizard's loader did the same. A section, a widget or a settings
+// page whose data comes back quickly never shows a spinner at all, instead of
+// flashing one for a frame. The same timing as `.ui-page-loading`: opacity
+// only, `both` holding the invisible first frame through the delay. The status
+// text is in the document from the start, so it is announced straight away;
+// opacity hides nothing from assistive technology. Under reduced motion the
+// fade is cut to nothing and the delay stays.
+.ui-async--loading {
+  align-items: center;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-8);
+  color: var(--ui-text-muted);
+  animation: ui-async-loading-in var(--ui-duration-reveal) var(--ui-ease-in) var(--ui-duration-slow) both;
+}
+
+@keyframes ui-async-loading-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ui-form-actions {
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: center;
+}
+
+// The end of a create form (`Ui.Form.footer`): a line under the fields, then
+// the way back at the start and the submit at the end. Wraps rather than
+// overflowing on a narrow screen, where the two stay apart by the gap.
+.ui-form-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  margin-block-start: var(--ui-space-3);
+  padding-block-start: var(--ui-space-5);
+  border-block-start: 1px solid var(--ui-border-subtle);
+}
+
+// The fields a switch reveals (`Ui.Form.nested`). Set in from the start and
+// hung off a line down that edge, as the wizard's nested groups were, so they
+// read as the switch's rather than as the next setting. The line is the subtle
+// border at an accent's width — a grouping, not a boundary a control needs to
+// be found by, so it carries no contrast requirement of its own. Spaced like the
+// stack it sits in.
+.ui-form-nested {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-7);
+  margin-inline-start: var(--ui-space-5);
+  // The line runs a little past the first field and the last, so the fields
+  // sit inside it rather than flush with its ends.
+  padding-block: var(--ui-space-3);
+  padding-inline-start: var(--ui-space-5);
+  border-inline-start: 3px solid var(--ui-border-subtle);
+}
+
+// A form nobody may change here (`Ui.Form.readOnly`): the fieldset is only
+// there to disable what is in it, so it draws nothing of its own.
+.ui-form-readonly {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+// Settings folded away under a label (`Ui.Form.collapsible`). The summary is
+// the target: a label in the weight of a field's, with a chevron that turns to
+// point at what it opened. The native marker is replaced so the chevron is the
+// same in every browser; the contents are a nested group.
+.ui-form-collapsible__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-block-size: var(--ui-hit-min);
+  list-style: none;
+  font-weight: var(--ui-weight-semibold);
+  color: var(--ui-text);
+  cursor: pointer;
+
+  &::-webkit-details-marker { display: none; }
+
+  &:hover { color: var(--ui-link-hover); }
+}
+
+.ui-form-collapsible__chevron {
+  display: inline-flex;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+  transition: rotate var(--ui-duration-fast) var(--ui-ease-out);
+
+  // It points along the reading direction while folded.
+  &:dir(rtl) { scale: -1 1; }
+}
+
+.ui-form-collapsible[open] > .ui-form-collapsible__summary .ui-form-collapsible__chevron {
+  rotate: 90deg;
+}
+
+.ui-form-collapsible[open] > .ui-form-nested {
+  margin-block-start: var(--ui-space-4);
+}
+
+.ui-form-errors {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-5);
+  border-inline-start: 3px solid var(--ui-danger-border);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-danger-subtle);
+  color: var(--ui-danger-on-subtle);
+}
+
+.ui-form-errors__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding-inline-start: var(--ui-space-6);
+  list-style: disc;
+}
+
+// Combobox — the typehint input.
+//
+// Once something is chosen the control shows the value rather than a text
+// field; clicking or focusing it reopens the search.
+
+.ui-combobox {
+  position: relative;
+}
+
+.ui-combobox__trigger-row {
+  position: relative;
+  display: flex;
+}
+
+.ui-combobox__trigger {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-4);
+
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  font: inherit;
+  font-size: var(--ui-text-body);
+  text-align: start;
+  cursor: pointer;
+
+  &:hover { border-color: var(--ui-border-strong); }
+
+  &.is-open { border-color: var(--ui-brand-strong); }
+
+  // In a field with an error: border, message and icon, as on every input.
+  &.is-invalid { border-color: var(--ui-danger-border); }
+}
+
+// Room for the clear button, which sits inside the field rather than beside
+// it. The trigger is a real button, so the clear cannot be nested inside it —
+// it is a sibling laid over the field's end edge.
+.ui-combobox__trigger-row.is-clearable .ui-combobox__trigger {
+  padding-inline-end: var(--ui-space-8);
+}
+
+.ui-combobox__placeholder {
+  color: var(--ui-text-muted);
+}
+
+.ui-combobox__clear {
+  position: absolute;
+  inset-inline-end: var(--ui-space-2);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  // Above the trigger, which is lifted while it has focus.
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Visual size is 1.5rem; the hit target is the 24px floor either way, and
+  // stays so at any density (WCAG 2.5.8).
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  min-inline-size: var(--ui-hit-min);
+  min-block-size: var(--ui-hit-min);
+
+  border: none;
+  border-radius: var(--ui-radius-pill);
+  background: none;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+}
+
+.ui-combobox__popup {
+  position: absolute;
+  inset-block-start: calc(100% + var(--ui-space-2));
+  inset-inline: 0;
+  z-index: 30;
+
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+  overflow: hidden;
+}
+
+.ui-combobox__search {
+  position: relative;
+  padding: var(--ui-space-3);
+
+  // The glyph is at the front, where it says the field is a search before
+  // anything has been typed into it. Room for it, and no more: the glyph's own
+  // width and one gap, rather than the three rems that used to sit there.
+  .ui-input { padding-inline-start: calc(var(--ui-space-4) + var(--ui-search-glyph) + var(--ui-space-3)); }
+}
+
+.ui-combobox__search-icon {
+  position: absolute;
+  inset-block-start: 50%;
+  // The field's own inline padding, plus the padding of the box around it.
+  inset-inline-start: calc(var(--ui-space-3) + var(--ui-space-4));
+  translate: 0 -50%;
+
+  // Above the field it sits on. A focused control is lifted — the reset gives
+  // `:focus-visible` `position: relative; z-index: 1`, so the ring is not
+  // painted over by whatever comes next — and a glyph left at the default
+  // stacking disappeared under the input the moment it took focus, leaving an
+  // indent with nothing in it.
+  z-index: 2;
+
+  // The hit-target floor the date picker's slot keeps, so the glyph sits in the
+  // middle of the room reserved for it rather than against the border.
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-hit-min);
+
+  color: var(--ui-text-muted);
+  pointer-events: none;
+}
+
+.ui-combobox__listbox {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  max-block-size: 16rem;
+  overflow-y: auto;
+  // Room for an option's focus ring, which this container would otherwise clip.
+  padding: var(--ui-focus-clearance) var(--ui-space-3) var(--ui-space-3);
+  list-style: none;
+}
+
+.ui-combobox__option {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-radius: var(--ui-radius-control);
+  cursor: pointer;
+
+  // Pointer and keyboard share one highlight, so there is never a stale
+  // second cursor. Focus stays in the search field throughout.
+  //
+  // The listing's own hover ground: a row under the pointer is the same idea
+  // here as it is there, and the brand tint made a list of suggestions read as
+  // a list of selected things.
+  //
+  // The ground alone would not do. It is a 6% wash, which is no boundary anyone
+  // can measure, and this is the only thing on screen saying which option Enter
+  // takes — the keyboard's cursor lives here while focus stays in the search
+  // field. The line around it is what carries that (1.4.11), drawn inside the
+  // option so it does not overlap the one above.
+  //
+  // The control border, which is the lightest role that clears 3:1 against what
+  // it is drawn on: 3.3:1 on the highlighted ground in light mode and 3.6:1 in
+  // dark, against 1.8:1 and 1.4:1 for the step below it. The strong border
+  // measures 7:1 and looks it — a box drawn around every row the pointer passes.
+  &.is-highlighted {
+    background: var(--ui-state-hover);
+    outline: 2px solid var(--ui-border-control);
+    outline-offset: -2px;
+  }
+}
+
+.ui-combobox__listbox:empty {
+  // Always rendered, because the search field's aria-controls points at it —
+  // but with nothing in it there is nothing to give room to.
+  padding: 0;
+}
+
+.ui-combobox__empty {
+  padding: 0 var(--ui-space-6) var(--ui-space-5);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+
+// Appears once there is something to save.
+//
+// Rendered into a page template's footer slot, which sits below the scrolling
+// region — so it is at the bottom of the screen by construction. Nothing is
+// positioned, nothing reserves room for it, and nothing is told how wide the
+// sidebar is.
+//
+// It reads as a card floating over the page: raised against the page surface,
+// with the elevation that says it sits above what it is about.
+.ui-form-unsaved {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-5);
+
+  inline-size: auto;
+  // The form's width, so the bar lines up with the form it is saving.
+  max-inline-size: var(--ui-measure-form);
+  // Its own spacing, so the band it sits in can be empty without leaving a gap
+  // along the bottom of every settings page that has nothing to save.
+  margin-block-end: var(--ui-space-5);
+  margin-inline: auto;
+  padding: var(--ui-space-4) var(--ui-space-5);
+
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-elevation-3-surface);
+  box-shadow: var(--ui-elevation-3);
+
+  // Only transform and opacity, so the entrance costs no layout.
+  animation: ui-form-unsaved-in var(--ui-duration-base) var(--ui-ease-out);
+}
+
+// When there is nothing left to save the bar is hidden rather than removed, so
+// it can go the way it came. `display` waits for the fade, and only then does
+// the band give its room back.
+.ui-form-unsaved[hidden] {
+  opacity: 0;
+  transform: translateY(0.5rem);
+  pointer-events: none;
+  transition:
+    opacity var(--ui-duration-base) var(--ui-ease-in),
+    transform var(--ui-duration-base) var(--ui-ease-in),
+    display var(--ui-duration-base) allow-discrete;
+}
+
+// After a save, the check on its button is the answer to the press: the bar
+// holds long enough for it to be seen, then goes.
+.ui-form-unsaved[hidden]:has(.ui-button--done) {
+  transition-delay: 800ms;
+}
+
+@keyframes ui-form-unsaved-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+.ui-form-unsaved__message {
+  font-size: var(--ui-text-body-sm);
+  color: var(--ui-text-muted);
+  min-inline-size: 0;
+}
+
+.ui-form-unsaved__actions {
+  display: flex;
+  gap: var(--ui-space-3);
+  flex-shrink: 0;
+}
+
+// A stack inside a field: the control and whatever sits under it — a strength
+// meter, a hex input, a hint that belongs to a group rather than to a control.
+.ui-field__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+// The same, side by side while they fit, each wrapping under the one before
+// when they do not: a color's picker and hex, and its palette after them.
+.ui-field__stack--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--ui-space-5);
+  row-gap: var(--ui-space-3);
+}
+
+// PREFIX, SUFFIX AND THE REVEAL BUTTON
+//
+// One row, the control taking whatever is left. The affixes are not controls,
+// so they take the recessed ground rather than a border of their own.
+// A FIELD IN A FRAME (`withFrame`)
+//
+// The markdown editor's shape, for a field that comes with its own tools: a box
+// with a bar above the control and one below it. The box owns the border, so
+// the control inside draws no second one, and the focus ring moves onto the
+// box the way the markdown editor's does.
+
+.ui-field__frame {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+}
+
+.ui-field__frame:has(.ui-input:focus-visible) {
+  outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-ring-offset);
+}
+
+.ui-field__frame-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-2);
+  background: var(--ui-surface-sunken);
+}
+
+// The bars are the ends of the box, so they take its corners — one radius less
+// the border they sit inside, or the gray square would show through the curve.
+.ui-field__frame-bar--start {
+  border-block-end: 1px solid var(--ui-border-subtle);
+  border-start-start-radius: calc(var(--ui-radius-control) - 1px);
+  border-start-end-radius: calc(var(--ui-radius-control) - 1px);
+}
+
+.ui-field__frame-bar--end {
+  border-block-start: 1px solid var(--ui-border-subtle);
+  border-end-start-radius: calc(var(--ui-radius-control) - 1px);
+  border-end-end-radius: calc(var(--ui-radius-control) - 1px);
+}
+
+.ui-field__frame > .ui-input {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+// WCAG 2.4.7 ring moved: onto the frame (`.ui-field__frame`, above), which is
+// what the control fills — the same move the markdown editor makes.
+.ui-field__frame > .ui-input:focus-visible {
+  outline: none;
+}
+
+.ui-field__frame-instead {
+  padding: var(--ui-space-4);
+  min-block-size: 6rem;
+}
+
+.ui-field__affixed {
+  display: flex;
+  align-items: stretch;
+  min-inline-size: 0;
+
+  .ui-input,
+  .ui-select {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+}
+
+.ui-field__affix {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--ui-space-4);
+  border: 1px solid var(--ui-border-control);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+  white-space: nowrap;
+
+  &:first-child {
+    border-inline-end: 0;
+    border-start-start-radius: var(--ui-radius-control);
+    border-end-start-radius: var(--ui-radius-control);
+  }
+
+  &:last-child {
+    border-inline-start: 0;
+    border-start-end-radius: var(--ui-radius-control);
+    border-end-end-radius: var(--ui-radius-control);
+  }
+}
+
+// An icon for a suffix (`withSuffixIcon`) — the icon the value names. A square
+// addon, so the field does not change width as the icon does, in the text color
+// so the preview reads as the icon it will be rather than as a muted unit.
+.ui-field__affix--icon {
+  justify-content: center;
+  min-inline-size: var(--ui-hit-min);
+  padding-inline: var(--ui-space-3);
+  color: var(--ui-text);
+  font-size: var(--ui-text-body);
+}
+
+// The affixed control loses the radius on the side the affix is on, so the two
+// read as one field rather than two things touching.
+.ui-field__affixed > .ui-field__affix:first-child + .ui-input,
+.ui-field__affixed > .ui-field__affix:first-child + .ui-select > .ui-input {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.ui-field__affixed > .ui-input:has(+ .ui-field__affix),
+.ui-field__affixed > .ui-select:has(+ .ui-field__affix) > .ui-input {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.ui-field__reveal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-inline-size: var(--ui-hit-min);
+  padding-inline: var(--ui-space-3);
+
+  border: 1px solid var(--ui-border-control);
+  border-inline-start: 0;
+  border-start-end-radius: var(--ui-radius-control);
+  border-end-end-radius: var(--ui-radius-control);
+  background: var(--ui-surface-sunken);
+  color: var(--ui-text-muted);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover:not(:disabled) { color: var(--ui-text); }
+
+  &:disabled {
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.ui-field__affixed > .ui-input:has(+ .ui-field__reveal) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+// A value in the shape of a field. Not a disabled input: nothing here says
+// "later", it says "this is what it is".
+.ui-field__static {
+  min-block-size: var(--ui-hit-min);
+  padding-block: var(--ui-space-3);
+  color: var(--ui-text);
+  overflow-wrap: anywhere;
+}
+
+// THE SWITCH
+//
+// A checkbox wearing a track. The state is a position as well as a color, so it
+// survives being looked at in grayscale (1.4.1).
+.ui-switch {
+  // One number decides the whole geometry, so the knob cannot end up traveling
+  // a different distance from the room the track gives it. Everything below is
+  // derived from it: the track is twice the knob plus the gaps, and the travel is
+  // whatever is left.
+  //
+  // The knob fills most of the track's height: a 3px gap plus the border read
+  // as a thick frame round a small dot. The track keeps its height; the knob
+  // takes the room.
+  --ui-switch-knob: 1rem;
+  --ui-switch-gap: 0.125rem;
+  --ui-switch-travel: var(--ui-switch-knob);
+  --ui-switch-border: 1px;
+
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+
+  // The border is in the size because everything here is border-box, while the
+  // knob is positioned against the padding box *inside* it. Leave the borders
+  // out and the gap below the knob is 1px where the gap above it is 3 — which is
+  // a knob sitting visibly low, on both axes.
+  inline-size: calc(
+    var(--ui-switch-knob) + var(--ui-switch-travel) + var(--ui-switch-gap) * 2 +
+      var(--ui-switch-border) * 2
+  );
+  block-size: calc(
+    var(--ui-switch-knob) + var(--ui-switch-gap) * 2 + var(--ui-switch-border) * 2
+  );
+  min-block-size: 0;
+  padding: 0;
+
+  border: var(--ui-switch-border) solid var(--ui-border-control);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface-sunken);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &::after {
+    content: '';
+    position: absolute;
+    // Against the padding box, which the size above has made
+    // knob + travel + gap × 2 — so this gap is the gap on all four sides.
+    inset-block-start: var(--ui-switch-gap);
+    inset-inline-start: var(--ui-switch-gap);
+
+    inline-size: var(--ui-switch-knob);
+    block-size: var(--ui-switch-knob);
+
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-elevation-1-surface);
+    box-shadow: var(--ui-elevation-1);
+
+    // The knob is the one thing in the system that animates its position: it is
+    // what says the switch was thrown, and it moves itself, not a layout.
+    transition: translate var(--ui-duration-fast) var(--ui-ease-out);
+  }
+
+  &:checked {
+    border-color: var(--ui-brand-strong);
+    background: var(--ui-brand-strong);
+  }
+
+  &:checked::after {
+    translate: var(--ui-switch-travel) 0;
+  }
+
+  &.is-invalid {
+    border-color: var(--ui-danger-border);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background: var(--ui-surface-sunken);
+    border-color: var(--ui-border-subtle);
+  }
+
+  // On but unavailable keeps a tint of the brand, at the strength of a selected
+  // tint rather than the full one, so a read-only list of switches still says at
+  // a glance which are on — the knob's position alone is slow to read down a
+  // column. A disabled control has no contrast floor (1.4.11); the position is
+  // still what carries the state.
+  &:disabled:checked {
+    background: var(--ui-brand-subtle-selected);
+    border-color: var(--ui-brand-subtle-selected);
+  }
+
+  &:disabled::after {
+    background: var(--ui-surface);
+    box-shadow: none;
+  }
+}
+
+.ui-field__check--switch {
+  gap: var(--ui-space-4);
+}
+
+// THE STRENGTH METER
+//
+// The words are the meter. The bars repeat what they say for anyone who reads
+// shape faster than text, and are hidden from anything that reads out loud.
+.ui-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+}
+
+.ui-strength__bars {
+  display: flex;
+  gap: var(--ui-space-1);
+}
+
+.ui-strength__bar {
+  inline-size: 1.5rem;
+  block-size: 0.25rem;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface-sunken);
+
+  transition: var(--ui-transition-state);
+}
+
+// Three tones, from the fraction of the bar that is filled rather than from a
+// level — so a score out of four and a score out of five land in the same place.
+.ui-strength__bars.is-weak .ui-strength__bar.is-on { background: var(--ui-danger-base); }
+.ui-strength__bars.is-fair .ui-strength__bar.is-on { background: var(--ui-warning-base); }
+.ui-strength__bars.is-strong .ui-strength__bar.is-on { background: var(--ui-success-base); }
+
+.ui-strength__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+}
+
+// The words carry the verdict and the icon repeats it in a shape, because three
+// colors of bar are three colors. The status roles are the on-subtle ones:
+// this is text on the page, not text on a tint.
+.ui-strength__label.is-weak { color: var(--ui-danger-on-subtle); }
+.ui-strength__label.is-fair { color: var(--ui-warning-on-subtle); }
+.ui-strength__label.is-strong { color: var(--ui-success-on-subtle); }
+.ui-strength__label.is-unknown { color: var(--ui-text-muted); }
+
+.ui-strength__icon {
+  display: inline-flex;
+}
+
+// While the answer is somewhere else. Opacity only, and the global
+// reduced-motion rule stops it.
+.ui-strength.is-busy .ui-strength__icon {
+  animation: ui-spin var(--ui-duration-slow) linear infinite;
+}
+
+.ui-strength.is-busy .ui-strength__bars {
+  animation: ui-strength-waiting 1.2s var(--ui-ease-out) infinite;
+}
+
+@keyframes ui-strength-waiting {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// SWATCHES
+.ui-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+}
+
+.ui-swatch {
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+  border: 1px solid var(--ui-border-subtle);
+  // Round, so a suggestion is not taken for the picker, which is a square.
+  border-radius: var(--ui-radius-pill);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:disabled { cursor: not-allowed; }
+}
+
+// Selected is a tick, not a ring: the ring outside is the focus ring, and a
+// swatch both selected and focused shows both. Its color, black or white, is
+// set inline for the swatch it sits on.
+.ui-swatch__tick {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+// The platform picker and the hex, on one row: one for choosing, one for reading
+// and for pasting a value from somewhere else.
+.ui-color {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+}
+
+.ui-color__picker {
+  // The swatch the browser draws inside is all we want; the chrome around it
+  // differs per platform and fights the rest of the form.
+  appearance: none;
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+  padding: 0;
+
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  cursor: pointer;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  &::-webkit-color-swatch {
+    border: 0;
+    border-radius: calc(var(--ui-radius-control) - 1px);
+  }
+
+  &::-moz-color-swatch {
+    border: 0;
+    border-radius: calc(var(--ui-radius-control) - 1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+// The hex and, for a color that may be left empty, the button that empties it,
+// in its trailing end as the date field's is.
+.ui-color__hex {
+  position: relative;
+  // A width of its own rather than the row's: the picker and the hex take only
+  // what they need, which is what leaves the palette room beside them.
+  inline-size: 10rem;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.ui-color__clear {
+  position: absolute;
+  inset-inline-end: var(--ui-space-2);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  // Above the input, which a focus ring lifts (see _date-picker.scss).
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // The hit target is the 24px floor whatever the visual is (WCAG 2.5.8).
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover:not(:disabled) {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+
+  &:disabled {
+    color: var(--ui-text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.ui-field__hex {
+  font-family: var(--ui-font-mono);
+}
+
+// Room for the button, so a long value does not run underneath it.
+.ui-field__hex--clearable {
+  padding-inline-end: calc(var(--ui-hit-min) + var(--ui-space-2));
+}
+
+// CHOICES — radio and checkbox groups
+//
+// The whole option is the label: the box, the name and the sentence under it.
+// A description outside the label is read separately from the thing it
+// describes, which is how "Private — only you can see this" becomes two
+// unrelated announcements.
+//
+// A group of choices, or of fields that are one answer, is a fieldset drawn as a
+// box with its legend as the heading — the same as `.ui-list-field`, so every
+// set in a form looks like a set. Without the edge the legend read as one more
+// field's label, and nothing said where the set ended. A hairline and padding,
+// no shadow: it usually sits inside a card already.
+// A group whose name shares its line with one control of its own
+// (`withGroupHeaderAction`). The legend is floated out of the border like every
+// other legend here, so the row is what carries the layout.
+.ui-field__group-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  inline-size: 100%;
+}
+
+// In that row the legend is one item of it, not the whole width it is
+// elsewhere — the float exists to lay a legend out as the column's first
+// item, and here the row does that job.
+.ui-field__group-header > .ui-field__legend {
+  float: none;
+  inline-size: auto;
+}
+
+.ui-field--group {
+  gap: var(--ui-space-4);
+  margin: 0;
+  padding: var(--ui-space-5);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+  min-inline-size: 0;
+}
+
+// The set's name, a step above the labels inside it — a step in size, not only
+// in weight. It was the size of a label and a weight above one, and the first
+// field under it then read as a second label for the same thing: two names,
+// one under the other, in the same words at the same size. It is the subtitle
+// size now, which is what the rest of the system sets the name of a box in.
+//
+// Floated, which is the one way to take a legend out of the border and into the
+// box, where it is laid out as the column's first item like everything else.
+//
+// Only the framed group is a heading. A group of choices and a group inside a
+// group are drawn as fields (below), and they set their own name back to a
+// label's size.
+.ui-field__legend {
+  float: inline-start;
+  inline-size: 100%;
+  padding: 0;
+  font-size: var(--ui-text-subtitle);
+  font-weight: var(--ui-weight-semibold);
+  line-height: var(--ui-leading-tight);
+  color: var(--ui-text);
+}
+
+// A choice group's name with a control beside it (`withLabelAction`) — select
+// all of a set of tags, or none. Beside the name rather than out at the end of
+// the row: the buttons belong to the name, and what follows the row is the set
+// they act on.
+.ui-field__label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+  inline-size: 100%;
+}
+
+// In that row the legend is one item of it, not the whole width it is
+// elsewhere — the float lays a legend out as the column's first item, and here
+// the row does that job.
+.ui-field__label-row > .ui-field__legend {
+  float: none;
+  inline-size: auto;
+}
+
+// A group of choices — a radio or checkbox group — is one setting with several
+// answers, so it is drawn as a field: its name as a label, the options under it,
+// no box. The box is for settings that belong together (`Field.group`,
+// `Ui.Form.section`). Still a fieldset and a legend underneath, so the name is
+// said as the set is entered.
+.ui-field--choices {
+  gap: var(--ui-space-2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+
+  // Set as a field's label in every respect, its line height included: the
+  // legend's own is a heading's, tighter, and left the options a couple of
+  // pixels closer to their name than a text field is to its label.
+  > .ui-field__legend,
+  > .ui-field__label-row > .ui-field__legend {
+    font-size: var(--ui-text-body);
+    font-weight: var(--ui-weight-medium);
+    line-height: var(--ui-leading-normal);
+  }
+}
+
+// A group inside a group is not framed again (the same rule inside a list
+// field's item is in _list-field.scss): its edge and padding go, and its name is
+// set as a field's label, spaced from its controls as one.
+.ui-field--group .ui-field--group {
+  gap: var(--ui-space-2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.ui-field--group .ui-field--group > .ui-field__legend {
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+  line-height: var(--ui-leading-normal);
+}
+
+// Several short fields that are one answer — a version's major, minor and patch.
+// Side by side while they fit, wrapping when they do not (1.4.10), and aligned
+// at the top so one field's error does not push its neighbors' inputs down.
+.ui-field__group-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ui-space-4);
+}
+
+.ui-field__group-fields > * {
+  flex: 1 1 6rem;
+  min-inline-size: 0;
+  max-inline-size: 12rem;
+}
+
+// A set of settings rather than one answer in parts (`withGroupStacked`): one
+// under another at full width, each a label, a control and its sentence, spaced
+// wider than their own parts so every setting reads as its own.
+.ui-field__group-fields--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  // The same room as between fields anywhere else in a form (`.ui-stack` of
+  // fields): a settings page whose fields are in a section reads at the same
+  // pace as one whose fields are not.
+  gap: var(--ui-space-7);
+
+  > * {
+    flex: none;
+    max-inline-size: none;
+  }
+
+  // And the fields a switch reveals sit close under it here too, as they do
+  // in a stack (_layout.scss).
+  > .ui-form-nested {
+    margin-block-start: calc(var(--ui-space-3) - var(--ui-space-7));
+  }
+}
+
+.ui-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.ui-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-3);
+
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-4);
+
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { background: var(--ui-state-hover); }
+
+  // Chosen is a tint and a border, not a border alone: at 3:1 a border change is
+  // legible, and the tint is what makes it obvious.
+  &.is-selected {
+    border-color: var(--ui-brand);
+    background: var(--ui-brand-subtle);
+  }
+
+  &:has(.ui-choice__input:disabled) {
+    cursor: not-allowed;
+    color: var(--ui-text-disabled);
+  }
+}
+
+.ui-choice__input {
+  flex-shrink: 0;
+  inline-size: 1rem;
+  block-size: 1rem;
+  // Aligns the box with the first line of the label rather than the middle of
+  // the whole option, which is where a description leaves it.
+  margin-block-start: 0.125rem;
+  accent-color: var(--ui-brand-strong);
+}
+
+.ui-choice__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+}
+
+// An option's name in the weight of a label, so it stands apart from the muted,
+// smaller description under it by weight as well as by size and color.
+.ui-choice__label {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+}
+
+.ui-choice__icon {
+  display: inline-flex;
+  color: var(--ui-text-muted);
+}
+
+// A choice's own color — a tag's, a phase's. Decorative: the label is what tells
+// the options apart, so the dot needs no contrast of its own beyond its ring.
+.ui-choice__color {
+  flex-shrink: 0;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  border-radius: var(--ui-radius-pill);
+  box-shadow: inset 0 0 0 1px var(--ui-border-subtle);
+}
+
+.ui-choice.is-selected .ui-choice__icon {
+  color: var(--ui-link);
+}
+
+// A few short options side by side (`withChoicesInline`) — all in one row, or all
+// one under another, never two in a row and the third alone on a line of its own.
+//
+// The basis is the switch: the room all the options need (the count the view
+// passes, each at its minimum, and the gaps) less the container's width, times a
+// large number. Where they fit it is negative, is clamped to nothing, and they
+// share the row; where they do not it is enormous, and each takes a line.
+.ui-choices--inline {
+  --ui-choices-option-min: 8rem;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+
+  > .ui-choice {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: calc(
+      (
+          var(--ui-choices-count, 3) * var(--ui-choices-option-min) +
+            (var(--ui-choices-count, 3) - 1) * var(--ui-space-2) - 100%
+        ) *
+        999
+    );
+    min-inline-size: 0;
+  }
+}
+
+// An option in a status's colors (`withChoiceTone`) — an announcement's level
+// as the alert it shows. The same roles as `.ui-alert`, so the pairs are the
+// verified ones: on-subtle text on the subtle tint, the border at 3:1 against it.
+// Hover keeps the tint and darkens it, rather than graying it out; the chosen one
+// takes a doubled edge, and its input says so too.
+.ui-choice--info {
+  --ui-choice-tone-subtle: var(--ui-info-subtle);
+  --ui-choice-tone-border: var(--ui-info-border);
+  --ui-choice-tone-on: var(--ui-info-on-subtle);
+}
+
+.ui-choice--warning {
+  --ui-choice-tone-subtle: var(--ui-warning-subtle);
+  --ui-choice-tone-border: var(--ui-warning-border);
+  --ui-choice-tone-on: var(--ui-warning-on-subtle);
+}
+
+.ui-choice--danger {
+  --ui-choice-tone-subtle: var(--ui-danger-subtle);
+  --ui-choice-tone-border: var(--ui-danger-border);
+  --ui-choice-tone-on: var(--ui-danger-on-subtle);
+}
+
+.ui-choice:is(.ui-choice--info, .ui-choice--warning, .ui-choice--danger) {
+  border-color: var(--ui-choice-tone-border);
+  background-color: var(--ui-choice-tone-subtle);
+  color: var(--ui-choice-tone-on);
+
+  &:hover {
+    background-color: var(--ui-choice-tone-subtle);
+    background-image: linear-gradient(var(--ui-state-hover), var(--ui-state-hover));
+  }
+
+  &.is-selected {
+    border-color: var(--ui-choice-tone-border);
+    background-color: var(--ui-choice-tone-subtle);
+    box-shadow: inset 0 0 0 1px var(--ui-choice-tone-border);
+  }
+
+  .ui-choice__input {
+    accent-color: var(--ui-choice-tone-on);
+  }
+}
+
+.ui-choice__description {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}

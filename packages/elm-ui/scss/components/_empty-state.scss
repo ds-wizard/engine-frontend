@@ -1,0 +1,63 @@
+// Empty state — inside a page rather than instead of one: an empty listing, a
+// search with no results, a panel with nothing in it yet. `.ui-page-message` is
+// the full-page shape; this one is quieter because the page around it is still
+// there and still has its own heading.
+
+.ui-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-5);
+
+  inline-size: 100%;
+  max-inline-size: 34rem;
+  margin-inline: auto;
+  padding-block: var(--ui-space-8);
+  padding-inline: var(--ui-space-5);
+
+  text-align: center;
+}
+
+// Decorative, and sized as a picture rather than as content: it shrinks with
+// the column. The same size as on a full-page message
+// (`.ui-page-message__illustration`), so the same drawing is the same drawing
+// wherever it is met.
+.ui-empty-state__illustration {
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
+  max-inline-size: 18rem;
+  color: var(--ui-text-subtle);
+  font-size: var(--ui-text-display);
+}
+
+.ui-empty-state__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+// The same size whatever the level. The level is about where the heading sits
+// in the page's outline; how loud it is belongs to the component.
+.ui-empty-state__title {
+  font-family: var(--ui-font-display);
+  // A step under the page's own heading: big enough to stand next to the
+  // drawing, and still the page's second heading rather than its first.
+  font-size: var(--ui-text-title);
+  font-weight: var(--ui-weight-semibold);
+  line-height: var(--ui-leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.ui-empty-state__description {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body);
+}
+
+.ui-empty-state__action {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ui-space-3);
+}

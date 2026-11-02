@@ -1,0 +1,203 @@
+// Projects — the sharing icon (`Common.Pages.Projects.Components.ProjectSharing`).
+
+// Well back from the name it follows: it qualifies the
+// project rather than naming it. `icon-subtle` is the faintest an informative
+// icon can be and still clear 3:1 on every surface a row can be under.
+.c-project-sharing {
+  display: inline-flex;
+  color: var(--ui-icon-subtle);
+}
+
+// The document a project's preview tab shows
+// (`Common.Pages.Projects.Detail.Preview`).
+//
+// Its size is the tab's: the frame turns its body flush while the document is
+// shown (`Ui.Page.Detail.withFlushContent`), and that stretches it from the tabs
+// to the bottom of the viewport. No border, because the frame is the document
+// rather than a box around it, and the sunken ground is what shows while it
+// loads instead of a white flash.
+.c-project-preview {
+  border: 0;
+  background: var(--ui-surface-sunken);
+}
+
+// The project's metrics tab (`Common.Pages.Projects.Detail.Metrics`).
+//
+// The chapter reports, and the explanations after them, sit further apart than
+// the parts of one report do — the widest step of the spacing scale against the
+// ordinary one inside each — so that where one chapter ends and the next begins
+// is plain without a rule between every pair.
+.c-project-metrics-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-8);
+  min-inline-size: 0;
+}
+
+// A report's table and its radar: side by side when the tab is wide enough for
+// both to be read, the radar under the table when it is not. Decided by the
+// width the tab is given rather than the window's — the same window leaves it
+// two different widths with the side panel and the navigation open or closed —
+// so the report is its own container. At 44rem each column is a little over
+// 21rem, which is what a metric's name, its measure and its bar need beside a
+// radar whose spoke labels are still legible.
+.c-project-metrics {
+  container: c-project-metrics / inline-size;
+  min-inline-size: 0;
+}
+
+.c-project-metrics__layout {
+  display: grid;
+  gap: var(--ui-space-6);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+@container c-project-metrics (min-width: 44rem) {
+  .c-project-metrics__layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// Between what the project is on and what it is to be moved to
+// (`Common.Pages.Projects.CreateMigration`): the page turns one into the other,
+// and the arrow is what says so at a glance.
+//
+// Decoration, and nothing else: the two legends either side of it say the same
+// in words, and an icon is `aria-hidden` (`Ui.Icon`), so nothing is announced
+// twice or announced as a shape.
+.c-project-migration__arrow {
+  display: flex;
+  justify-content: center;
+  color: var(--ui-text-muted);
+}
+
+// Where the user's changes to the questionnaire are, in the project's header
+// (`Common.Pages.Projects.Detail.savingIndicator`): "Saving…", "Saved", or a quiet
+// check once everything has arrived. Muted and small — it reports, it does not
+// ask for anything.
+.c-project-saving {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+}
+
+// A tab a plugin adds to a project (`Common.Pages.Projects.Detail`).
+//
+// The plugin's, edge to edge: the tab gives it the whole content area and no
+// padding of ours, and what happens inside is the plugin's own business — the
+// same bargain the preview's document gets. Like the preview's frame, the tab
+// is a scrolling region of its own: what is longer than the area scrolls in
+// it, under the project's header and tabs, which stay. The flush body around
+// it clips (`.ui-detail__body--flush`), so without this a long plugin was cut
+// off, and the page moved instead.
+.c-project-plugin-tab {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+// The plugin's element, and the one box it mounts its content in (the SDK's
+// is a span), are the area's height, so a plugin that fills the area — with
+// scrolling regions of its own — can be 100% of it. A plugin longer than the
+// area overflows them, and the tab scrolls. Two levels and no deeper: below
+// that is the plugin's own layout, which a height of ours would distort.
+.c-project-plugin-tab > * {
+  display: block;
+  block-size: 100%;
+  min-inline-size: 0;
+}
+
+.c-project-plugin-tab > * > :only-child {
+  display: block;
+  block-size: 100%;
+}
+
+// Built of the SDK's components — its root a Stack — the tab is padded as a
+// page's body is, lined up with the project's title, with nothing asked of the
+// plugin. Any other root (its own element) is left as drawn, edge to edge.
+.c-project-plugin-tab > * > * > .ui-stack {
+  padding: var(--ui-space-7) var(--ui-page-gutter);
+}
+
+// Importing into a project (`Common.Pages.Projects.Import`).
+//
+// What the import would do beside the project it would do it to: the changes in
+// the workspace's own column — as wide as the reader wants it, an overlay on a
+// narrow screen — and the questionnaire they land in beside them. The workspace
+// owns both, so there is nothing here about either.
+
+// The plugin draws its own interface; the page gives it room and a margin.
+// One change: the question it answers, and what it answers with. The whole card
+// is the control — all of it leads to the same question — so it is a button
+// wearing the card, closer in than a card of prose and with the pointer to say
+// so. Tighter than a card of its own, because a column of these is a list.
+.c-project-import__change {
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border: 0;
+  color: var(--ui-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+}
+
+.c-project-import__change:hover {
+  background: var(--ui-state-hover);
+}
+
+// The question is one line: a long one is cut rather than made the column wider
+// than the reader set it, which is what put a scrollbar under the whole list.
+.c-project-import__question {
+  display: block;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--ui-weight-medium);
+}
+
+// What it answers with, under the question. A reply can be a URL, so it breaks
+// rather than reaching past the card.
+.c-project-import__reply {
+  display: flex;
+  gap: var(--ui-space-2);
+  align-items: baseline;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  color: var(--ui-text-muted);
+}
+
+// The questionnaire's own row for folding its chapters away: our row holds that
+// button (`Workspace.withNavToggleExtras`), so the one it draws for itself would
+// be a second row with one button in it.
+#project-import .ui-workspace__main .ui-workspace__toolbar--nav-only {
+  display: none;
+}
+
+
+// What a project's settings show with a link to its own page under it — the
+// template field, the knowledge model's card (`Common.Pages.Projects.Detail.Settings`).
+// The link sits as close as a field's hint does under its control, and in the
+// smallest text, so it reads as belonging to what is above it rather than as
+// the next thing on the page.
+.c-project-settings-linked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.c-project-settings-linked__link {
+  font-size: var(--ui-text-label);
+}

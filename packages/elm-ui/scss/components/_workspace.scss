@@ -1,0 +1,307 @@
+// A workspace (`Ui.Page.Workspace`): a toolbar over a navigation, the work and a
+// panel, each scrolling on its own inside a region that never scrolls as a whole.
+//
+// The outer element is the size container and nothing else — a container query
+// cannot style the container itself — and the frame inside it is the grid.
+
+// Clipped, never scrolled: only the regions inside scroll, and a focus or a
+// scroll into view deep inside one must not move the frame (a box with
+// `overflow: hidden` would be moved).
+//
+// Its inline margins are the page's gutter (`--ui-page-gutter`, set by the
+// detail page it sits in), so its toolbar, its navigation, its work and its
+// panel start on the same edge as the page's title and tabs above.
+.ui-workspace {
+  --ui-workspace-gutter: var(--ui-page-gutter, var(--ui-space-5));
+
+  container: ui-workspace / inline-size;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: clip;
+}
+
+.ui-workspace__frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    'toolbar'
+    'main';
+  block-size: 100%;
+  min-block-size: 0;
+
+  &.has-nav {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'toolbar toolbar'
+      'nav main';
+  }
+
+  &.has-aside {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'toolbar toolbar'
+      'main aside';
+  }
+
+  &.has-nav.has-aside {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'toolbar toolbar toolbar'
+      'nav main aside';
+  }
+}
+
+// TOOLBAR
+
+.ui-workspace__toolbar {
+  grid-area: toolbar;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2) var(--ui-space-4);
+  min-inline-size: 0;
+  padding: var(--ui-space-2) var(--ui-workspace-gutter);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface);
+}
+
+.ui-workspace__toolbar-start,
+.ui-workspace__toolbar-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+// A trail in the toolbar is a row of the toolbar, not a heading with a title
+// under it, so it keeps no room below itself.
+.ui-workspace__toolbar .ui-breadcrumbs {
+  margin-block-end: 0;
+}
+
+// The navigation's toggle, and a row holding nothing else, exist only while the
+// navigation is an overlay.
+.ui-workspace__nav-toggle,
+.ui-workspace__toolbar--nav-only {
+  display: none;
+}
+
+// NAVIGATION
+
+// A column: the overlay's own heading (narrow only), the header that stays, and
+// the content that scrolls under it.
+.ui-workspace__nav {
+  grid-area: nav;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--ui-workspace-nav-width, 18rem);
+  min-block-size: 0;
+  min-inline-size: 0;
+  // The work's own ground, not the frame's: beside the application's
+  // navigation, a frame-colored column ran into it as one panel. A line says
+  // where the work begins.
+  background: var(--ui-surface);
+  border-inline-end: 1px solid var(--ui-border-subtle);
+}
+
+.ui-workspace__nav-header {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+  padding: var(--ui-space-5) var(--ui-workspace-gutter) var(--ui-space-3);
+
+  // A header that is a bar of its own: it spans the panel and brings its own
+  // padding, so the line under it reaches both edges.
+  &.is-flush { padding: 0; }
+}
+
+.ui-workspace__nav-scroll {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--ui-space-5) var(--ui-workspace-gutter);
+}
+
+.ui-workspace__nav-header + .ui-workspace__nav-scroll {
+  padding-block-start: 0;
+}
+
+// The overlay's own heading row, with its close button: only when it is one.
+.ui-workspace__overlay-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-3) var(--ui-workspace-gutter) 0;
+}
+
+.ui-workspace__overlay-title {
+  font-weight: var(--ui-weight-semibold);
+}
+
+// MAIN
+
+.ui-workspace__main {
+  position: relative;
+  grid-area: main;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+  padding: 0 var(--ui-workspace-gutter);
+  background: var(--ui-surface);
+
+  // Edge to edge, for content that is a table rather than a column of prose.
+  &.is-flush { padding: 0; }
+  // The work is focused from script (a skip, a moved focus) and never from the
+  // keyboard; its ring would outline the whole screen.
+  &:focus:not(:focus-visible) { outline-color: transparent; }
+}
+
+// ASIDE
+
+.ui-workspace__aside {
+  grid-area: aside;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--ui-workspace-aside-width, 24rem);
+  min-block-size: 0;
+  min-inline-size: 0;
+  background: var(--ui-surface);
+  border-inline-start: 1px solid var(--ui-border-subtle);
+}
+
+// Beside the work the panel has no chrome at all: what opened it closes it.
+// The narrow layout, where the panel is over the work, draws this row — and so
+// does a panel that was opened from inside the work, where the control that
+// opened it has scrolled away (`closeInPanel`).
+.ui-workspace__aside-close {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--ui-space-2) var(--ui-space-2) 0;
+}
+
+.ui-workspace__aside-close.is-always-shown {
+  display: flex;
+}
+
+.ui-workspace__aside-title {
+  @include ui-visually-hidden;
+}
+
+// Flush: the panel's content decides its own padding. A panel is a column of
+// rows that highlight, and a row that stops short of the edge on both sides
+// wastes the width a narrow panel has least of. What needs a margin asks for
+// one.
+.ui-workspace__aside-scroll {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  min-block-size: 0;
+  overflow-y: auto;
+  // The start padding is the room a focus ring needs and nothing more: a panel
+  // of links begins at the top, and a scroll container cuts the ring of what
+  // is first inside it — the ring is drawn outside the element.
+  padding-block: var(--ui-focus-clearance) var(--ui-space-5);
+}
+
+.ui-workspace__scrim {
+  display: none;
+}
+
+// NARROW: the work takes the width; the navigation and the panel open over it.
+@container ui-workspace (max-width: 56rem) {
+  .ui-workspace__frame,
+  .ui-workspace__frame.has-nav,
+  .ui-workspace__frame.has-aside,
+  .ui-workspace__frame.has-nav.has-aside {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'toolbar'
+      'main';
+  }
+
+  .ui-workspace__nav-toggle {
+    display: inline-flex;
+  }
+
+  .ui-workspace__toolbar--nav-only {
+    display: flex;
+  }
+
+  // The trail goes. It is the longest thing in the toolbar and the least
+  // urgent: where you are is also the title of the form under it, and the room
+  // is wanted for the control that opens the navigation.
+  .ui-workspace__toolbar .ui-breadcrumbs {
+    display: none;
+  }
+
+
+  .ui-workspace__nav,
+  .ui-workspace__aside {
+    grid-area: main;
+    position: absolute;
+    inset-block: 0;
+    z-index: 2;
+    max-inline-size: calc(100% - var(--ui-space-8));
+    box-shadow: var(--ui-elevation-3);
+  }
+
+  .ui-workspace__nav {
+    display: none;
+    inset-inline-start: 0;
+    inline-size: min(var(--ui-workspace-nav-width, 18rem), 22rem);
+
+    &.is-open {
+      display: flex;
+    }
+  }
+
+  .ui-workspace__aside {
+    inset-inline-end: 0;
+    inline-size: min(var(--ui-workspace-aside-width, 24rem), 28rem);
+  }
+
+  // An open navigation is over the panel, since it was opened last or is the
+  // way to somewhere else.
+  .ui-workspace__frame.is-nav-open .ui-workspace__nav {
+    z-index: 3;
+  }
+
+  .ui-workspace__overlay-header,
+  .ui-workspace__aside-close {
+    display: flex;
+  }
+
+  .ui-workspace__scrim {
+    display: block;
+    grid-area: main;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--ui-surface-backdrop);
+  }
+
+  // Nothing to drag on an overlay.
+  .ui-workspace__nav .ui-resizer,
+  .ui-workspace__aside .ui-resizer {
+    display: none;
+  }
+}

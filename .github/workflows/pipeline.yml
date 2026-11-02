@@ -1,0 +1,258 @@
+name: Pipeline
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+# A newer push supersedes the running pipeline for the same ref; release (tag) runs are never canceled
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+permissions:
+  contents: read
+
+jobs:
+
+# ----------------------------------------------------------------------------------------------------
+# Phase 1: checks, tests and the builds, all in parallel
+# ----------------------------------------------------------------------------------------------------
+  format:
+    name: Check / elm-format
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npx --yes elm-format@0.8.8 --validate apps/dsw apps/registry packages/elm-ui packages/elm-common packages/elm-vendor test/elm
+
+  rules:
+    name: Check / repository rules
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/node-setup
+      # the ui style rules and the guide links (tools/checks)
+      - run: npm run test:checks
+
+  test:
+    name: Test / ${{ matrix.suite }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [elm, ui]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/node-setup
+      - run: npm run test:${{ matrix.suite }}
+
+  build:
+    name: Build / ${{ matrix.component }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [dsw, registry]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # the version stamped into the build is the tag or branch with the commit
+      - uses: ./.github/actions/node-setup
+      - run: npm run build:${{ matrix.component }}
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-${{ matrix.component }}
+          path: dist/${{ matrix.component }}/
+          retention-days: 3
+
+# ----------------------------------------------------------------------------------------------------
+# Phase 2: the images, once everything above passed
+#   - branches:      ghcr.io/ds-wizard/<image>:<branch>, :sha-<commit>
+#   - main:          datastewardshipwizard/<image>:main, :sha-<commit>
+#   - v* tags:       datastewardshipwizard/<image>:X.Y.Z, :X.Y, and :X and :latest when it is the highest tag
+#   - pull requests: built, not pushed
+# ----------------------------------------------------------------------------------------------------
+  image:
+    name: Image / ${{ matrix.component }}
+    needs: [format, rules, test, build]
+    if: ${{ !failure() && !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: dsw
+            image: wizard-client
+            dockerfile: apps/dsw/docker/Dockerfile
+          - component: registry
+            image: registry-client
+            dockerfile: apps/registry/docker/Dockerfile
+    env:
+      INTERNAL_IMAGE: ghcr.io/ds-wizard/${{ matrix.image }}
+      PUBLIC_IMAGE: datastewardshipwizard/${{ matrix.image }}
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: dist-${{ matrix.component }}
+          path: dist/${{ matrix.component }}
+
+      # latest and the major tag move only when the pushed tag is the highest version,
+      # so a hotfix of an older line never hijacks them
+      - name: Is highest tag
+        id: highest
+        if: github.ref_type == 'tag'
+        run: |
+          HIGHEST=$(git tag --sort=-v:refname | head -1)
+          echo "value=$([ "$HIGHEST" = "$GITHUB_REF_NAME" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Docker login (GHCR)
+        if: github.event_name == 'push' && github.ref_type == 'branch' && github.ref != 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker login (Docker Hub)
+        if: >-
+          github.event_name == 'push' &&
+          env.DOCKER_HUB_USERNAME != '' &&
+          (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Docker meta (GHCR)
+        id: meta-internal
+        if: github.event_name == 'push' && github.ref_type == 'branch' && github.ref != 'refs/heads/main'
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.INTERNAL_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+          flavor: |
+            latest=false
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Docker meta (Docker Hub)
+        id: meta-public
+        if: >-
+          github.event_name == 'push' &&
+          env.DOCKER_HUB_USERNAME != '' &&
+          (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.PUBLIC_IMAGE }}
+          tags: |
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ steps.highest.outputs.value == 'true' }}
+            type=raw,value=latest,enable=${{ steps.highest.outputs.value == 'true' }}
+          flavor: |
+            latest=false
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      - name: Docker build (pull request)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      - name: Docker build + push
+        if: >-
+          github.event_name == 'push' &&
+          (steps.meta-internal.outcome == 'success' || steps.meta-public.outcome == 'success')
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.meta-internal.outputs.tags }}
+            ${{ steps.meta-public.outputs.tags }}
+          labels: |
+            ${{ steps.meta-public.outputs.labels || steps.meta-internal.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+# ----------------------------------------------------------------------------------------------------
+# Phase 3: release only — the builds and the translations on the GitHub release
+# ----------------------------------------------------------------------------------------------------
+  release:
+    name: Release
+    needs: [format, rules, test, build]
+    if: ${{ !failure() && !cancelled() && github.ref_type == 'tag' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/node-setup
+
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: dist-*
+          path: dist
+
+      - name: Archives and translations
+        run: |
+          for component in dsw registry; do
+            (cd "dist/dist-$component" && zip -qr "../../$component-${GITHUB_REF_NAME}.zip" .)
+          done
+          mkdir -p locale
+          npm run pot
+
+      - name: Pre-release
+        id: prerelease
+        run: |
+          if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: "dsw-${{ github.ref_name }}.zip,registry-${{ github.ref_name }}.zip,locale/dsw.pot"
+          prerelease: ${{ steps.prerelease.outputs.value }}
+          replacesArtifacts: true

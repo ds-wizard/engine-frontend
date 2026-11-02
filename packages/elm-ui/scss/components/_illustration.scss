@@ -1,0 +1,57 @@
+// The drawing on a full-page message or an empty state.
+//
+// The box is fixed and the picture is contained in it: the eight images an
+// application installs may be drawn to any shape, and a page must not change
+// height because a customer's set is squarer than the wizard's. See
+// Ui.Illustration for what each one is for.
+//
+// Which file goes in each box is the application's to say — it declares
+// `--ui-illustration-<name>` pointing at its own `assets/illustrations/`. With
+// no set installed the box is empty rather than broken, which is what the
+// fallback is for.
+.ui-illustration {
+  display: block;
+  // A width of its own, not one borrowed from the slot. The box has no content,
+  // so a percentage in a slot that sizes to its content resolves to nothing and
+  // the drawing disappears; the largest slot's width with a 100% ceiling fills
+  // any slot that states a size and survives one that does not.
+  inline-size: 18rem;
+  max-inline-size: 100%;
+  aspect-ratio: 4 / 3;
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.ui-illustration--empty {
+  background-image: var(--ui-illustration-empty, none);
+}
+
+.ui-illustration--no-results {
+  background-image: var(--ui-illustration-no-results, none);
+}
+
+.ui-illustration--error {
+  background-image: var(--ui-illustration-error, none);
+}
+
+.ui-illustration--not-found {
+  background-image: var(--ui-illustration-not-found, none);
+}
+
+.ui-illustration--not-allowed {
+  background-image: var(--ui-illustration-not-allowed, none);
+}
+
+.ui-illustration--placeholder {
+  background-image: var(--ui-illustration-placeholder, none);
+}
+
+.ui-illustration--download {
+  background-image: var(--ui-illustration-download, none);
+}
+
+.ui-illustration--success {
+  background-image: var(--ui-illustration-success, none);
+}

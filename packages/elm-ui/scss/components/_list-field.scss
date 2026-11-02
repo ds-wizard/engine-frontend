@@ -1,0 +1,163 @@
+// A field whose value is a list of things: its label, then a frame for each item
+// holding that item's fields and its remove button, then the button that adds
+// another. The same on every screen, whatever an item is — a parameter's name and
+// value, or an announcement's level, content and where it shows.
+//
+// The set itself is not framed. The items are, because an item of several
+// fields has to read as one entity and apart from the next; a frame round the
+// set as well would put a box round boxes. Hairlines and padding rather than
+// shadows: a list usually sits inside a card already.
+.ui-list-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+// The set's name, set as every field's label is — it names this field. Floated,
+// which is the one way to take a legend out of the fieldset's border and lay it
+// out as the column's first item like everything else.
+.ui-list-field__legend {
+  float: inline-start;
+  inline-size: 100%;
+  padding: 0;
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+  color: var(--ui-text);
+}
+
+// The label is as close to the first item as any field's label is to its
+// control (`.ui-field`'s gap); the items keep the wider gap between them.
+.ui-list-field > .ui-list-field__legend {
+  margin-block-end: calc(var(--ui-space-2) - var(--ui-space-3));
+}
+
+.ui-list-field__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  list-style: none;
+  min-inline-size: 0;
+}
+
+// One item: a frame round its fields, with the remove button inside it, since it
+// removes this item and nothing else. Centered on the frame when the fields have
+// no visible label; see below for when they do.
+.ui-list-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+
+  padding: var(--ui-space-4);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+}
+
+.ui-list-field__content {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
+}
+
+// A group of choices inside an item — an announcement's level — is not framed
+// again: the item's frame already says what it belongs to, and a box in a box is
+// one frame too many. Its edge and padding go, and its name is set and spaced as
+// a field's label. A list inside an item keeps the list's own form: a label,
+// then its items framed, each an entity of its own.
+.ui-list-field .ui-field--group {
+  gap: var(--ui-space-2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.ui-list-field .ui-field--group > .ui-field__legend {
+  font-size: var(--ui-text-body);
+  font-weight: var(--ui-weight-medium);
+  line-height: var(--ui-leading-normal);
+}
+
+// The add button, and the list's hint and error, follow the items.
+.ui-list-field__add {
+  display: flex;
+}
+
+// An item's controls — move, remove — together at the top end of its frame, in
+// the order given with remove last. Pinned to the top rather than centered on the
+// item or set against its first input: an item can be one field or a dozen, and
+// the corner is the one place every item has.
+.ui-list-field__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--ui-space-1);
+}
+
+// FILE UPLOAD
+//
+// The button is the control. The area around it takes the drop, which is an
+// extra way in rather than the way in — so it has no role, no tab stop, and
+// nothing that suggests pressing it.
+.ui-file-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ui-space-3);
+
+  padding: var(--ui-space-7);
+
+  border: 1px dashed var(--ui-border-control);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-surface-sunken);
+  text-align: center;
+
+  transition: var(--ui-transition-state);
+
+  &.is-hovered {
+    border-color: var(--ui-brand);
+    border-style: solid;
+    background: var(--ui-brand-subtle);
+  }
+
+  &.is-invalid {
+    border-color: var(--ui-danger-border);
+  }
+}
+
+.ui-file-upload__icon {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-title);
+}
+
+.ui-file-upload__hint {
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-body-sm);
+}
+
+// Once there is a file the area is a statement rather than a target, so it stops
+// being dashed and stops being a well.
+.ui-file-upload--chosen {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--ui-space-4);
+
+  padding: var(--ui-space-4) var(--ui-space-5);
+  border-style: solid;
+  border-color: var(--ui-border-subtle);
+  background: var(--ui-surface);
+  text-align: start;
+}
+
+.ui-file-upload__name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}

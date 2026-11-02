@@ -1,0 +1,114 @@
+module Common.Data.Forms.ProjectCreateForm exposing
+    ( ProjectCreateForm
+    , ValidationMode(..)
+    , encodeFromPackage
+    , encodeFromTemplate
+    , init
+    , validation
+    )
+
+import Common.Api.Models.Project.ProjectSharing as ProjectSharing
+import Common.Api.Models.Project.ProjectVisibility as ProjectVisibility
+import Common.Api.Models.ProjectPermission as ProjectPermission exposing (ProjectPermission)
+import Common.Data.AppState exposing (AppState)
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
+import Form exposing (Form)
+import Form.Field as Field
+import Form.Validate as V exposing (Validation)
+import Json.Encode as E
+import Json.Encode.Extra as E
+import Uuid exposing (Uuid)
+
+
+type alias ProjectCreateForm =
+    { name : String
+    , visibilityEnabled : Bool
+    , visibilityPermission : ProjectPermission
+    , sharingEnabled : Bool
+    , sharingPermission : ProjectPermission
+    , knowledgeModelPackageUuid : String
+    , projectUuid : String
+    , language : String
+    }
+
+
+init : AppState -> ValidationMode -> Maybe Uuid -> Maybe Uuid -> Form FormError ProjectCreateForm
+init appState validationMode selectedTemplateUuid selectedPackageUuid =
+    let
+        toField fieldName mbFieldValue =
+            case mbFieldValue of
+                Just fieldValue ->
+                    [ ( fieldName, Field.string fieldValue ) ]
+
+                _ ->
+                    []
+
+        ( visibilityEnabled, visibilityPermission ) =
+            ProjectVisibility.toFormValues appState.config.project.projectVisibility.defaultValue
+
+        ( sharingEnabled, sharingPermission ) =
+            ProjectSharing.toFormValues appState.config.project.projectSharing.defaultValue
+
+        initials =
+            [ ( "visibilityEnabled", Field.bool visibilityEnabled )
+            , ( "visibilityPermission", ProjectPermission.field visibilityPermission )
+            , ( "sharingEnabled", Field.bool sharingEnabled )
+            , ( "sharingPermission", ProjectPermission.field sharingPermission )
+            , ( "language", Field.string "" )
+            ]
+                ++ toField "projectUuid" (Maybe.map Uuid.toString selectedTemplateUuid)
+                ++ toField "knowledgeModelPackageUuid" (Maybe.map Uuid.toString selectedPackageUuid)
+    in
+    Form.initial initials (validation validationMode)
+
+
+type ValidationMode
+    = TemplateValidationMode
+    | PackageValidationMode
+
+
+validation : ValidationMode -> Validation FormError ProjectCreateForm
+validation validationMode =
+    let
+        validationBase =
+            V.succeed ProjectCreateForm
+                |> V.andMap (V.field "name" V.string)
+                |> V.andMap (V.field "visibilityEnabled" V.bool)
+                |> V.andMap (V.field "visibilityPermission" ProjectPermission.validation)
+                |> V.andMap (V.field "sharingEnabled" V.bool)
+                |> V.andMap (V.field "sharingPermission" ProjectPermission.validation)
+    in
+    case validationMode of
+        TemplateValidationMode ->
+            validationBase
+                |> V.andMap (V.succeed "")
+                |> V.andMap (V.field "projectUuid" V.string)
+                |> V.andMap (V.field "language" V.optionalString)
+
+        PackageValidationMode ->
+            validationBase
+                |> V.andMap (V.field "knowledgeModelPackageUuid" V.string)
+                |> V.andMap (V.succeed "")
+                |> V.andMap (V.field "language" V.optionalString)
+
+
+encodeFromPackage : List String -> ProjectCreateForm -> E.Value
+encodeFromPackage questionTagUuids form =
+    E.object
+        [ ( "name", E.string form.name )
+        , ( "knowledgeModelPackageUuid", E.string form.knowledgeModelPackageUuid )
+        , ( "visibility", ProjectVisibility.encode (ProjectVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
+        , ( "sharing", ProjectSharing.encode (ProjectSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
+        , ( "questionTagUuids", E.list E.string questionTagUuids )
+        , ( "projectUuid", E.maybe E.string Nothing )
+        , ( "language", E.string form.language )
+        ]
+
+
+encodeFromTemplate : ProjectCreateForm -> E.Value
+encodeFromTemplate form =
+    E.object
+        [ ( "name", E.string form.name )
+        , ( "projectUuid", E.string form.projectUuid )
+        ]

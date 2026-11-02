@@ -1,0 +1,287 @@
+// A navigation tree (`Ui.Tree`): nested lists of entries, a disclosure button
+// before each entry that can open.
+//
+// Each item is a grid of two columns, the toggle's and the entry's. An entry is
+// always in the second, whether or not there is a toggle in the first, and its
+// children's list spans the second below it — so the labels of a level line up,
+// and a level in is a toggle's width in, with no spacer and no wrapper.
+//
+// Entries hover and mark the current place the way the side navigation does —
+// the brand's lightest tint, and the stronger one with a weight for where the
+// reader is — because they are the same kind of thing: places to go.
+
+.ui-tree,
+.ui-tree__group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-tree > li,
+.ui-tree__group > li {
+  display: grid;
+  grid-template-columns: var(--ui-hit-min) minmax(0, 1fr);
+  column-gap: var(--ui-space-1);
+  align-items: stretch;
+  min-inline-size: 0;
+}
+
+// A level in, with a hairline down its start edge under the toggle that opened
+// it, as a file explorer draws nesting: the line is the lightest border there
+// is, there to follow, not to read.
+.ui-tree__group {
+  grid-column: 1 / -1;
+  margin-block-start: 1px;
+  margin-inline-start: calc(var(--ui-hit-min) / 2);
+  padding-inline-start: calc(var(--ui-hit-min) / 2 - 1px);
+  border-inline-start: 1px solid var(--ui-border-subtle);
+}
+
+// A circle round the caret, the caret in its middle.
+.ui-tree__toggle {
+  display: inline-flex;
+  grid-column: 1;
+  align-self: center;
+  justify-self: center;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-hit-min);
+  block-size: var(--ui-hit-min);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ui-text-muted);
+  font-size: var(--ui-text-label);
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-state-hover);
+    color: var(--ui-text);
+  }
+}
+
+// One line an entry, a long label cut short with an ellipsis, as the wizard's
+// navigation did: a tree is scanned for where things are, and a column of
+// wrapped titles is hard to scan. The label is still whole to a screen reader —
+// the ellipsis is drawn, not the text. The text is the button's own, so the
+// button is the block that clips it; what comes after it (a count, a mark) is
+// placed at the end, in room the entry keeps for it (`.has-end`), and is never
+// what gives way.
+.ui-tree__entry {
+  position: relative;
+  display: block;
+  grid-column: 2;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  min-inline-size: 0;
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-2) var(--ui-space-3);
+
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: transparent;
+  color: var(--ui-text);
+  font: inherit;
+  font-size: var(--ui-text-body);
+  text-align: start;
+  cursor: pointer;
+  transition: var(--ui-transition-state);
+
+  &:hover {
+    background: var(--ui-brand-subtle);
+    color: var(--ui-brand-on-subtle);
+  }
+
+  &:hover .ui-tree__icon { color: inherit; }
+
+  // Where the reader is: a tint and a weight, not color alone.
+  &[aria-current='true'] {
+    background: var(--ui-brand-subtle-selected);
+    color: var(--ui-brand-on-subtle);
+    font-weight: var(--ui-weight-medium);
+  }
+}
+
+.ui-tree__icon {
+  display: inline-block;
+  inline-size: 1rem;
+  margin-inline-end: var(--ui-space-2);
+  text-align: center;
+  color: var(--ui-text-muted);
+}
+
+.ui-tree__entry[aria-current='true'] .ui-tree__icon { color: inherit; }
+
+// What comes after the label (a count, a mark) keeps to the end edge, over room
+// the entry keeps clear of its label.
+.ui-tree__entry.has-end {
+  padding-inline-end: calc(var(--ui-space-3) + 2.75rem);
+}
+
+.ui-tree__entry > :not(.ui-tree__icon) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--ui-space-3);
+  translate: 0 -50%;
+}
+
+// PILLS (`Ui.Tree.pills`): the top level on grounds of their own, apart from
+// each other. The entry spans both columns and the toggle sits over its start,
+// inside the pill — the entry's padding keeps the label clear of it, so the
+// labels line up whether or not a pill has a toggle.
+.ui-tree--pills {
+  gap: var(--ui-space-2);
+}
+
+// The app's navigation's ground: a light pill on the white navigation.
+// Taller than an entry inside it, so a chapter reads as a place of its own.
+
+.ui-tree--pills > li {
+  grid-template-columns: var(--ui-hit-min) minmax(0, 1fr);
+  column-gap: 0;
+}
+
+.ui-tree--pills > li > .ui-tree__entry {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding-block: var(--ui-space-3);
+  padding-inline-start: calc(var(--ui-hit-min) + var(--ui-space-2));
+  background: var(--ui-frame);
+  font-weight: var(--ui-weight-medium);
+}
+
+.ui-tree--pills > li > .ui-tree__entry:hover {
+  background: var(--ui-brand-subtle);
+}
+
+// The current pill takes the lighter tint: on a pill, the stronger one is a
+// heavy block of color down the navigation.
+.ui-tree--pills > li > .ui-tree__entry[aria-current='true'] {
+  background: var(--ui-brand-subtle);
+}
+
+.ui-tree--pills > li > .ui-tree__toggle {
+  grid-row: 1;
+  z-index: 1;
+  margin-inline-start: var(--ui-space-1);
+}
+
+.ui-tree--pills > li:has(> .ui-tree__entry[aria-current='true']) > .ui-tree__toggle {
+  color: var(--ui-brand-on-subtle);
+}
+
+// What is inside an open pill needs no indent and no line — the pill above is
+// the boundary — and room before the next pill, so it is clear which it
+// belongs to.
+.ui-tree--pills > li > .ui-tree__group {
+  margin-block: var(--ui-space-2) var(--ui-space-4);
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+// A stand-in label ("Item 3"): italic, and muted until the entry is hovered or
+// is the current place.
+.ui-tree__entry.is-placeholder {
+  font-style: italic;
+  color: var(--ui-text-muted);
+
+  &:hover,
+  &[aria-current='true'] {
+    color: var(--ui-brand-on-subtle);
+  }
+}
+
+// What comes after the label says what it is in words, so it is not part of
+// the label's voice: a stand-in name is italic, the mark beside it is not.
+.ui-tree__entry.is-placeholder > :not(.ui-tree__icon) {
+  font-style: normal;
+}
+
+// An entry that makes something (`Ui.Tree.withAction`) rather than goes
+// somewhere. It lines up with its siblings — it belongs to the same collection
+// — and is muted, so a collection reads as its contents followed by the way to
+// add to it: a different kind of row, not a different kind of control.
+.ui-tree__entry.is-action {
+  color: var(--ui-text-muted);
+
+  .ui-tree__icon {
+    font-size: var(--ui-text-label);
+  }
+
+  &:hover {
+    color: var(--ui-brand-on-subtle);
+  }
+}
+
+// The thing everything else is inside (`Ui.Tree.withRoot`): the whole width,
+// the toggles' column included, so the carets and the lines below it read as
+// belonging to it rather than standing beside it.
+.ui-tree__entry.is-root {
+  grid-column: 1 / -1;
+  font-weight: var(--ui-weight-medium);
+}
+
+// What has happened to what an entry names (`Ui.Tree.withTone`): a color on
+// the label beside the word at its end, never instead of it. The current place
+// keeps its own color — where you are outranks what happened to it.
+.ui-tree__entry.is-success { color: var(--ui-success-on-subtle); }
+.ui-tree__entry.is-info { color: var(--ui-info-on-subtle); }
+.ui-tree__entry.is-danger { color: var(--ui-danger-on-subtle); }
+
+.ui-tree__entry.is-success .ui-tree__icon { color: inherit; }
+.ui-tree__entry.is-info .ui-tree__icon { color: inherit; }
+.ui-tree__entry.is-danger .ui-tree__icon { color: inherit; }
+
+.ui-tree__entry[aria-current='true'].is-success,
+.ui-tree__entry[aria-current='true'].is-info,
+.ui-tree__entry[aria-current='true'].is-danger {
+  color: var(--ui-brand-on-subtle);
+}
+
+// Nothing behind it to go to (`Ui.Tree.withDisabled`): it still says what it is
+// and what happened to it, and does not answer the pointer. It is set well back
+// — in a tree where most entries are out of reach, the few that are not have to
+// be findable by weight alone.
+.ui-tree__entry:disabled {
+  cursor: default;
+  color: var(--ui-text-subtle);
+
+  .ui-tree__icon { color: var(--ui-text-subtle); }
+
+  &:hover {
+    background: transparent;
+    color: var(--ui-text-subtle);
+  }
+}
+
+// The entry the tree is about (`Ui.Tree.withHighlight`) — the entity a move
+// dialog is moving. A ground of its own, so it is found at a glance.
+//
+// Not the brand's: in the one tree that has both, the brand marks the place
+// that has been chosen, and the thing being moved is not a choice. The info
+// role, which is also what the word at its end wears, with an edge down its
+// start so it is told apart by more than a tint.
+.ui-tree__entry.is-highlighted {
+  // The bar is taken out of the entry's own start padding, so the label stays
+  // where its siblings' labels are.
+  border-inline-start: var(--ui-space-2) solid var(--ui-info-border);
+  padding-inline-start: calc(var(--ui-space-3) - var(--ui-space-2));
+  background: var(--ui-info-subtle);
+  color: var(--ui-info-on-subtle);
+  font-weight: var(--ui-weight-medium);
+
+  &:disabled,
+  &:disabled .ui-tree__icon,
+  &:hover {
+    background: var(--ui-info-subtle);
+    color: var(--ui-info-on-subtle);
+  }
+}

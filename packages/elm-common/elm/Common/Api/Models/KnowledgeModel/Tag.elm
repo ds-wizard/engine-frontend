@@ -1,0 +1,39 @@
+module Common.Api.Models.KnowledgeModel.Tag exposing (Tag, decoder, equalContent, localize)
+
+import Common.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Gettext exposing (Locale, gettext)
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Pipeline as D
+
+
+type alias Tag =
+    { uuid : String
+    , name : String
+    , description : Maybe String
+    , color : String
+    , annotations : List Annotation
+    }
+
+
+decoder : Decoder Tag
+decoder =
+    D.succeed Tag
+        |> D.required "uuid" D.string
+        |> D.required "name" D.string
+        |> D.required "description" (D.nullable D.string)
+        |> D.required "color" D.string
+        |> D.required "annotations" (D.list Annotation.decoder)
+
+
+equalContent : Tag -> Tag -> Bool
+equalContent tag1 tag2 =
+    (tag1.name == tag2.name)
+        && (tag1.description == tag2.description)
+
+
+localize : Locale -> Tag -> Tag
+localize locale tag =
+    { tag
+        | name = gettext tag.name locale
+        , description = Maybe.map (\description -> gettext description locale) tag.description
+    }

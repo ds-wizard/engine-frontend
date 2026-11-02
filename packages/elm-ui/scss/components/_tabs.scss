@@ -1,0 +1,91 @@
+// Underline tabs, shared by Ui.Tabs and Ui.NavTabs. Same look, different
+// semantics — see the module comments.
+
+.ui-tabs {
+  border-block-end: 1px solid var(--ui-border-subtle);
+}
+
+.ui-tabs__list {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  list-style: none;
+
+  // The scrollbar would sit on the underline and read as a second rule.
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.ui-tabs__list--full {
+  overflow: visible;
+
+  .ui-tabs__item { flex: 1 1 0; }
+}
+
+.ui-tabs__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-2);
+  inline-size: 100%;
+
+  min-block-size: var(--ui-hit-min);
+  padding: var(--ui-space-3) var(--ui-space-5);
+
+  border: none;
+  border-block-end: 2px solid transparent;
+  background: none;
+  color: var(--ui-text);
+  font: inherit;
+  font-size: var(--ui-text-body);
+  // Stated rather than inherited: the underline sits on the bottom edge, so the
+  // tab's height has to come from the tab and not from whichever of its
+  // children happens to be tallest.
+  line-height: var(--ui-leading-normal);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition: var(--ui-transition-state);
+
+  &:hover { border-block-end-color: var(--ui-border-control); }
+
+  // The active tab is marked by weight *and* by the underline, so the state
+  // does not depend on color alone (WCAG 1.4.1).
+  &.is-active {
+    font-weight: var(--ui-weight-semibold);
+    border-block-end-color: var(--ui-brand-strong);
+  }
+
+  // The ring is inset because an outward one would be clipped by the list's
+  // horizontal scroll container.
+  &:focus-visible {
+    outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+    outline-offset: calc(var(--ui-focus-ring-offset) * -1);
+  }
+}
+
+// Reserve the width of the bold label so the bar does not shift when the
+// active tab changes. A hidden bold copy sets the width; the visible text
+// then never has to grow into it.
+.ui-tabs__label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+
+  &::before {
+    content: attr(data-label);
+    block-size: 0;
+    visibility: hidden;
+    overflow: hidden;
+    font-weight: var(--ui-weight-semibold);
+    pointer-events: none;
+  }
+}

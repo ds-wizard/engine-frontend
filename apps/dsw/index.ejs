@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/assets/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/assets/favicon/safari-pinned-tab.svg">
+    <link rel="shortcut icon" href="/assets/favicon/favicon.ico">
+    <meta name="msapplication-config" content="/assets/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <script src="/config.js"></script>
+    <script>
+        // Applied before first paint so a stored appearance never flashes. The
+        // same key the design system's theme port writes (packages/elm-ui/js/theme.js).
+        (function () {
+            try {
+                var mode = localStorage.getItem('ui-mode')
+                if (mode === 'light' || mode === 'dark') {
+                    document.documentElement.setAttribute('data-theme', mode)
+                }
+            } catch (e) { /* blocked storage: follow the system */ }
+        })()
+    </script>
+    <style>
+        /* The wait before the application is there, set like the loader inside
+           it (`Ui.AsyncBlock`): the same spinning circle over the same muted
+           line, fading in only once the wait is long enough to be a wait. Its
+           own keyframes and colors, because the stylesheet that holds the
+           design system's is what is being waited for. */
+        @keyframes loader-in{from{opacity:0}to{opacity:1}}
+        @keyframes loader-spin{to{transform:rotate(360deg)}}
+        .Loading__Loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:#6b7280;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:.875rem;opacity:0;animation:loader-in 1s ease-in .4s forwards}
+        .Loading__Loader__Spinner{display:block;width:3rem;height:3rem;animation:loader-spin 1s linear infinite}
+        @media (prefers-color-scheme:dark){html:not([data-theme=light]) body{background:#1c1f24}html:not([data-theme=light]) .Loading__Loader{color:#9aa3ae}}
+        html[data-theme=dark] body{background:#1c1f24}
+        html[data-theme=dark] .Loading__Loader{color:#9aa3ae}
+        @media (prefers-reduced-motion:reduce){.Loading__Loader__Spinner{animation:none}}
+    </style>
+    <!-- The bundle's tags, written out by hand.
+
+         The stylesheet is preloaded, not linked: a stylesheet in the head
+         blocks the first paint, so the loader in the body could not be seen
+         until the whole of it had arrived. index.js applies it once it has
+         loaded and only then starts the application, so the application never
+         paints unstyled.
+
+         Nothing but the loader goes in the body. The bootstrap empties the body
+         before the application starts, and Elm takes the body over when it
+         does — a stylesheet link left there is removed, and its rules go with
+         it. -->
+    <% for (const css of htmlWebpackPlugin.files.css) { %><link rel="preload" as="style" href="<%= css %>" data-app-stylesheet><% } %>
+    <% for (const js of htmlWebpackPlugin.files.js) { %><script type="module" src="<%= js %>"></script><% } %>
+</head>
+<body>
+<div class="Loading__Loader" role="status">
+    <svg class="Loading__Loader__Spinner" aria-hidden="true" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <path d="M222.7 32.1c5 16.9-4.6 34.8-21.5 39.8C121.8 95.6 64 169.1 64 256c0 106 86 192 192 192s192-86 192-192c0-86.9-57.8-160.4-137.1-184.1c-16.9-5-26.6-22.9-21.5-39.8s22.9-26.6 39.8-21.5C434.9 42.1 512 140 512 256c0 141.4-114.6 256-256 256S0 397.4 0 256C0 140 77.1 42.1 182.9 10.6c16.9-5 34.8 4.6 39.8 21.5z" fill="currentColor"/>
+    </svg>
+    <span class="Loading__Loader__Label">Loading&hellip;</span>
+</div>
+</body>
+</html>

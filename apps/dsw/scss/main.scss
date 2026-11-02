@@ -1,0 +1,29 @@
+// app-dsw is built on the design system alone.
+
+// Font Awesome's Sass is made of modules: its font path is configured on its
+// variables module, which has to be loaded first, before the icons are imported.
+@use '~@fortawesome/fontawesome-free/scss/variables' with ($font-path: '~@fortawesome/fontawesome-free/webfonts');
+
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+// Brands only for the external login providers' own marks (OpenID, Google, …).
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
+// Third-party stylesheets come before the system's, whose themes replace their
+// colors and leave their layout alone.
+@import '~flatpickr/dist/flatpickr';
+@import '~driver.js/dist/driver.css';
+
+@import '../../../packages/elm-ui/scss/index';
+@import '../../../packages/elm-common/scss/index';
+
+// No typeface is set here on purpose: the application ships the
+// system stack, which is what --ui-font-display defaults to.
+
+// The color is the wizard's, not the system's default blue.
+@import 'brand';
+
+// The drawings for Ui.Illustration's eight situations.
+@import 'illustrations';
+

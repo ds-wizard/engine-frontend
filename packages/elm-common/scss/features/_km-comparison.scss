@@ -1,0 +1,352 @@
+// The knowledge model comparison (`Common.Components.KMComparison`).
+//
+// Two knowledge models beside each other, one row per entity. The row is the
+// unit: it carries what happened, and its two cells hold what each side has —
+// an empty cell where a side does not have it at all.
+//
+// The nesting is drawn, not structural: the fold hands the view a flat list
+// with a level on each row, so a row indents itself with
+// `--c-km-comparison-level` and the list stays one `ul` that a screen reader
+// counts once.
+
+// The comparison fills whatever it is given — a page's content region, or the
+// body of a cover modal — and the workspace inside it does the rest.
+.c-km-comparison-pane {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+.c-km-comparison {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+// WHAT EACH SIDE IS
+//
+// The two packages, above their own columns and staying there while the rows
+// scroll under them — a row 200 deep still needs to say which model it is in.
+
+.c-km-comparison__header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: var(--c-km-comparison-gutter) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0;
+  padding-block: var(--ui-space-4);
+  // A rule above as well as below: the page's content is flush, so without one
+  // the two packages sit straight against the page's own header.
+  border-block: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface);
+}
+
+// The gutter the status column takes, so the header's two halves line up with
+// the cells below them.
+.c-km-comparison {
+  --c-km-comparison-gutter: var(--ui-space-8);
+}
+
+.c-km-comparison__package {
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: flex-start;
+  min-inline-size: 0;
+}
+
+// The first package sits in the second grid column: the first is the status
+// gutter, which the header has nothing to put in.
+.c-km-comparison__package:first-child {
+  grid-column: 2;
+}
+
+// The same rules the rows have, so the two knowledge models are told apart in
+// the header as well as under it.
+.c-km-comparison__package {
+  border-inline-start: 1px solid var(--ui-border-subtle);
+  padding-inline-start: var(--ui-space-4);
+}
+
+.c-km-comparison__package:last-child {
+  border-inline-end: 1px solid var(--ui-border-subtle);
+  padding-inline-end: var(--ui-space-4);
+}
+
+.c-km-comparison__package-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+}
+
+.c-km-comparison__package-name {
+  display: flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+// THE ROWS
+
+.c-km-comparison__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-block-size: 0;
+}
+
+.c-km-comparison__row {
+  display: grid;
+  grid-template-columns: var(--c-km-comparison-gutter) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  border-block-end: 1px solid var(--ui-border-subtle);
+}
+
+// A rule down each side of a column. With four or five levels of nesting the
+// two knowledge models run into each other otherwise, and which column a row
+// belongs to is the whole point of the page.
+.c-km-comparison__cell {
+  border-inline-start: 1px solid var(--ui-border-subtle);
+}
+
+.c-km-comparison__cell:last-child {
+  border-inline-end: 1px solid var(--ui-border-subtle);
+}
+
+// Hovering darkens whatever tint the row already has, so a row that is green
+// goes a deeper green rather than gray. A row of the section titles is a
+// heading, not a place to go, so it does not react.
+//
+// The whole row lights up, not only the cells that hold something: the row is
+// what the pointer is on, and a highlight that stops at the status gutter or at
+// an empty column reads as three things rather than one.
+.c-km-comparison__row:not(.c-km-comparison__row--section):hover {
+  background: color-mix(in oklab, var(--ui-surface) 92%, var(--ui-text));
+}
+
+.c-km-comparison__row:not(.c-km-comparison__row--section):hover
+  .c-km-comparison__cell:not(.c-km-comparison__cell--empty) {
+  background: color-mix(in oklab, var(--c-km-comparison-tint, var(--ui-surface)) 92%, var(--ui-text));
+}
+
+// WHAT HAPPENED
+//
+// The state is said once per row: an icon for the eye, its label for everything
+// else (1.4.1). The tint on the cells is the second
+// signal, never the only one.
+//
+// Each row names its own tint, so hovering can darken whatever that tint is
+// rather than painting gray over a color.
+
+.c-km-comparison__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--ui-space-2);
+}
+
+.c-km-comparison__row--added {
+  --c-km-comparison-tint: var(--ui-success-subtle);
+  --c-km-comparison-status: var(--ui-success-on-subtle);
+}
+
+.c-km-comparison__row--removed {
+  --c-km-comparison-tint: var(--ui-danger-subtle);
+  --c-km-comparison-status: var(--ui-danger-on-subtle);
+}
+
+.c-km-comparison__row--changed {
+  --c-km-comparison-tint: var(--ui-warning-subtle);
+  --c-km-comparison-status: var(--ui-warning-on-subtle);
+}
+
+// The section titles sit on the sunken surface, which is what tells a heading
+// from the rows under it at a glance.
+.c-km-comparison__row--section {
+  --c-km-comparison-tint: var(--ui-surface-sunken);
+}
+
+.c-km-comparison__status {
+  color: var(--c-km-comparison-status, var(--ui-icon-subtle));
+}
+
+// Only a cell that holds something is tinted, so an added entity tints the side
+// it was added to and leaves the other side plainly empty.
+.c-km-comparison__cell:not(.c-km-comparison__cell--empty) {
+  background: var(--c-km-comparison-tint, var(--ui-surface));
+}
+
+// A SIDE
+
+.c-km-comparison__cell {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-1);
+  min-inline-size: 0;
+  padding-block: var(--ui-space-1);
+  padding-inline-end: var(--ui-space-3);
+}
+
+// The indentation the level draws. It is a box rather than a padding so the
+// toggle that follows it lines up down the column whatever the depth is.
+.c-km-comparison__indent {
+  flex: 0 0 auto;
+  inline-size: calc(var(--ui-space-5) * var(--c-km-comparison-level, 0));
+}
+
+.c-km-comparison__cell--section {
+  color: var(--ui-text-muted);
+}
+
+.c-km-comparison__section {
+  font-size: var(--ui-text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// THE DISCLOSURE
+//
+// A real button with `aria-expanded`, before the entry it opens, where the eye
+// expects a caret. A row with nothing inside it keeps the space, so the names
+// line up.
+
+.c-km-comparison__toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ui-space-6);
+  block-size: var(--ui-space-6);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: none;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+}
+
+.c-km-comparison__toggle:hover {
+  color: var(--ui-text);
+}
+
+.c-km-comparison__toggle--none {
+  cursor: default;
+}
+
+// THE ENTITY
+//
+// The name is the control that opens the panel, so a keyboard reaches it. It is
+// a button rather than a link because it opens a panel on the page it is on.
+
+.c-km-comparison__entity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+  padding: var(--ui-space-1) var(--ui-space-2);
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+// No wash of its own: the row is already darkening under it, and a gray one
+// would be invisible on a tinted row and wrong on a colored one. The name
+// underlines, which reads on any background.
+.c-km-comparison__entity:hover .c-km-comparison__title {
+  text-decoration: underline;
+}
+
+.c-km-comparison__entity > i {
+  flex: 0 0 auto;
+  color: var(--ui-icon-subtle);
+}
+
+.c-km-comparison__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// CHOOSING THE TWO SIDES
+//
+// The dialog on the Compare page: the same three fields twice, beside each
+// other where there is room and stacked where there is not. Each side is a
+// fieldset, so the knowledge model, its version and its tags are one named
+// group rather than six loose fields.
+
+.c-km-comparison-select {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--ui-space-6);
+  align-items: start;
+}
+
+// THE PANEL
+//
+// One entity, its fields, and what changed inside each value. `<ins>` and
+// `<del>` are announced as an insertion and a deletion on their own, so the
+// colors here are for the eye only and carry no meaning the ear misses.
+//
+// The workspace's aside is flush by design — a panel of rows that highlight
+// wants its full width — but this one is a description list, which is prose and
+// needs a margin to be read.
+
+.c-km-comparison-detail {
+  padding: var(--ui-space-4);
+}
+
+.c-km-comparison-detail__state {
+  margin-block-end: var(--ui-space-4);
+}
+
+.c-km-comparison-detail__list {
+  margin: 0;
+  padding-inline-start: var(--ui-space-5);
+}
+
+.c-km-comparison-detail__empty {
+  color: var(--ui-icon-subtle);
+}
+
+// What arrived and what went, wherever a difference is shown: the comparison of
+// two knowledge models, and the migration onto a newer parent. The elements say
+// which is which on their own; these are the colors for the eye.
+.c-km-comparison-detail ins,
+.c-diff ins {
+  background: var(--ui-success-subtle);
+  color: var(--ui-success-on-subtle);
+  text-decoration: none;
+}
+
+.c-km-comparison-detail del,
+.c-diff del {
+  background: var(--ui-danger-subtle);
+  color: var(--ui-danger-on-subtle);
+}
+
+// A diff of lines (`DiffText.lines`): each line is a band of its own, and the
+// text keeps its indentation.
+.c-diff--lines {
+  margin: 0;
+  font-family: var(--ui-font-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.c-diff--lines > * {
+  display: block;
+}
+
+
+// Nothing chosen yet. The page's content is flush so the table can reach the
+// edges; this is prose, and asks for the margin back.
+.c-km-comparison-empty {
+  padding: var(--ui-space-8) var(--ui-space-6);
+}

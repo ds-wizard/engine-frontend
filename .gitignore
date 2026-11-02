@@ -1,25 +1,21 @@
 # dependencies
 node_modules
 elm-stuff
-!elm-kernel-replacements/elm-stuff
+!packages/elm-kernel-replacements/elm-stuff
 
 # build
 dist
 
-# docs
-.doit.db
-docs
-
 # local config
 config.js
-engine-wizard/static/wizard/config.js
 
 # locale
 !*/locale
 /locale
 
-# guide links
-guide-links.json
+# editors and OS
+.DS_Store
+.idea/
 
-# temporary files
-tmp
+# scratch
+/tmp

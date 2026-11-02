@@ -1,0 +1,16 @@
+// The registry is built on the design system alone, as app-dsw is.
+
+// Font Awesome's Sass is made of modules: its font path is configured on its
+// variables module, which has to be loaded first, before the icons are imported.
+@use '~@fortawesome/fontawesome-free/scss/variables' with ($font-path: '~@fortawesome/fontawesome-free/webfonts');
+
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+
+@import '../../../packages/elm-ui/scss/index';
+@import '../../../packages/elm-common/scss/index';
+
+// The wizard's color and drawings: the registry is its catalog.
+@import 'brand';
+@import 'illustrations';

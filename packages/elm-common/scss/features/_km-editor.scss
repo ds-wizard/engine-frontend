@@ -1,0 +1,539 @@
+// The knowledge model editor (`Common.Pages.KMEditor.Editor`).
+//
+// The Edit tab is a workspace: the knowledge model's tree down the start, the
+// selected entity in the middle. `Ui.Page.Workspace` owns the scrolling, the
+// resizer and the narrow-screen overlay; what is here is the entity pane.
+
+.c-km-editor-entity {
+  // A column of a readable width on a wide screen, as the questionnaire's
+  // content is. Wider than a settings form (`--ui-measure-form`) for the same
+  // reason the questionnaire is: a child list's row carries its handle and its
+  // move buttons beside the name, and a form stretched the width of a desktop
+  // puts a field's label and its value an arm apart.
+  max-inline-size: 56rem;
+  min-inline-size: 0;
+  margin-inline: auto;
+  padding: var(--ui-space-6);
+}
+
+// The tabs that are forms are the same column. The two that are matrices are
+// not: a table of every question against every tag needs whatever width there
+// is and whatever height, and it scrolls on its own — so it is given the area
+// rather than laid inside it.
+.c-km-editor-tab {
+  padding: var(--ui-space-6);
+}
+
+.c-km-editor-tab:has(.c-km-editor-matrix) {
+  padding: 0;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+// The tab that is a form scrolls itself. The detail page's body does not: with
+// flush content it is one surface between the tabs and the bottom edge, clipped
+// rather than scrolled, and each tab owns the scrolling of what it shows — the
+// matrices do, the tree does, the preview's questionnaire does.
+//
+// The measure is `Ui.Page.Content`'s, on the column inside. Centering the
+// scrolling box instead would put its scrollbar in the middle of the page.
+.c-km-editor-tab:not(:has(.c-km-editor-matrix)) {
+  // A scroll container is the containing block of what is positioned in it,
+  // as .ui-page is: otherwise visually hidden text far down its content is
+  // placed against the frame, and the whole page scrolls to it.
+  position: relative;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow-y: auto;
+}
+
+.c-km-editor-entity__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+}
+
+// What can be done to the whole entity — copy its identifier, move it, delete
+// it — together at the end of the row that says what it is.
+.c-km-editor-entity__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+// AN INTEGRATION
+//
+// A secret is a name and the reference that uses it, framed as a row so a
+// column of them reads as a list of things rather than a run of text.
+//
+// The room under the list is the list's own, so the way to configure them
+// stands clear of the last one — and an integration with no secrets, which
+// renders no list, gets no gap it has nothing to separate.
+.c-km-editor-secrets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  margin-block-end: var(--ui-space-4);
+}
+
+.c-km-editor-secret {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  min-inline-size: 0;
+  padding: var(--ui-space-2) var(--ui-space-3);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-frame);
+}
+
+// The questions already using an integration. It keeps its markers — it reads
+// as a list — but the indent is the markers' own room rather than the browser's
+// default, which pushed the whole list out past the field it sits in.
+.c-km-editor-uses {
+  margin: 0;
+  padding-inline-start: var(--ui-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+}
+
+// MOVING AN ENTITY
+//
+// A tree where most entries are somewhere the thing cannot go. That makes the
+// few that it can the thing to find, so they are the ones given a ground —
+// the opposite of a navigation, where everything is a place to go and only the
+// current one is marked.
+
+.c-km-editor-move {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  min-block-size: 0;
+}
+
+.c-km-editor-move__tree {
+  position: relative;
+  overflow-y: auto;
+  max-block-size: min(28rem, 55dvh);
+  padding: var(--ui-space-3);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+}
+
+// Somewhere it can go. Quiet — there can be dozens — but enough of an edge to
+// pick out of a column of entries that are mostly out of reach.
+.c-km-editor-move__tree .ui-tree__entry:not(:disabled):not(.is-highlighted) {
+  background: var(--ui-surface-sunken);
+}
+
+.c-km-editor-move__tree .ui-tree__entry:not(:disabled):not(.is-highlighted):hover {
+  background: var(--ui-brand-subtle);
+}
+
+// THE PANELS
+//
+// What is not finished, and which links are broken: two lists beside the
+// editor, each item a link to the entity it belongs to.
+
+// The gutter the rest of the workspace has: the panel is a column of links and
+// prose rather than rows that highlight, so it stops short of the edge.
+.c-km-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  padding-inline: var(--ui-workspace-gutter);
+  // The scroll container leaves only the room a focus ring needs above, so the
+  // first line sits against the panel's header without this.
+  padding-block: var(--ui-space-4);
+}
+
+.c-km-editor-panel__list {
+  margin: 0;
+  // Room for the markers, which hang outside the text.
+  padding-inline-start: var(--ui-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.c-km-editor-panel__broken {
+  padding-block: var(--ui-space-2);
+  border-block-end: 1px solid var(--ui-border-subtle);
+}
+
+.c-km-editor-panel__broken p {
+  margin: 0;
+}
+
+// THE TABS BESIDE THE KNOWLEDGE MODEL
+//
+// Question Tags and Phases are one matrix with a different column; Settings is
+// an ordinary form. All three sit inside the detail page's content, which
+// scrolls, so they only need their own padding.
+
+// THE MATRIX
+//
+// A real table: the question names are row headers and the columns are column
+// headers, so a checkbox is announced with both. The header row and the first
+// column stay put, because a grid of checkboxes with the names scrolled away
+// is a grid of checkboxes.
+
+.c-km-editor-matrix {
+  position: relative;
+  // The table is the tab: it scrolls itself in both directions, so the
+  // question names can stay put while the columns move under them.
+  overflow: auto;
+  block-size: 100%;
+  max-block-size: 100%;
+}
+
+.c-km-editor-matrix table {
+  border-collapse: collapse;
+  // The full width, always. The columns take what they need and the question
+  // column takes the rest; when they need more than there is, the table grows
+  // past the container and only it scrolls, the question column staying put.
+  inline-size: 100%;
+}
+
+.c-km-editor-matrix th,
+.c-km-editor-matrix td {
+  border: 1px solid var(--ui-border-subtle);
+  padding-block: var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+
+  // A tint that arrives at once across a whole column reads as a flash. It
+  // settles the way everything else in the system settles, which is a repaint
+  // and never a layout — and nothing at all under reduced motion.
+  transition: var(--ui-transition-state);
+}
+
+// THE QUESTIONS
+//
+// The first column stays while the rest scrolls. It takes the width the other
+// columns leave and gives it back down to a floor as they take more, so a
+// knowledge model with two tags reads as a list of questions and one with
+// thirty still shows a question beside the boxes.
+
+.c-km-editor-matrix__corner,
+.c-km-editor-matrix__name {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--ui-surface);
+  text-align: start;
+  font-weight: var(--ui-weight-regular);
+
+  // It takes whatever the other columns leave — `100%` on one cell of an
+  // auto-laid table is how a column is told to absorb the slack — and gives
+  // way down to a floor when there are more columns than fit. A name too long
+  // for it wraps; nothing here is cut.
+  inline-size: 100%;
+  min-inline-size: 16rem;
+  white-space: normal;
+}
+
+// The two thick rules are drawn by the cells rather than as borders. A
+// collapsed border belongs to the table, not to the cell, so it stays where the
+// table is while the cell it was drawn on sticks — the line slid away from its
+// own column. A pseudo-element is part of the cell and goes where it goes.
+.c-km-editor-matrix__corner::after,
+.c-km-editor-matrix__name::after,
+.c-km-editor-matrix thead th::before {
+  content: '';
+  position: absolute;
+  // A shade lighter than a control's edge: it is a rule between parts of one
+  // table, not the outline of something on top of it.
+  background: color-mix(in oklab, var(--ui-border-control) 55%, var(--ui-surface));
+}
+
+// Down the side of the column that stays.
+.c-km-editor-matrix__corner::after,
+.c-km-editor-matrix__name::after {
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: 2px;
+}
+
+// And under the header that stays.
+.c-km-editor-matrix thead th::before {
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 2px;
+}
+
+// The icon keeps the first line and the name wraps beside it rather than
+// under it.
+.c-km-editor-matrix__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ui-space-2);
+  min-inline-size: 0;
+}
+
+// The indent is the nesting, and it has to beat the padding the cells share —
+// a shorthand from `.c-km-editor-matrix th` would otherwise win on
+// specificity and flatten every question against the edge.
+.c-km-editor-matrix th.c-km-editor-matrix__name,
+.c-km-editor-matrix th.c-km-editor-matrix__corner {
+  padding-inline-start: calc(var(--ui-space-3) + var(--ui-space-5) * var(--c-km-editor-matrix-level, 0));
+}
+
+.c-km-editor-matrix__name {
+  font-weight: var(--ui-weight-regular);
+}
+
+.c-km-editor-matrix__label i {
+  flex: 0 0 auto;
+  color: var(--ui-icon-subtle);
+}
+
+.c-km-editor-matrix thead th {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--ui-surface);
+  white-space: nowrap;
+  // The same line as the one down the side, for the same reason: it says where
+  // the part that stays ends.
+  border-block-end: 2px solid var(--ui-border-control);
+}
+
+.c-km-editor-matrix__corner {
+  z-index: 3;
+}
+
+// A row naming a parent rather than holding checkboxes. Only a chapter is set
+// apart in weight: an answer and an item name a place inside one, and reading
+// every gray row as a heading loses which of them is the heading.
+.c-km-editor-matrix__separator th,
+.c-km-editor-matrix__separator td {
+  background: var(--ui-surface-sunken);
+  text-align: start;
+  font-weight: var(--ui-weight-regular);
+}
+
+.c-km-editor-matrix__separator th.is-chapter {
+  font-weight: var(--ui-weight-semibold);
+}
+
+.c-km-editor-matrix__cell {
+  text-align: center;
+}
+
+// WHERE THE POINTER IS
+//
+// A cell in the middle of a wide grid is hard to trace back to the question it
+// is on and the tag it is under, so both light up, in the brand's lightest
+// tint. The column is done by position, for as many columns as anybody is
+// likely to have; past that the row still lights and the header still says
+// which column it is.
+//
+// A gray row is a label rather than an answer, so nothing lights it — but the
+// column it is passing through still does. Dropping the column while the
+// pointer crosses a label and picking it up again on the other side is a blink
+// down the whole table; what the pointer is over has not changed.
+
+.c-km-editor-matrix tbody tr.c-km-editor-matrix__question:hover td,
+.c-km-editor-matrix tbody tr.c-km-editor-matrix__question:hover .c-km-editor-matrix__name {
+  // The color rather than the shorthand: the shorthand is not what settles,
+  // and the column that stays would snap while the rest of its row faded.
+  // Opaque, which that column needs: the table slides under it.
+  background-color: var(--ui-brand-subtle);
+}
+
+@for $column from 2 through 32 {
+  .c-km-editor-matrix:has(tbody td:nth-child(#{$column}):hover) thead th:nth-child(#{$column}),
+  .c-km-editor-matrix:has(tbody td:nth-child(#{$column}):hover) tbody .c-km-editor-matrix__question td:nth-child(#{$column}) {
+    background-color: var(--ui-brand-subtle);
+  }
+}
+
+// The checkbox is the whole cell's worth of target, so a tick is not a hunt
+// for a 13px square in the middle of a grid.
+.c-km-editor-matrix__cell input {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  accent-color: var(--ui-brand-strong);
+  cursor: pointer;
+}
+
+// THE PREVIEW
+//
+// The questionnaire as the knowledge model would produce it, with a strip above
+// it: which question tags to narrow it by, and the one action it has. The strip
+// keeps its place while the questionnaire below scrolls on its own, the way the
+// matrices' headings do.
+
+.c-km-editor-preview {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+// Saving sits at the end of the first line whatever is beside it, so it is in
+// the same place with tags and without them.
+.c-km-editor-preview__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface);
+}
+
+// The tags take the room there is; saving takes what it needs.
+.c-km-editor-preview__tags {
+  flex: 1 1 20rem;
+  min-inline-size: 0;
+}
+
+.c-km-editor-preview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
+
+// A tag is as wide as its name and no wider. The inline choices the system
+// draws elsewhere share the row out evenly, which is right for two or three
+// words of the same weight and wrong for a list of names: it stretches "Core"
+// across a third of the page and wraps the long one under itself.
+.c-km-editor-preview__tags .ui-choices {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+}
+
+.c-km-editor-preview__tags .ui-choice {
+  flex: 0 0 auto;
+  max-inline-size: 100%;
+}
+
+.c-km-editor-preview__body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+// THE MIGRATION
+//
+// One conflict at a time: what changed, where it lands, and the three ways to
+// answer it.
+
+.c-km-migration {
+  padding: var(--ui-space-6);
+}
+
+// The change and, beside it on a wide screen, where in the knowledge model it
+// lands. Under each other when there is not room for both.
+.c-km-migration__conflict {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ui-space-4);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .c-km-migration__conflict {
+    grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  }
+}
+
+.c-km-migration__event {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-4);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-surface);
+}
+
+// Above the change rather than below it: the fields can be long, and an answer
+// you have to scroll past the evidence to give is given at the bottom.
+//
+// Rejecting sits apart from the two that keep the change, so the one that
+// throws it away is not next to the one that does the opposite.
+.c-km-migration__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-space-2);
+  margin-block-end: var(--ui-space-2);
+}
+
+// The path down to the entity: one child per level, nested.
+.c-km-migration__path {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-4);
+  border: 1px solid var(--ui-border-subtle);
+  border-radius: var(--ui-radius-surface);
+  background: var(--ui-surface);
+}
+
+.c-km-migration__path-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Each level indented from the one above, with a rule down the inset to make
+// the nesting visible at a glance.
+//
+// The rule falls through the middle of the parent's icon rather than down the
+// far left, so it reads as a line dropped from the thing it belongs to: the
+// node's own inline padding, then half an icon — `.ui-icon` is 1em square, and
+// the nested list inherits the font size the icon is drawn at.
+.c-km-migration__path-list .c-km-migration__path-list {
+  margin-block-start: var(--ui-space-1);
+  margin-inline-start: calc(var(--ui-space-2) + 0.5em);
+  padding-inline-start: var(--ui-space-3);
+  border-inline-start: 1px solid var(--ui-border-subtle);
+}
+
+.c-km-migration__path-node {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-1) var(--ui-space-2);
+  border-radius: var(--ui-radius-control);
+  min-inline-size: 0;
+}
+
+// What is happening to the entity the event is about. The word is in the path
+// as well, so the color is never the only thing that says it (1.4.1).
+.c-km-migration__path-node.is-added {
+  background: var(--ui-success-subtle);
+  color: var(--ui-success-on-subtle);
+}
+
+.c-km-migration__path-node.is-deleted {
+  background: var(--ui-danger-subtle);
+  color: var(--ui-danger-on-subtle);
+}
+
+.c-km-migration__path-node.is-changed {
+  background: var(--ui-warning-subtle);
+  color: var(--ui-warning-on-subtle);
+}
+
+// What most people never change, folded away: a native `details`, so the
+// summary is a real disclosure and find-in-page can open it.
+
+.c-km-editor-advanced > summary {
+  cursor: pointer;
+  padding-block: var(--ui-space-2);
+  font-weight: 600;
+}

@@ -1,0 +1,379 @@
+// Roles — the semantic layer, and the entire themeable surface.
+//
+// Components read roles and nothing else. Two scopes: an explicit data-theme
+// wins in both directions, and "system" (no attribute) follows the OS.
+//
+// `*-on-subtle` clears 4.5:1 against its own tint *and* against the darkest
+// (light) or lightest (dark) neutral surface a state layer can produce — it is
+// used as status text on a plain surface too, most visibly a danger menu item.
+//
+// 83 roles are defined here. The value scale is the first of the domain roles
+// to arrive, because the project metrics needed it; the other 9 (diff colors,
+// private comments) are reserved at the foot of this file and arrive when
+// Wizard adopts the system.
+
+@mixin ui-light {
+  // Surface
+  //
+  // A page is not one surface. The frame the application lives in and the area
+  // its content is read in are different jobs, and they get different grounds:
+  // the frame recedes, the content is paper. Everything else is measured
+  // against those two.
+  //
+  // --ui-surface is the default: white, because that is what content is read
+  // on. --ui-frame is the frame around it, one step down. Nothing here is a
+  // new color — the two swapped jobs — so every pairing Ui.Theme.Check
+  // verifies still holds.
+  --ui-surface: var(--ui-neutral-0);
+  --ui-frame: var(--ui-neutral-50);
+
+  --ui-surface-sunken: var(--ui-neutral-100);
+  --ui-surface-inverse: var(--ui-neutral-900);
+  --ui-surface-backdrop: rgb(15 17 19 / 0.45);
+
+  // Text — every role clears 4.5:1 against every surface above.
+  // Recession comes from size, weight and position, never from contrast.
+  --ui-text: var(--ui-neutral-900);
+  --ui-text-muted: var(--ui-neutral-600);
+  --ui-text-subtle: var(--ui-neutral-550);
+  --ui-text-disabled: var(--ui-neutral-500);
+  --ui-text-inverse: var(--ui-neutral-0);
+  --ui-text-on-brand: var(--ui-neutral-0);
+  --ui-link: #1f5ce4;
+  --ui-link-hover: #0b48cf;
+
+  // Border — removed from regions, kept and strengthened on controls.
+  --ui-border-control: var(--ui-neutral-500);
+  --ui-border-subtle: var(--ui-neutral-200);
+  --ui-border-strong: var(--ui-neutral-700);
+  --ui-border-focus: var(--ui-link);
+
+  // An icon that informs but stands back from the text beside it — a project's
+  // sharing state after its name. The faintest value that is still a
+  // meaningful graphic (1.4.11, 3:1), which is the control border's, so it is
+  // named for its job and verified through that one: 3.01:1 at its worst, on a
+  // pressed surface, and above 3.2:1 on every brand's subtle tint.
+  --ui-icon-subtle: var(--ui-border-control);
+
+  // Brand — derived from the seed by Ui.Theme.Derive; these are the defaults
+  // for seed #2563EB and are replaced at runtime for a tenant. The link roles
+  // above come from the same derivation.
+  //
+  // The default is a plain blue that belongs to no product. An application
+  // with a brand of its own overrides these the way it overrides the display
+  // face.
+  --ui-brand: #2563eb;
+  --ui-brand-strong: #2461e9;
+  --ui-brand-hover: #124fd6;
+  --ui-brand-active: #013ec5;
+  --ui-brand-subtle: #e9f1ff;
+  --ui-brand-subtle-hover: #dae7ff;
+
+  // One step past hover: the thing that is chosen rather than pointed at. A
+  // navigation group takes `subtle` while you are inside it and the page itself
+  // takes this, so the two are the same color at two strengths.
+  --ui-brand-subtle-selected: #cbddff;
+
+  // The brand as text on either tint, derived against the stronger one — the
+  // link color clears 4.5:1 on `subtle` and not on `subtle-selected`, and one
+  // foreground for both beats two that differ by a shade.
+  --ui-brand-on-subtle: #1754db;
+
+  // Status
+  --ui-success-base: #308643;
+  --ui-success-on: var(--ui-neutral-0);
+  --ui-success-subtle: #dff8e2;
+  --ui-success-border: #489c58;
+  --ui-success-on-subtle: #0b6c2b;
+
+  --ui-warning-base: #9e6d00;
+  --ui-warning-on: var(--ui-neutral-0);
+  --ui-warning-subtle: #ffeed4;
+  --ui-warning-border: #b88000;
+  --ui-warning-on-subtle: #7e5600;
+
+  --ui-danger-base: #c94d45;
+  --ui-danger-on: var(--ui-neutral-0);
+  --ui-danger-subtle: #ffebe8;
+  --ui-danger-border: #e16258;
+  --ui-danger-on-subtle: #ab302b;
+
+  --ui-info-base: #007eb0;
+  --ui-info-on: var(--ui-neutral-0);
+  --ui-info-subtle: #e1f3ff;
+  --ui-info-border: #0094ce;
+  --ui-info-on-subtle: #00648d;
+
+  // Private — what only some of the people looking at a thing can see: an
+  // editor's note on a project everyone else can read. Not a status: nothing
+  // has gone right or wrong, and the hue says "somewhere else" rather than
+  // "pay attention". Purple, as the wizard's editor notes were, and the one
+  // hue in the set that no status has claimed.
+  --ui-private-base: #6d33d6;
+  --ui-private-on: var(--ui-neutral-0);
+  --ui-private-subtle: #f1eafd;
+  --ui-private-border: #5b21b6;
+  --ui-private-on-subtle: #5b21b6;
+
+  // Focus
+  // Derived against a hovered surface, because a focused row is usually also
+  // a hovered row.
+  --ui-focus-ring: var(--ui-link);
+  --ui-focus-ring-width: var(--ui-focus-width);
+  --ui-focus-ring-offset: var(--ui-focus-offset);
+
+  // Elevation — shadow in light mode. Offsets stay in px: a shadow is a
+  // rendering effect standing in for distance from the page, not a measurement
+  // of anything the reader sized.
+  //
+  // Level 1 is short enough that its offset shadow all but vanishes on the
+  // block-start edge, so it adds an unoffset 1px ring: a faint outline on all
+  // four sides, which the drop shadow then deepens below.
+  --ui-elevation-1: 0 0 0 1px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
+  --ui-elevation-2: 0 6px 16px rgb(0 0 0 / 0.12), 0 2px 4px rgb(0 0 0 / 0.08);
+  --ui-elevation-3: 0 16px 40px rgb(0 0 0 / 0.16), 0 4px 10px rgb(0 0 0 / 0.1);
+
+  // ...and the ground the shadow is cast on, which in light mode is the same
+  // white as the page, because there is nothing above white. A raised thing
+  // says so with its shadow and its hairline; in dark mode the same two
+  // declarations say it with lightness instead, and the component does not
+  // have to know which mode it is in.
+  --ui-elevation-1-surface: var(--ui-neutral-0);
+  --ui-elevation-2-surface: var(--ui-neutral-0);
+  --ui-elevation-3-surface: var(--ui-neutral-0);
+
+  // Chart series. Eight, because a legend with more than that is a legend
+  // nobody reads, and each one clears 3:1 against both grounds a chart sits on
+  // (1.4.11 — a data series is a meaningful graphic, not decoration).
+  //
+  // Fixed rather than derived from the brand: a tenant's color moves, and a
+  // palette that moves with it can put two series on top of each other. The
+  // legend names every series, so color is never the only way to tell them
+  // apart (1.4.1).
+  //
+  // The hues, in their order — blue, yellow, green, red, purple, teal, indigo,
+  // orange. Those whose base hex is too light for 3:1 are darkened in
+  // lightness only (OKLCH), so the hue and the saturation stay the base ones:
+  // #0091ff, #f7b500, #6dd400, #44d7b6 and #fa6400 here.
+  --ui-chart-1: #0189f1;
+  --ui-chart-2: #ae7f07;
+  --ui-chart-3: #4c9800;
+  --ui-chart-4: #e02020;
+  --ui-chart-5: #b620e0;
+  --ui-chart-6: #06987e;
+  --ui-chart-7: #6236ff;
+  --ui-chart-8: #e55b03;
+
+  // Syntax — the five distinctions a highlighter actually needs, each solved
+  // for 4.5:1 on both grounds code sits on (the page and a well). They are
+  // roles rather than a CodeMirror theme so that the stylesheet decides what a
+  // keyword looks like, and dark mode needs no second theme.
+  --ui-syntax-comment: var(--ui-neutral-550);
+  --ui-syntax-keyword: #7c3aed;
+  --ui-syntax-string: #0a3069;
+  --ui-syntax-number: #0550ae;
+  --ui-syntax-name: #953800;
+
+  // The hairline that does the lifting where the shadow cannot. One step
+  // stronger than the rule between table rows: that one separates things that
+  // are on the same level, and this one has to say that something is off the
+  // page. Transparent in dark mode, where the surface step has already said it.
+  --ui-border-elevated: var(--ui-neutral-300);
+
+  // Value scale — how well something scores, from 0 to 1: red, through yellow
+  // at the middle, to green. Eleven steps interpolated in OKLCH by
+  // Ui.Theme.Derive.valueScale (the stops are in Ui.Theme.Palette, which
+  // mirrors these and is what Ui.Theme.Check verifies). Pick a step with
+  // Ui.ValueScale, never by name.
+  //
+  // A step is a color and never the only signal: whatever wears one writes
+  // its value out beside it (1.4.1). And a filled step must stand out from the
+  // track it fills (1.4.11, 3:1). Yellow cannot do that on a light track and
+  // still be yellow, so here every fill is drawn with an edge in
+  // --ui-value-edge — the control border, 3.25:1 on the sunken track — rather
+  // than every step being darkened into olive.
+  --ui-value-0: #e23532;
+  --ui-value-10: #ee540e;
+  --ui-value-20: #f17500;
+  --ui-value-30: #f49000;
+  --ui-value-40: #f7aa00;
+  --ui-value-50: #f8c20d;
+  --ui-value-60: #d4bc00;
+  --ui-value-70: #aeb600;
+  --ui-value-80: #86ae22;
+  --ui-value-90: #59a438;
+  --ui-value-100: #139948;
+  --ui-value-edge: var(--ui-border-control);
+
+  // An owner's crown: gold, in both themes. The crown is always labeled in
+  // words, so its color carries nothing a reader has to see.
+  --ui-crown: #f7b500;
+
+  // Hues for values that are told apart by color as well as by their words —
+  // how widely a project is open, in the analytics. A light tint with the
+  // text's own color on it: each hue 15% into white.
+  --ui-hue-indigo: #6610f2;
+  --ui-hue-yellow: #ffc107;
+  --ui-hue-orange: #fd7e14;
+  --ui-hue-red: #dc3545;
+  --ui-tint-indigo: color-mix(in srgb, var(--ui-hue-indigo) 15%, #ffffff);
+  --ui-tint-yellow: color-mix(in srgb, var(--ui-hue-yellow) 15%, #ffffff);
+  --ui-tint-orange: color-mix(in srgb, var(--ui-hue-orange) 15%, #ffffff);
+  --ui-tint-red: color-mix(in srgb, var(--ui-hue-red) 15%, #ffffff);
+}
+
+@mixin ui-dark {
+  // Surface — charcoal, designed on its own terms rather than inverted.
+  //
+  // The same division, in the same direction: the frame sits behind the
+  // content. Light mode runs out of headroom at white, so there content is the
+  // lightest thing on the page and cards lift off it with a hairline and a
+  // shadow; here there is room above, so the ladder keeps going — frame,
+  // surface, card, overlay.
+  --ui-surface: var(--ui-charcoal-50);
+  --ui-frame: var(--ui-charcoal-25);
+
+  --ui-surface-sunken: var(--ui-charcoal-25);
+  --ui-surface-inverse: var(--ui-charcoal-1000);
+  --ui-surface-backdrop: rgb(7 10 14 / 0.6);
+
+  --ui-text: var(--ui-charcoal-900);
+  --ui-text-muted: var(--ui-charcoal-600);
+  // The same value as muted, and that is the honest answer rather than an
+  // oversight: charcoal-600 is already within 0.03 of the 4.5:1 floor against a
+  // pressed overlay, so dark mode has no dimmer step to give. Weight and case
+  // carry the difference there.
+  --ui-text-subtle: var(--ui-charcoal-600);
+  --ui-text-disabled: var(--ui-charcoal-500);
+  --ui-text-inverse: var(--ui-charcoal-0);
+  --ui-text-on-brand: var(--ui-charcoal-0);
+  --ui-link: #92b7ff;
+  --ui-link-hover: #b0cbff;
+
+  --ui-border-control: var(--ui-charcoal-500);
+  --ui-border-subtle: var(--ui-charcoal-400);
+  --ui-border-strong: var(--ui-charcoal-700);
+  --ui-border-focus: var(--ui-link);
+
+  --ui-icon-subtle: var(--ui-border-control);
+
+  --ui-brand: #5d92ff;
+  --ui-brand-strong: #5d92ff;
+  --ui-brand-hover: #7ba8ff;
+  --ui-brand-active: #97bbff;
+  --ui-brand-subtle: #182e5b;
+  --ui-brand-subtle-hover: #213b6e;
+  --ui-brand-subtle-selected: #21438a;
+  --ui-brand-on-subtle: #8db4ff;
+
+  --ui-success-base: #52a661;
+  --ui-success-on: var(--ui-charcoal-0);
+  --ui-success-subtle: #1d3921;
+  --ui-success-border: #368c49;
+  --ui-success-on-subtle: #75ca83;
+
+  --ui-warning-base: #c48900;
+  --ui-warning-on: var(--ui-charcoal-0);
+  --ui-warning-subtle: #422d08;
+  --ui-warning-border: #a17000;
+  --ui-warning-on-subtle: #eaad41;
+
+  --ui-danger-base: #ed6d62;
+  --ui-danger-on: var(--ui-charcoal-0);
+  --ui-danger-subtle: #4e221e;
+  --ui-danger-border: #cb4f46;
+  --ui-danger-on-subtle: #ff9d92;
+
+  --ui-info-base: #109eda;
+  --ui-info-on: var(--ui-charcoal-0);
+  --ui-info-subtle: #0c364b;
+  --ui-info-border: #0084b8;
+  --ui-info-on-subtle: #4bc2ff;
+
+  --ui-private-base: #a78bfa;
+  --ui-private-on: var(--ui-charcoal-0);
+  --ui-private-subtle: #2b1a52;
+  --ui-private-border: #7c5cf0;
+  --ui-private-on-subtle: #c9b6ff;
+
+  // Derived against a hovered surface, because a focused row is usually also
+  // a hovered row.
+  --ui-focus-ring: var(--ui-link);
+  --ui-focus-ring-width: var(--ui-focus-width);
+  --ui-focus-ring-offset: var(--ui-focus-offset);
+
+  // The ink flips: on a dark ground a state has to lighten, not darken.
+  --ui-state-hover: rgb(255 255 255 / 0.08);
+  --ui-state-active: rgb(255 255 255 / 0.13);
+
+  // Elevation — lightness, not shadow. Shadows barely read on a dark ground.
+  --ui-elevation-1: none;
+  --ui-elevation-2: none;
+  --ui-elevation-3: none;
+  --ui-elevation-1-surface: var(--ui-charcoal-100);
+  --ui-elevation-2-surface: var(--ui-charcoal-200);
+  --ui-elevation-3-surface: var(--ui-charcoal-300);
+
+  // The base hexes themselves, which are light enough for the dark ground —
+  // but the indigo, lifted in lightness only to clear it.
+  --ui-chart-1: #0091ff;
+  --ui-chart-2: #f7b500;
+  --ui-chart-3: #6dd400;
+  --ui-chart-4: #e02020;
+  --ui-chart-5: #b620e0;
+  --ui-chart-6: #44d7b6;
+  --ui-chart-7: #6a50ff;
+  --ui-chart-8: #fa6400;
+
+  --ui-syntax-comment: #9198a1;
+  --ui-syntax-keyword: #ff9492;
+  --ui-syntax-string: #a5d6ff;
+  --ui-syntax-number: #79c0ff;
+  --ui-syntax-name: #d2a8ff;
+
+  // Nothing: the lighter ground has already said the thing is above the page,
+  // and a line as well would be saying it twice.
+  --ui-border-elevated: transparent;
+
+  // On the dark track every step clears 3:1 by itself — 5.53:1 at its worst,
+  // value-0 — so there is no edge to draw.
+  --ui-value-0: #f0574e;
+  --ui-value-10: #f76a38;
+  --ui-value-20: #fa7f1f;
+  --ui-value-30: #f99400;
+  --ui-value-40: #f6a800;
+  --ui-value-50: #efbd24;
+  --ui-value-60: #d4be1d;
+  --ui-value-70: #b7bf2a;
+  --ui-value-80: #96be3e;
+  --ui-value-90: #71bc53;
+  --ui-value-100: #43b966;
+  --ui-value-edge: transparent;
+
+  // The same hues a quarter into the dark surface, for the light text on them.
+  --ui-tint-indigo: color-mix(in srgb, var(--ui-hue-indigo) 25%, var(--ui-surface));
+  --ui-tint-yellow: color-mix(in srgb, var(--ui-hue-yellow) 25%, var(--ui-surface));
+  --ui-tint-orange: color-mix(in srgb, var(--ui-hue-orange) 25%, var(--ui-surface));
+  --ui-tint-red: color-mix(in srgb, var(--ui-hue-red) 25%, var(--ui-surface));
+}
+
+:root,
+:root[data-theme='light'] {
+  @include ui-light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include ui-dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include ui-dark;
+}
+
+// Reserved — domain roles, not yet built. Named here so the count stays honest.
+//   --ui-diff-inserted / -bg                 (2)
+//   --ui-diff-deleted / -bg                  (2)
+//   --ui-diff-edited / -bg                   (2)
+//   --ui-comment-private / -bg / -border     (3)

@@ -1,0 +1,106 @@
+// External login — a provider's own colors on a secondary button.
+//
+// The wrapper is not a box, so the button lays out as if it were not there.
+//
+// The colors arrive as custom properties from Elm, exactly as the provider is
+// configured, with no contrast check: a provider's brand is the administrator's
+// to follow (see ExternalLoginButton). The border is a tone of the provider's
+// own ground, mixed toward its text color, rather than the gray control border:
+// a provider's ground can match the page — a dark button on the dark theme's
+// charcoal, a white one on the light theme — and the border is what keeps it a
+// button there (1.4.11), in the provider's colors rather than against them.
+// Hover and press mix the ground toward the button's own text color — lighter
+// for a dark button with light text, darker for a light one with dark text — so
+// the change shows on any configured pair, where the system's translucent state
+// layer barely moves a dark ground. The border takes the text color too, which
+// makes the hovered button unmistakable even when the two colors are close.
+// Only the ground and the border move; the text keeps the configured color.
+// The spinner of a busy button is in the text color too, not the secondary
+// button's.
+.c-external-login {
+  --c-external-login-border: color-mix(in oklab, var(--c-external-login-background) 75%, var(--c-external-login-color));
+
+  display: contents;
+
+  // On the login page the providers are a column of their own, as wide as the
+  // form, where a button in a column otherwise keeps its label's width.
+  .ui-stack > & > .ui-button {
+    align-self: stretch;
+  }
+
+  .ui-button--secondary {
+    // One width for the set. Providers' names differ by a few characters, and a
+    // row or a column of buttons each cut to its own name reads as a mistake
+    // rather than as a choice. A name longer than this widens its own button:
+    // the name is what the button says, and it is not shortened for the sake of
+    // a straight edge.
+    min-inline-size: 12rem;
+
+    border-color: var(--c-external-login-border);
+    background: var(--c-external-login-background);
+    color: var(--c-external-login-color);
+
+    &.ui-button--loading .ui-button__spinner {
+      color: var(--c-external-login-color);
+    }
+
+    &:hover:not(:disabled, [aria-disabled='true']) {
+      background: color-mix(in oklab, var(--c-external-login-background) 80%, var(--c-external-login-color));
+      border-color: var(--c-external-login-color);
+    }
+
+    &:active:not(:disabled, [aria-disabled='true']) {
+      background: color-mix(in oklab, var(--c-external-login-background) 65%, var(--c-external-login-color));
+      border-color: var(--c-external-login-color);
+    }
+  }
+}
+
+// The provider's mark on its own: the icon on the configured ground, as the
+// OpenID list shows it beside each provider's name. It is decorative, so it has
+// no hit target; the border keeps it visible when the ground matches the page,
+// as the button's does.
+.c-external-login-icon,
+.c-external-login-badge {
+  --c-external-login-border: color-mix(in oklab, var(--c-external-login-background) 75%, var(--c-external-login-color));
+}
+
+.c-external-login-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--ui-space-3);
+  padding-inline: var(--ui-space-4);
+
+  border: 1px solid var(--c-external-login-border);
+  border-radius: var(--ui-radius-control);
+  background: var(--c-external-login-background);
+  color: var(--c-external-login-color);
+}
+
+// The provider as a badge: its icon and name in the configured colors, with the
+// metrics of a Ui badge so it sits on a line of them. The border keeps
+// it visible when the ground matches the page, as the icon's does.
+.c-external-login-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  padding-block: var(--ui-space-1);
+  padding-inline: var(--ui-space-3);
+
+  border: 1px solid var(--c-external-login-border);
+  border-radius: var(--ui-radius-pill);
+  background: var(--c-external-login-background);
+  color: var(--c-external-login-color);
+  font-size: var(--ui-text-label);
+  font-weight: var(--ui-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.c-external-login-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-2);
+}
