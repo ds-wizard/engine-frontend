@@ -283,6 +283,7 @@ viewCompleted appState migration =
         |> Message.withAction
             (Button.linkPrimary (gettext "Publish" appState.locale)
                 (Routes.toUrl appState (Routes.kmEditorPublish migration.editorUuid))
+                |> Button.withTestId "km-migration_publish"
             )
         |> Message.withinPage
         |> Message.announced
@@ -300,7 +301,7 @@ viewConflict appState model migration event =
 
             Nothing ->
                 text ""
-        , div [ class "c-km-migration__conflict" ]
+        , div [ class "c-km-migration__conflict", TestId.attribute "km-migration_conflict" ]
             [ div [ class "c-km-migration__event", TestId.attribute (conflictTestId event) ]
                 -- The answer comes first. The fields under it can be long, and
                 -- a decision you have to scroll past the evidence to make is a

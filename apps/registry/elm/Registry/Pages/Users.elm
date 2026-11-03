@@ -150,7 +150,7 @@ view appState model =
                     Html.text ""
 
         deleteModal =
-            ConfirmModal.delete appState
+            ConfirmModal.deleteWithTestId appState
                 { title = gettext "Delete user" appState.locale
                 , open = Maybe.isJust model.toDelete
                 , question = gettext "Are you sure you want to permanently delete the following user?" appState.locale
@@ -158,6 +158,7 @@ view appState model =
                 , onConfirm = Delete
                 , onClose = AskDelete Nothing
                 , result = model.deleting
+                , testId = Just "users-delete"
                 }
     in
     Content.content

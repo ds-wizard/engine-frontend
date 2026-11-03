@@ -2279,6 +2279,14 @@ panelButton appState model editorContext panel =
 
             else
                 identity
+
+        testId =
+            case panel of
+                Panels.Warnings ->
+                    "km-editor_panel_warnings"
+
+                Panels.UrlCheck ->
+                    "km-editor_panel_url-check"
     in
     Button.toHtml
         (Button.ghost (Panels.title (panelsConfig appState model) panel)
@@ -2293,6 +2301,7 @@ panelButton appState model editorContext panel =
             |> Button.withPressed open
             |> withCount
             |> Button.small
+            |> Button.withTestId testId
         )
 
 

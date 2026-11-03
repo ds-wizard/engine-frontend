@@ -194,7 +194,7 @@ toHtml (ListItem config) =
                 Nothing ->
                     text ""
             , div [ class "ui-list__content" ]
-                [ div [ class "ui-list__title" ] [ config.title ]
+                [ div [ class "ui-list__title", TestId.attribute "list-item_title" ] [ config.title ]
                 , let
                     fragments =
                         List.map (\fragment -> span [ class "ui-list__fragment" ] [ fragment ]) config.fragments
@@ -202,7 +202,7 @@ toHtml (ListItem config) =
                     description =
                         case config.description of
                             Just value ->
-                                [ span [ class "ui-list__fragment ui-list__fragment--description" ] [ text value ] ]
+                                [ span [ class "ui-list__fragment ui-list__fragment--description", TestId.attribute "list-item_description" ] [ text value ] ]
 
                             Nothing ->
                                 []

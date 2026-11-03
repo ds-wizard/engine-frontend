@@ -291,6 +291,7 @@ listingItem policy appState kmPackage =
                     { label = gettext "update available" appState.locale
                     , url = Routes.toUrl appState (Routes.knowledgeModelsImport kmPackageId)
                     }
+                    |> Link.withTestId "listing-item_link_update-available"
                     |> Link.toHtml
                 ]
 

@@ -361,6 +361,7 @@ listingBadges appState kmEditor =
                 -- opens it: the same thing the Update action does, where the
                 -- reader is already looking.
                 [ Badge.warning (gettext "update available" appState.locale)
+                    |> Badge.withTestId "listing-item_badge_update-available"
                     |> Badge.withDescription (gettext "There is a new version of parent knowledge model" appState.locale)
                     |> Badge.withAction (openUpgrade kmEditor)
                 ]

@@ -133,7 +133,7 @@ signedIn appState config content =
                 [ Menu.withIcon (Icon.solid "fa-user-pen") (Menu.linkItem (gettext "Account" appState.locale) (Routes.toUrl Routes.Account))
                 , Menu.withIcon (Icon.solid "fa-key") (Menu.linkItem (gettext "API Keys" appState.locale) (Routes.toUrl Routes.ApiKeys))
                 ]
-            , moreItems = [ Menu.withIcon (Icon.solid "fa-right-from-bracket") (Menu.item (gettext "Log out" appState.locale) config.logoutMsg) ]
+            , moreItems = [ Menu.withIcon (Icon.solid "fa-right-from-bracket") (Menu.item (gettext "Log out" appState.locale) config.logoutMsg) |> Menu.withTestId "user-menu_logout" ]
             }
         , mode = appState.uiMode
         , setMode = config.setMode

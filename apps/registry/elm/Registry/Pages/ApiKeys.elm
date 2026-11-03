@@ -198,7 +198,7 @@ view appState model =
                     |> Table.toHtml
 
         deleteModal =
-            ConfirmModal.delete appState
+            ConfirmModal.deleteWithTestId appState
                 { title = gettext "Delete API key" appState.locale
                 , open = Maybe.isJust model.toDelete
                 , question = gettext "Are you sure you want to delete this API key? Wizards that use it will no longer reach the registry." appState.locale
@@ -206,6 +206,7 @@ view appState model =
                 , onConfirm = Delete
                 , onClose = AskDelete Nothing
                 , result = model.deleting
+                , testId = Just "api-keys_delete"
                 }
     in
     Content.content

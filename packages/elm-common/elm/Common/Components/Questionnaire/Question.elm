@@ -217,7 +217,12 @@ viewAnswerMetrics props =
             metricTitle measure.metricUuid
                 |> Maybe.map
                     (\title ->
-                        span [ class "c-questionnaire-metric", ValueScale.tone measure.measure ]
+                        span
+                            [ class "c-questionnaire-metric"
+                            , ValueScale.tone measure.measure
+                            , TestId.attribute ("questionnaire_answer-metric_" ++ measure.metricUuid)
+                            , attribute "data-value" (String.fromFloat measure.measure)
+                            ]
                             (text title
                                 :: (if props.showValue then
                                         -- The gap is what separates the two to
@@ -226,7 +231,7 @@ viewAnswerMetrics props =
                                         -- whitespace alone it is no flex item
                                         -- and takes no room.
                                         [ text " "
-                                        , span [ class "c-questionnaire-metric__value" ] [ text (String.fromInt (round (100 * measure.measure)) ++ "%") ]
+                                        , span [ class "c-questionnaire-metric__value", TestId.attribute "questionnaire_answer-metric-value" ] [ text (String.fromInt (round (100 * measure.measure)) ++ "%") ]
                                         ]
 
                                     else
@@ -240,7 +245,7 @@ viewAnswerMetrics props =
             Nothing
 
         measures ->
-            Just (span [ class "c-questionnaire-metrics" ] measures)
+            Just (span [ class "c-questionnaire-metrics", TestId.attribute "questionnaire_answer-metrics" ] measures)
 
 
 {-| The follow-ups' own control, at the top of their section, as in the wizard.
@@ -383,7 +388,7 @@ viewValue locale timeZone actions node flags answeredAt replyString commentCount
 
         warning pattern message =
             if not (String.isEmpty currentValue) && not (Regex.contains pattern currentValue) then
-                Alert.toHtml (Alert.warning message)
+                Alert.toHtml (Alert.withTestId "questionnaire_format-warning" (Alert.warning message))
 
             else
                 text ""
@@ -402,7 +407,7 @@ viewValue locale timeZone actions node flags answeredAt replyString commentCount
                     text ""
 
                 Err error ->
-                    Alert.toHtml (Alert.warning error)
+                    Alert.toHtml (Alert.withTestId ("questionnaire_validation-warning_" ++ QuestionValidation.toOptionString validation) (Alert.warning error))
 
         inputView =
             case valueType of
@@ -426,7 +431,7 @@ viewValue locale timeZone actions node flags answeredAt replyString commentCount
 
                 Just QuestionValueType.TextQuestionValueType ->
                     if readOnly then
-                        [ div [ class "c-questionnaire-read-only-text" ] [ Markdown.view { headingOffset = 3 } currentValue ] ]
+                        [ div [ class "c-questionnaire-read-only-text", TestId.attribute "questionnaire_read-only-text" ] [ Markdown.view { headingOffset = 3 } currentValue ] ]
 
                     else
                         [ field Field.markdown ]
@@ -653,7 +658,7 @@ viewFile locale actions node flags answeredAt replyString fileString commentCoun
                 Just _ ->
                     case Result.toMaybe (D.decodeString ProjectFileSimple.decoder fileString) of
                         Just file ->
-                            ( div [ class "c-questionnaire-file" ]
+                            ( div [ class "c-questionnaire-file", TestId.attribute "questionnaire_file" ]
                                 [ span [ class "c-questionnaire-file__icon" ] [ Icon.toHtml (Icon.fromClass (FileIcon.getFileIcon file.fileName file.contentType)) ]
                                 , textButton file.fileName (DownloadFile file.uuid)
                                 , Text.muted ("(" ++ ByteUnits.toReadable file.fileSize ++ ")")
@@ -846,7 +851,7 @@ viewIntegrationApi locale actions node flags mbTypeHints answeredAt replyString 
         questionInput =
             case mbReplyValue of
                 Just (IntegrationReply (IntegrationReplyType.IntegrationType selected _)) ->
-                    div [ class "c-questionnaire-read-only-text" ] [ Markdown.view { headingOffset = 3 } selected ]
+                    div [ class "c-questionnaire-read-only-text", TestId.attribute "questionnaire_read-only-text" ] [ Markdown.view { headingOffset = 3 } selected ]
 
                 Just (IntegrationReply (IntegrationReplyType.PlainType plain)) ->
                     viewInput plain
@@ -952,7 +957,7 @@ viewTypeHints : Gettext.Locale -> String -> Maybe Int -> Maybe TypeHints -> Html
 viewTypeHints locale questionPath highlighted mbTypeHints =
     case mbTypeHints of
         Just typeHints ->
-            div [ class "c-questionnaire-type-hints", id (typeHintsId questionPath) ] [ viewTypeHintsResult locale questionPath highlighted typeHints ]
+            div [ class "c-questionnaire-type-hints", id (typeHintsId questionPath), TestId.attribute "questionnaire_type-hints" ] [ viewTypeHintsResult locale questionPath highlighted typeHints ]
 
         Nothing ->
             text ""
@@ -982,6 +987,7 @@ viewTypeHintsResult locale questionPath highlighted typeHints =
                             , attribute "role" "option"
                             , attribute "aria-selected" (boolToString isHighlighted)
                             , classList [ ( "c-questionnaire-type-hint", True ), ( "is-highlighted", isHighlighted ) ]
+                            , TestId.attribute ("questionnaire_type-hint_" ++ String.fromInt index)
 
                             -- The press keeps focus in the input; the choice is
                             -- made on the click (WCAG 2.5.2).
@@ -1020,7 +1026,7 @@ viewIntegrationPlugin locale actions node flags answeredAt replyString project c
             case pluginOf node of
                 Just pluginData ->
                     if answered && not pluginData.rendersReply then
-                        div [ class "c-questionnaire-read-only-text" ]
+                        div [ class "c-questionnaire-read-only-text", TestId.attribute "questionnaire_read-only-text" ]
                             [ Markdown.view { headingOffset = 3 } (Maybe.unwrap "" (ReplyValue.getStringReply << .value) mbReply) ]
 
                     else
@@ -1124,8 +1130,8 @@ wrapper props content =
 
         tags =
             if Flags.showTags props.flags && not (List.isEmpty props.node.tags) then
-                div [ class "c-questionnaire-question__tags" ]
-                    [ Tag.list (List.map (\tag -> Tag.withColor tag.color (Tag.tag tag.name)) props.node.tags) ]
+                div [ class "c-questionnaire-question__tags", TestId.attribute "questionnaire_question-tags" ]
+                    [ Tag.list (List.map (\tag -> Tag.withTestId ("questionnaire_question-tag_" ++ tag.uuid) (Tag.withColor tag.color (Tag.tag tag.name))) props.node.tags) ]
 
             else
                 text ""
@@ -1193,8 +1199,8 @@ viewActions props =
             action button =
                 Button.toHtml (button |> Button.quiet |> Button.small)
 
-            iconAction icon label msg =
-                action (Button.iconOnly icon label msg |> Button.withTooltipAt Tooltip.End)
+            iconAction testId icon label msg =
+                action (Button.iconOnly icon label msg |> Button.withTooltipAt Tooltip.End |> Button.withTestId ("questionnaire_question-action_" ++ testId))
 
             -- A TODO is an icon to add it, and once there a badge saying TODO
             -- with a cross that takes it away.
@@ -1204,13 +1210,13 @@ viewActions props =
 
                 else if Flags.hasTodo props.flags then
                     [ span [ class "c-questionnaire-todo" ]
-                        [ text (gettext "TODO" props.locale)
-                        , iconAction (Icon.solid "fa-xmark") (gettext "Remove TODO" props.locale) (RemoveTodo path)
+                        [ span [ TestId.attribute "questionnaire_todo" ] [ text (gettext "TODO" props.locale) ]
+                        , iconAction "remove-todo" (Icon.solid "fa-xmark") (gettext "Remove TODO" props.locale) (RemoveTodo path)
                         ]
                     ]
 
                 else
-                    [ iconAction (Icon.solid "fa-plus") (gettext "Add TODO" props.locale) (AddTodo path) ]
+                    [ iconAction "add-todo" (Icon.solid "fa-plus") (gettext "Add TODO" props.locale) (AddTodo path) ]
 
             comments =
                 if Flags.commentsEnabled props.flags then
@@ -1253,7 +1259,7 @@ viewActions props =
                     gettext "Copy link" props.locale
         in
         div [ class "c-questionnaire-question__actions" ]
-            (todo ++ comments ++ plugins ++ [ iconAction (Icon.solid "fa-link") copyLabel (CopyLinkToQuestion path) ])
+            (todo ++ comments ++ plugins ++ [ iconAction "copy-link" (Icon.solid "fa-link") copyLabel (CopyLinkToQuestion path) ])
 
     else
         text ""
@@ -1388,6 +1394,7 @@ viewClearReply props =
                 (Button.ghost (gettext "Clear answer" props.locale) (ClearReply props.questionPath)
                     |> Button.withIcon (Icon.solid "fa-rotate-left")
                     |> Button.small
+                    |> Button.withTestId "questionnaire_clear-answer"
                 )
             ]
 

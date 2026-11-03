@@ -52,6 +52,7 @@ import Task
 import Ui.EmptyState as EmptyState
 import Ui.Field as Field
 import Ui.Icon as Icon
+import Ui.TestId as TestId
 import Ui.Text as Text
 
 
@@ -332,11 +333,25 @@ viewResults locale model =
 
 viewResult : String -> Result_ -> Html Msg
 viewResult term result =
+    let
+        -- Where the result goes, not what it says.
+        testId =
+            case result.outcome of
+                GoToPath path ->
+                    "questionnaire-search_result_path_" ++ path
+
+                GoToQuestion uuid ->
+                    "questionnaire-search_result_question_" ++ uuid
+
+                GoToChapter uuid ->
+                    "questionnaire-search_result_chapter_" ++ uuid
+    in
     li []
         [ button
             [ type_ "button"
             , class "c-questionnaire-search__result"
             , onClick (Chose result.outcome)
+            , TestId.attribute testId
             ]
             [ span [ class "c-questionnaire-search__kind" ] [ text result.kind ]
             , span [ class "c-questionnaire-search__value" ] (highlight term result.value)

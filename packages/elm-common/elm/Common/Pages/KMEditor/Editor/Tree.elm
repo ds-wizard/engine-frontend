@@ -295,7 +295,7 @@ entityNode config editorContext uuid label icon =
         |> Tree.withCurrent (EditorContext.isActive uuid editorContext)
         |> Tree.withEnd (stateBadge config editorContext uuid)
         |> Tree.withDisabled (EditorContext.isDeleted uuid editorContext)
-        |> Tree.withTestId "km-editor_tree_entity"
+        |> Tree.withTestId ("km-editor_tree_entity_" ++ uuid)
         |> named
         |> toned
 
@@ -324,13 +324,13 @@ name: a screen reader says "Chapter 2, added".
 stateBadge : Config msg -> EditorContext -> String -> List (Html msg)
 stateBadge config editorContext uuid =
     if EditorContext.isDeleted uuid editorContext then
-        [ Badge.toHtml (Badge.danger (gettext "Deleted" config.locale)) ]
+        [ Badge.toHtml (Badge.withTestId "km-editor_tree_badge_deleted" (Badge.danger (gettext "Deleted" config.locale))) ]
 
     else if EditorContext.isAdded uuid editorContext then
-        [ Badge.toHtml (Badge.success (gettext "Added" config.locale)) ]
+        [ Badge.toHtml (Badge.withTestId "km-editor_tree_badge_added" (Badge.success (gettext "Added" config.locale))) ]
 
     else if EditorContext.isEdited uuid editorContext then
-        [ Badge.toHtml (Badge.info (gettext "Edited" config.locale)) ]
+        [ Badge.toHtml (Badge.withTestId "km-editor_tree_badge_edited" (Badge.info (gettext "Edited" config.locale))) ]
 
     else
         []

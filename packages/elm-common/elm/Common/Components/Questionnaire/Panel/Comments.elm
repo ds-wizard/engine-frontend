@@ -74,6 +74,7 @@ import Ui.Icon as Icon
 import Ui.ItemIcon as ItemIcon
 import Ui.Menu as Menu
 import Ui.Tabs as Tabs
+import Ui.TestId as TestId
 import Ui.Text as Text
 import Ui.Tooltip as Tooltip
 import Uuid exposing (Uuid)
@@ -712,6 +713,7 @@ viewThread appState cfg model thread =
         , classList [ ( "is-resolved", thread.resolved ), ( "is-private", thread.private ) ]
         , id (threadElementId thread.uuid)
         , attribute "data-comment-thread-uuid" (Uuid.toString thread.uuid)
+        , TestId.attribute "comments_thread"
         , attribute "aria-label"
             (String.format (ngettext ( "Thread by %s, 1 comment", "Thread by %s, %s comments" ) (List.length thread.comments) appState.locale)
                 [ name, String.fromInt (List.length thread.comments) ]
@@ -749,6 +751,7 @@ viewThreadHeader appState cfg model thread assigned =
                         |> Button.quiet
                         |> Button.small
                         |> Button.withTooltipAt Tooltip.Start
+                        |> Button.withTestId "comments_thread_resolve"
                     )
                 ]
 
@@ -790,6 +793,7 @@ viewThreadHeader appState cfg model thread assigned =
                         gettext "Copy link to this thread" appState.locale
                     )
                     (CopyLink cfg.path thread.uuid)
+                    |> Button.withTestId "comments_thread_copy-link"
                 )
             ]
 
@@ -805,17 +809,17 @@ viewThreadHeader appState cfg model thread assigned =
         items =
             Maybe.values
                 [ if not cfg.readonly && Feature.projectCommentThreadReopen appState cfg.questionnaire thread then
-                    Just (Menu.item (gettext "Reopen this thread" appState.locale) (Reopen cfg.path thread) |> Menu.withIcon (Icon.solid "fa-rotate-left"))
+                    Just (Menu.item (gettext "Reopen this thread" appState.locale) (Reopen cfg.path thread) |> Menu.withIcon (Icon.solid "fa-rotate-left") |> Menu.withTestId "comments_thread_reopen")
 
                   else
                     Nothing
                 , if not cfg.readonly && not thread.resolved && Maybe.isJust thread.assignedTo && Feature.projectCommentThreadRemoveAssign appState cfg.questionnaire thread then
-                    Just (Menu.item (gettext "Remove assignment" appState.locale) (Assign cfg.path thread Nothing) |> Menu.withIcon (Icon.solid "fa-user-slash"))
+                    Just (Menu.item (gettext "Remove assignment" appState.locale) (Assign cfg.path thread Nothing) |> Menu.withIcon (Icon.solid "fa-user-slash") |> Menu.withTestId "comments_thread_remove-assignment")
 
                   else
                     Nothing
                 , if not cfg.readonly && Feature.projectCommentThreadDelete appState cfg.questionnaire thread then
-                    Just (Menu.dangerItem (gettext "Delete this thread" appState.locale) (AskDelete cfg.path thread Nothing) |> Menu.withIcon (Icon.solid "fa-trash"))
+                    Just (Menu.dangerItem (gettext "Delete this thread" appState.locale) (AskDelete cfg.path thread Nothing) |> Menu.withIcon (Icon.solid "fa-trash") |> Menu.withTestId "comments_thread_delete")
 
                   else
                     Nothing
@@ -828,7 +832,7 @@ viewThreadHeader appState cfg model thread assigned =
             else
                 [ Menu.toHtml
                     { id = threadMenuId thread.uuid
-                    , trigger = Menu.kebab (gettext "What to do with this thread" appState.locale)
+                    , trigger = Menu.kebab (gettext "What to do with this thread" appState.locale) |> Menu.withTriggerTestId "comments_thread_menu"
                     , alignment = Menu.End
                     , items = items
                     , toMsg = MenuMsg (threadMenuId thread.uuid)
@@ -915,8 +919,8 @@ viewComment appState cfg model thread index comment =
                                     |> Field.withRows (linesIn editing.text)
                                 )
                             , div [ class "c-questionnaire-comments__actions" ]
-                                [ Button.toHtml (Button.primary (gettext "Save" appState.locale) (SendEdit cfg.path thread comment) |> Button.small)
-                                , Button.toHtml (Button.ghost (gettext "Cancel" appState.locale) CancelEdit |> Button.small)
+                                [ Button.toHtml (Button.primary (gettext "Save" appState.locale) (SendEdit cfg.path thread comment) |> Button.small |> Button.withTestId "comments_edit_submit")
+                                , Button.toHtml (Button.ghost (gettext "Cancel" appState.locale) CancelEdit |> Button.small |> Button.withTestId "comments_edit_cancel")
                                 ]
                             ]
                         ]
@@ -927,7 +931,7 @@ viewComment appState cfg model thread index comment =
                 Nothing ->
                     [ Markdown.view { headingOffset = 3 } comment.text ]
     in
-    li [ class "c-questionnaire-comments__comment" ]
+    li [ class "c-questionnaire-comments__comment", attribute "data-comment-uuid" (Uuid.toString comment.uuid), TestId.attribute "comments_comment" ]
         (div [ class "c-questionnaire-comments__header" ]
             ([ ItemIcon.toHtml avatar
              , div [ class "c-questionnaire-comments__who" ]
@@ -970,12 +974,12 @@ viewCommentActions appState cfg model thread comment first =
         items =
             Maybe.values
                 [ if not cfg.readonly && Feature.projectCommentEdit appState cfg.questionnaire thread comment then
-                    Just (Menu.item (gettext "Edit this comment" appState.locale) (StartEdit comment) |> Menu.withIcon (Icon.solid "fa-pen"))
+                    Just (Menu.item (gettext "Edit this comment" appState.locale) (StartEdit comment) |> Menu.withIcon (Icon.solid "fa-pen") |> Menu.withTestId "comments_comment_edit")
 
                   else
                     Nothing
                 , if not first && not cfg.readonly && Feature.projectCommentDelete appState cfg.questionnaire thread comment then
-                    Just (Menu.dangerItem (gettext "Delete this comment" appState.locale) (AskDelete cfg.path thread (Just comment)) |> Menu.withIcon (Icon.solid "fa-trash"))
+                    Just (Menu.dangerItem (gettext "Delete this comment" appState.locale) (AskDelete cfg.path thread (Just comment)) |> Menu.withIcon (Icon.solid "fa-trash") |> Menu.withTestId "comments_comment_delete")
 
                   else
                     Nothing
@@ -988,7 +992,7 @@ viewCommentActions appState cfg model thread comment first =
             else
                 [ Menu.toHtml
                     { id = commentMenuId comment.uuid
-                    , trigger = Menu.kebab (gettext "Comment actions" appState.locale)
+                    , trigger = Menu.kebab (gettext "Comment actions" appState.locale) |> Menu.withTriggerTestId "comments_comment_menu"
                     , alignment = Menu.End
                     , items = items
                     , toMsg = MenuMsg (commentMenuId comment.uuid)
@@ -1011,6 +1015,7 @@ viewAssign appState cfg model thread =
                     List.map
                         (\user ->
                             Menu.item (User.fullName user) (Assign cfg.path thread (Just user))
+                                |> Menu.withTestId ("comments_thread_assign_" ++ Uuid.toString user.uuid)
                                 |> Menu.withLeading (ItemIcon.toHtml (ItemIcon.withSize ItemIcon.Small (avatarOf user.firstName user.lastName user.imageUrl (Just user.gravatarHash))))
                         )
                         users
@@ -1041,6 +1046,7 @@ viewAssign appState cfg model thread =
                 , content = [ Icon.toHtml (Icon.solid "fa-user-plus") ]
                 }
                 |> Menu.withTriggerTooltipAt Tooltip.End
+                |> Menu.withTriggerTestId "comments_thread_assign"
         , alignment = Menu.End
         , items = items
         , toMsg = MenuMsg (assignMenuId thread.uuid)
@@ -1106,9 +1112,19 @@ viewEditor appState config =
             text ""
 
           else
+            let
+                -- A new thread's box, or a reply's inside a thread.
+                testIdPrefix =
+                    case config.thread of
+                        Just _ ->
+                            "comments_reply"
+
+                        Nothing ->
+                            "comments_new-thread"
+            in
             div [ class "c-questionnaire-comments__actions" ]
-                [ Button.toHtml (Button.primary config.send (Send config.path config.thread config.private) |> Button.small)
-                , Button.toHtml (Button.ghost (gettext "Cancel" appState.locale) (Typed config.path config.thread "") |> Button.small)
+                [ Button.toHtml (Button.primary config.send (Send config.path config.thread config.private) |> Button.small |> Button.withTestId (testIdPrefix ++ "_submit"))
+                , Button.toHtml (Button.ghost (gettext "Cancel" appState.locale) (Typed config.path config.thread "") |> Button.small |> Button.withTestId (testIdPrefix ++ "_cancel"))
                 ]
         ]
 
@@ -1124,7 +1140,7 @@ viewDeleteModal appState model =
                 Nothing ->
                     ( gettext "Delete thread" appState.locale, gettext "Are you sure you want to delete this thread and every comment in it?" appState.locale )
     in
-    ConfirmModal.delete appState
+    ConfirmModal.deleteWithTestId appState
         { title = title
         , open = Maybe.isJust model.deleting
         , question = question
@@ -1132,4 +1148,5 @@ viewDeleteModal appState model =
         , onConfirm = ConfirmDelete
         , onClose = CancelDelete
         , result = Unset
+        , testId = Just "comments-delete"
         }

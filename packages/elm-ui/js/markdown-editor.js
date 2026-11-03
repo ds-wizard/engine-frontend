@@ -290,6 +290,7 @@ function define() {
                 button.type = 'button'
                 button.className = 'ui-markdown__button'
                 button.dataset.command = command.key
+                button.dataset.cy = 'markdown-editor_' + command.key
                 button.setAttribute('aria-pressed', 'false')
                 button.tabIndex = -1
 
@@ -339,6 +340,7 @@ function define() {
                 button.type = 'button'
                 button.className = 'ui-mode-switch__option'
                 button.dataset.mode = mode
+                button.dataset.cy = 'markdown-editor_mode-' + mode
                 button.setAttribute('role', 'radio')
                 button.setAttribute('aria-checked', String(mode === this._mode))
                 button.tabIndex = -1
@@ -461,17 +463,20 @@ function define() {
             input.type = 'url'
             input.id = id
             input.className = 'ui-input'
+            input.dataset.cy = 'markdown-editor_prompt-input'
             input.placeholder = command.prompt.placeholder
             input.value = command.prompt.value(this.editor)
 
             const apply = document.createElement('button')
             apply.type = 'button'
             apply.className = 'ui-button ui-button--primary ui-button--sm'
+            apply.dataset.cy = 'markdown-editor_prompt-apply'
             apply.textContent = words.apply
 
             const cancel = document.createElement('button')
             cancel.type = 'button'
             cancel.className = 'ui-button ui-button--secondary ui-button--sm'
+            cancel.dataset.cy = 'markdown-editor_prompt-cancel'
             cancel.textContent = words.cancel
 
             const done = (value) => {

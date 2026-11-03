@@ -27,6 +27,7 @@ import Json.Decode as Decode
 import Ui.Button as Button exposing (Button)
 import Ui.Field as Field
 import Ui.Icon as Icon
+import Ui.TestId as TestId
 import Ui.Text as Text
 
 
@@ -205,6 +206,7 @@ unsavedBar config =
     div
         [ class "ui-form-unsaved"
         , attribute "role" "status"
+        , TestId.attribute "form-unsaved"
         , hidden (not config.visible)
         ]
         [ span [ class "ui-form-unsaved__message" ] [ text config.message ]

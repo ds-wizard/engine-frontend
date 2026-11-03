@@ -171,7 +171,7 @@ viewModalLazy locale kmLocale knowledgeModel phaseIndex open =
                         , ( "is-done", index < phaseIndex )
                         , ( "is-current", index == phaseIndex )
                         ]
-                     , TestId.attribute "phase-option"
+                     , TestId.attribute ("phase-option_" ++ phase.uuid)
                      ]
                         ++ currentAttrs
                     )

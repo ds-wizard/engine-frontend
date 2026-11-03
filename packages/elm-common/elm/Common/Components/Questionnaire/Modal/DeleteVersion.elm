@@ -92,7 +92,7 @@ update appState cfg msg model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    ConfirmModal.delete appState
+    ConfirmModal.deleteWithTestId appState
         { title = gettext "Delete the version" appState.locale
         , open = Maybe.isJust model.version
         , question = gettext "Are you sure you want to delete this version? The answers stay as they are; only its name goes." appState.locale
@@ -100,4 +100,5 @@ view appState model =
         , onConfirm = Confirm
         , onClose = Close
         , result = model.result
+        , testId = Just "version-delete"
         }

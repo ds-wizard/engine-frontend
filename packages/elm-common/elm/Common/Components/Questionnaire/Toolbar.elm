@@ -183,11 +183,14 @@ viewStartLazy locale importUrl viewSettings importersEnabled model =
             if importersEnabled && not (List.isEmpty model.importers) then
                 [ Menu.toHtml
                     { id = importMenuId
-                    , trigger = Menu.quiet (gettext "Import" locale)
+                    , trigger = Menu.quiet (gettext "Import" locale) |> Menu.withTriggerTestId "questionnaire_toolbar_import"
                     , alignment = Menu.Start
                     , items =
                         List.map
-                            (\( _, connector ) -> Menu.linkItem connector.name (String.replace importerPlaceholder connector.url importUrl))
+                            (\( plugin, connector ) ->
+                                Menu.linkItem connector.name (String.replace importerPlaceholder connector.url importUrl)
+                                    |> Menu.withTestId ("questionnaire_toolbar_import_" ++ Uuid.toString plugin.uuid)
+                            )
                             model.importers
                     , toMsg = ImportMenuMsg
                     }
@@ -204,9 +207,15 @@ viewStartLazy locale importUrl viewSettings importersEnabled model =
             else
                 [ Menu.toHtml
                     { id = actionsMenuId
-                    , trigger = Menu.quiet (gettext "Actions" locale)
+                    , trigger = Menu.quiet (gettext "Actions" locale) |> Menu.withTriggerTestId "questionnaire_toolbar_actions"
                     , alignment = Menu.Start
-                    , items = List.map (\( plugin, connector ) -> Menu.item connector.name (OpenAction plugin.uuid connector.element)) model.actions
+                    , items =
+                        List.map
+                            (\( plugin, connector ) ->
+                                Menu.item connector.name (OpenAction plugin.uuid connector.element)
+                                    |> Menu.withTestId ("questionnaire_toolbar_action_" ++ Uuid.toString plugin.uuid)
+                            )
+                            model.actions
                     , toMsg = ActionsMenuMsg
                     }
                     model.actionsMenu
@@ -215,7 +224,7 @@ viewStartLazy locale importUrl viewSettings importersEnabled model =
     span [ class "c-questionnaire-toolbar__group" ]
         (Menu.toHtml
             { id = viewMenuId
-            , trigger = Menu.quiet viewLabel
+            , trigger = Menu.quiet viewLabel |> Menu.withTriggerTestId "questionnaire_toolbar_view"
             , alignment = Menu.Start
             , items = viewItems locale viewSettings
             , toMsg = ViewMenuMsg
@@ -229,17 +238,20 @@ viewStartLazy locale importUrl viewSettings importersEnabled model =
 viewItems : Gettext.Locale -> ViewSettings -> List (Menu.Item Msg)
 viewItems locale viewSettings =
     let
-        check checked label toggle =
+        check testId checked label toggle =
             Menu.checkItem checked label (SetViewSettings (toggle viewSettings))
+                |> Menu.withTestId ("questionnaire_toolbar_view_" ++ testId)
     in
     [ Menu.item (gettext "Show all" locale) (SetViewSettings ViewSettings.all)
+        |> Menu.withTestId "questionnaire_toolbar_view_show-all"
     , Menu.item (gettext "Hide all" locale) (SetViewSettings ViewSettings.none)
+        |> Menu.withTestId "questionnaire_toolbar_view_hide-all"
     , Menu.separator
-    , check viewSettings.answeredBy (gettext "Answered by" locale) ViewSettings.toggleAnsweredBy
-    , check viewSettings.phases (gettext "Phases" locale) ViewSettings.togglePhases
-    , check viewSettings.tags (gettext "Question tags" locale) ViewSettings.toggleTags
-    , check viewSettings.nonDesirableQuestions (gettext "Non-desirable questions" locale) ViewSettings.toggleNonDesirableQuestions
-    , check viewSettings.metricValues (gettext "Metric values" locale) ViewSettings.toggleMetricValues
+    , check "answered-by" viewSettings.answeredBy (gettext "Answered by" locale) ViewSettings.toggleAnsweredBy
+    , check "phases" viewSettings.phases (gettext "Phases" locale) ViewSettings.togglePhases
+    , check "tags" viewSettings.tags (gettext "Question tags" locale) ViewSettings.toggleTags
+    , check "non-desirable-questions" viewSettings.nonDesirableQuestions (gettext "Non-desirable questions" locale) ViewSettings.toggleNonDesirableQuestions
+    , check "metric-values" viewSettings.metricValues (gettext "Metric values" locale) ViewSettings.toggleMetricValues
     ]
 
 

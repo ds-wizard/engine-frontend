@@ -1141,6 +1141,14 @@ filterMenuId filterId =
     "listing-filter-" ++ filterId
 
 
+{-| The test hook of one value in a filter's menu: the filter and the value it
+sets, never the words shown for it.
+-}
+filterOptionTestId : String -> String -> String
+filterOptionTestId filterId value =
+    filterMenuId filterId ++ "_option_" ++ value
+
+
 viewItem : ViewConfig a msg -> State a -> Item msg -> ListItem.ListItem msg
 viewItem cfg state row =
     let
@@ -1338,6 +1346,7 @@ clearItems appState cfg state filterId =
                     (PaginationQueryFilters.removeFilter filterId state.filters)
                 )
             )
+            |> Menu.withTestId (filterMenuId filterId ++ "_clear")
         ]
 
     else
@@ -1381,6 +1390,7 @@ viewSingleFilter appState cfg state filterId filterCfg =
                     Menu.radioItem (currentValue == Just value)
                         label
                         (choose (PaginationQueryFilters.insertValue filterId value state.filters))
+                        |> Menu.withTestId (filterOptionTestId filterId value)
                 )
                 filterCfg.options
     in
@@ -1410,6 +1420,7 @@ viewMultiFilter appState cfg state filterId filterCfg =
                     Menu.checkItem (List.member value selectedValues)
                         label
                         (cfg.wrapMsg (FiltersChanged Nothing (Internal.toggleValue filterId value state.filters)))
+                        |> Menu.withTestId (filterOptionTestId filterId value)
                 )
                 filterCfg.options
     in
@@ -1496,7 +1507,7 @@ viewSearchFilter appState cfg state filterId filterCfg =
                 []
 
         selectedItems =
-            List.map (\s -> Menu.checkItem True s.label (toggle s)) selected
+            List.map (\s -> Menu.checkItem True s.label (toggle s) |> Menu.withTestId (filterOptionTestId filterId s.id)) selected
 
         foundItems =
             case search.suggestions of
@@ -1510,7 +1521,7 @@ viewSearchFilter appState cfg state filterId filterCfg =
                                 [ Menu.note [ text filterCfg.noResults ] ]
 
                         found ->
-                            List.map (\s -> Menu.checkItem False s.label (toggle s)) found
+                            List.map (\s -> Menu.checkItem False s.label (toggle s) |> Menu.withTestId (filterOptionTestId filterId s.id)) found
 
                 ActionResult.Error message ->
                     [ Menu.note [ text message ] ]

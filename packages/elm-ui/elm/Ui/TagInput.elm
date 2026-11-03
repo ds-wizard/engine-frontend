@@ -200,6 +200,7 @@ toHtml (TagInput config) =
                     -- Nothing to add is a state the button can show; a press
                     -- that does nothing is not.
                     |> Button.withDisabled (config.disabled || String.isEmpty typed)
+                    |> Button.withTestId (config.id ++ "_add")
                 )
             ]
         , case config.hint of

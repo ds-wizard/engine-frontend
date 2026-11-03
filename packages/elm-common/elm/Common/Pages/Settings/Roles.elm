@@ -226,6 +226,7 @@ viewSetDefault appState defaultRoleUuid role =
     else
         [ Button.ghost (gettext "Set as default" appState.locale) (SetDefaultRole role.uuid)
             |> Button.withAccessibleName (String.format (gettext "Set %s as the default role" appState.locale) [ Role.localizedName appState.locale role ])
+            |> Button.withTestId "roles_set-default"
         ]
 
 
@@ -240,6 +241,7 @@ viewDelete appState defaultRoleUuid role =
         button =
             Button.dangerIconOnly (Icon.solid "fa-trash") (gettext "Delete" appState.locale) (ShowHideDeleteRole (Just role))
                 |> Button.withAccessibleName (String.format (gettext "Delete %s" appState.locale) [ Role.localizedName appState.locale role ])
+                |> Button.withTestId "roles_delete"
     in
     case deleteBlockedReason appState defaultRoleUuid role of
         Just reason ->
@@ -279,5 +281,5 @@ viewDeleteModal appState model =
         , onConfirm = DeleteRole
         , onClose = ShowHideDeleteRole Nothing
         , result = model.deletingRole
-        , testId = Just "openid-delete"
+        , testId = Just "roles-delete"
         }

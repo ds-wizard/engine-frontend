@@ -44,6 +44,7 @@ import Ui.Button as Button
 import Ui.Icon as Icon
 import Ui.Layout as Layout
 import Ui.Link as Link
+import Ui.TestId as TestId
 import Ui.Text as Text
 
 
@@ -183,6 +184,19 @@ viewWarnings config editorContext =
                             [ class "ui-link"
                             , href (config.entityUrl warning.editorUuid)
                             , onFollow config warning
+
+                            -- The entity and the field the warning is about.
+                            , TestId.attribute
+                                ("km-editor_warning_"
+                                    ++ warning.editorUuid
+                                    ++ (case warning.field of
+                                            Just field ->
+                                                "_" ++ field
+
+                                            Nothing ->
+                                                ""
+                                       )
+                                )
                             ]
                             [ text warning.message ]
                         ]

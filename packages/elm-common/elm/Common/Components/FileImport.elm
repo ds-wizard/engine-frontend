@@ -266,9 +266,11 @@ viewFiles appState cfg (Model model) files =
                     { cancel =
                         Button.ghost (gettext "Cancel" appState.locale) (cfg.wrapMsg Cancel)
                             |> Button.withDisabled loading
+                            |> Button.withTestId "file-import_cancel"
                     , submit =
                         Button.primary (gettext "Import" appState.locale) (cfg.wrapMsg Submit)
                             |> Button.withLoading loading
+                            |> Button.withTestId "file-import_submit"
                     }
     in
     Layout.stack

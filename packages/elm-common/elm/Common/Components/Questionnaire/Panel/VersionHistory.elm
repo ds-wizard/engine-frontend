@@ -67,6 +67,7 @@ import Ui.Field as Field
 import Ui.Icon as Icon
 import Ui.ItemIcon as ItemIcon
 import Ui.Menu as Menu
+import Ui.TestId as TestId
 import Ui.Text as Text
 import Uuid exposing (Uuid)
 
@@ -533,18 +534,29 @@ viewEvent appState cfg model event =
         -- Three things can be done with a change, and they are not the same
         -- kind of thing: name it, go and look at it, or go back to it. The
         -- wizard's menu was grouped that way and so is this one.
+        menuId =
+            "history-" ++ Uuid.toString eventUuid
+
+        -- The menu's id is the change's, so a test finds the item for one
+        -- change by the change, not by its words.
+        itemTestId action =
+            Menu.withTestId (menuId ++ "_" ++ action)
+
         naming =
             case ( owner, version ) of
                 ( True, Just aVersion ) ->
                     [ Menu.item (gettext "Rename this version" appState.locale) (Chose (RenameVersion aVersion))
                         |> Menu.withIcon (Icon.solid "fa-pen")
+                        |> itemTestId "rename"
                     , Menu.dangerItem (gettext "Delete this version" appState.locale) (Chose (DeleteVersion aVersion))
                         |> Menu.withIcon (Icon.solid "fa-trash")
+                        |> itemTestId "delete"
                     ]
 
                 ( True, Nothing ) ->
                     [ Menu.item (gettext "Name this version" appState.locale) (Chose (NameVersion eventUuid))
                         |> Menu.withIcon (Icon.solid "fa-tag")
+                        |> itemTestId "name"
                     ]
 
                 _ ->
@@ -556,6 +568,7 @@ viewEvent appState cfg model event =
                     Just
                         (Menu.item (gettext "View questionnaire" appState.locale) (Chose (ViewVersion eventUuid (viewTitle appState event version)))
                             |> Menu.withIcon (Icon.regular "fa-rectangle-list")
+                            |> itemTestId "view"
                         )
 
                   else
@@ -564,6 +577,7 @@ viewEvent appState cfg model event =
                     Just
                         (Menu.linkItem (gettext "Create document" appState.locale) (Routes.toUrl appState (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuid)))
                             |> Menu.withIcon (Icon.regular "fa-file")
+                            |> itemTestId "create-document"
                         )
 
                   else
@@ -574,6 +588,7 @@ viewEvent appState cfg model event =
             if cfg.canRevert && owner && not isCurrent then
                 [ Menu.dangerItem (gettext "Revert to this version" appState.locale) (Chose (Revert event))
                     |> Menu.withIcon (Icon.solid "fa-clock-rotate-left")
+                    |> itemTestId "revert"
                 ]
 
             else
@@ -589,13 +604,11 @@ viewEvent appState cfg model event =
                 []
 
             else
-                let
-                    menuId =
-                        "history-" ++ Uuid.toString eventUuid
-                in
                 [ Menu.toHtml
                     { id = menuId
-                    , trigger = Menu.kebab (gettext "What to do with this change" appState.locale)
+                    , trigger =
+                        Menu.kebab (gettext "What to do with this change" appState.locale)
+                            |> Menu.withTriggerTestId (menuId ++ "_menu")
                     , alignment = Menu.End
                     , items = items
                     , toMsg = MenuMsg menuId
@@ -603,7 +616,7 @@ viewEvent appState cfg model event =
                     (Maybe.withDefault Menu.init (Dict.get menuId model.menus))
                 ]
     in
-    li [ class "c-questionnaire-history__event" ]
+    li [ class "c-questionnaire-history__event", TestId.attribute ("history-event-" ++ Uuid.toString eventUuid) ]
         [ div [ class "c-questionnaire-history__line" ]
             (Timestamp.view appState (ProjectEvent.getCreatedAt event) :: badges ++ menu)
         , div [ class "c-questionnaire-history__what" ] what

@@ -42,6 +42,7 @@ import Html exposing (Html, caption, figcaption, figure, table, tbody, td, text,
 import Html.Attributes exposing (attribute, class, classList, scope)
 import Json.Encode as Encode
 import List.Extra as List
+import Ui.TestId as TestId
 
 
 type Chart
@@ -237,7 +238,7 @@ radar's spokes are its rows, as a bar chart's bars are.
 -}
 viewTable : { a | label : String, categories : List String, series : List Series } -> Html msg
 viewTable config =
-    table [ class "ui-chart__data ui-visually-hidden" ]
+    table [ class "ui-chart__data ui-visually-hidden", TestId.attribute "chart_data" ]
         [ caption [] [ text config.label ]
         , thead []
             [ tr []
@@ -252,7 +253,9 @@ viewTable config =
         , tbody []
             (List.indexedMap
                 (\index category ->
-                    tr []
+                    -- Rows by position, as the categories are the caller's
+                    -- words: the first spoke is row 0.
+                    tr [ TestId.attribute ("chart_data_row_" ++ String.fromInt index) ]
                         (th [ scope "row" ] [ text category ]
                             :: List.map (\entry -> td [] [ text (valueAt index entry) ]) config.series
                         )

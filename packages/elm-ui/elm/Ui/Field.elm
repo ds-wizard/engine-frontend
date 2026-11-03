@@ -103,6 +103,7 @@ import Maybe.Extra as Maybe
 import Rumkin
 import Ui.Badge as Badge exposing (Badge)
 import Ui.Icon as Icon exposing (Icon)
+import Ui.TestId as TestId
 import Ui.Theme.Oklch as Oklch
 import Ui.Tooltip as Tooltip
 
@@ -2381,6 +2382,10 @@ viewChoice config option =
             , ( "ui-choice--warning", option.entry.tone == Just WarningTone )
             , ( "ui-choice--danger", option.entry.tone == Just DangerTone )
             ]
+
+        -- The group and the value, never the words: a test picks an option
+        -- by what it sets.
+        , TestId.attribute (config.id ++ "_" ++ option.entry.value)
         ]
         [ Html.input
             ([ type_ option.inputType

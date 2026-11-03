@@ -217,7 +217,7 @@ frame config editorContext uuid form =
             , div [ class "c-km-editor-entity__actions" ] (entityActions config editorContext uuid form deleted)
             ]
             :: (if deleted then
-                    [ Alert.toHtml (Alert.warning (gettext "This has been deleted. It goes when the knowledge model is published." config.locale)) ]
+                    [ Alert.toHtml (Alert.withTestId "km-editor_entity-deleted" (Alert.warning (gettext "This has been deleted. It goes when the knowledge model is published." config.locale))) ]
 
                 else
                     form.fields

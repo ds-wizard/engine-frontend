@@ -1611,7 +1611,7 @@ viewPreviewTab appState model =
         Success draft ->
             div [ class "c-dt-editor-preview" ]
                 [ viewPreviewToolbar appState model draft
-                , div [ class "c-dt-editor-preview__document" ] [ viewPreviewDocument appState model draft ]
+                , div [ class "c-dt-editor-preview__document", TestId.attribute "dt-editor_preview-document" ] [ viewPreviewDocument appState model draft ]
                 ]
 
         _ ->
@@ -1754,6 +1754,7 @@ viewPreviewDocument appState model draft =
                 iframe
                     [ src urlResponse.url
                     , class "c-dt-editor-preview__frame"
+                    , TestId.attribute "dt-editor_preview-frame"
                     , title (gettext "Document preview" appState.locale)
                     ]
                     []
@@ -1772,6 +1773,7 @@ viewPreviewDocument appState model draft =
                             |> Button.withIcon (Icon.solid "fa-download")
                             |> Button.external
                             |> Button.withExternalNotice (gettext "(opens in a new tab)" appState.locale)
+                            |> Button.withTestId "dt-editor_preview-download"
                         )
                     |> Message.withinPage
                     |> Message.toHtml

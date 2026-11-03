@@ -29,6 +29,7 @@ import Html.Events exposing (onClick)
 import List.Extra as List
 import Ui.EmptyState as EmptyState
 import Ui.Icon as Icon exposing (Icon)
+import Ui.TestId as TestId
 
 
 type Msg
@@ -86,7 +87,7 @@ viewGroup icon ( chapter, rows ) =
 
 viewRow : Icon -> Row -> Html Msg
 viewRow icon row =
-    li [ class "c-questionnaire-panel__row" ]
+    li [ class "c-questionnaire-panel__row", TestId.attribute "questionnaire-panel_row" ]
         -- The mark is the panel's, not the question's: it says the same thing
         -- on every row, so it stays outside the link rather than joining its
         -- name and its underline, as the wizard had it.
@@ -95,6 +96,9 @@ viewRow icon row =
                 [ type_ "button"
                 , class "ui-link c-questionnaire-panel__link"
                 , onClick (Selected row.path)
+
+                -- By the question's path, which is what the row goes to.
+                , TestId.attribute ("questionnaire-panel_item_" ++ row.path)
                 ]
                 [ text row.title ]
             :: row.end

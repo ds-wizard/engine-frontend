@@ -59,6 +59,7 @@ import Ui.Layout as Layout
 import Ui.Link as Link
 import Ui.Prose as Prose
 import Ui.Separator as Separator
+import Ui.TestId as TestId
 
 
 type alias Model =
@@ -284,8 +285,8 @@ view appState model =
         loginScreen =
             appState.config.loginScreen
 
-        viewInfo info =
-            Prose.toHtml [ MarkdownOrHtml.toHtml [] info ]
+        viewInfo testId info =
+            Html.div [ TestId.attribute testId ] [ Prose.toHtml [ MarkdownOrHtml.toHtml [] info ] ]
 
         form =
             if model.codeRequired then
@@ -297,8 +298,8 @@ view appState model =
     PublicLayout.panel appState
         { title = gettext "Log In" appState.locale
         , content = [ Announcements.view loginScreen.announcements, form ]
-        , intro = Maybe.map viewInfo loginScreen.loginInfo
-        , aside = Maybe.map viewInfo loginScreen.loginInfoSidebar
+        , intro = Maybe.map (viewInfo "login_info") loginScreen.loginInfo
+        , aside = Maybe.map (viewInfo "login_info-sidebar") loginScreen.loginInfoSidebar
         }
 
 

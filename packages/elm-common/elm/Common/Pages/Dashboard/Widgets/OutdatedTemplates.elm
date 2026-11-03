@@ -97,7 +97,7 @@ viewDocumentTemplate appState template =
     ListItem.item
         (Layout.inline
             [ Link.toHtml (Link.link { label = template.name, url = Routes.toUrlIn appState template.workspaceUuid (Routes.documentTemplatesDetail template.uuid) })
-            , Badge.toHtml (Badge.warning (gettext "update available" appState.locale))
+            , Badge.toHtml (Badge.withTestId "listing-item_badge_update-available" (Badge.warning (gettext "update available" appState.locale)))
             ]
         )
         |> ListItem.withIcon (ItemIcon.toHtml (UserAvatar.item template.name Nothing))

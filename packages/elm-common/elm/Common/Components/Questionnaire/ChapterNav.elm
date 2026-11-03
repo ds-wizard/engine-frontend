@@ -356,7 +356,7 @@ viewChapter locale nav counts chapter =
                 , onSelect = OpenChapter chapter.uuid
                 }
                 |> Tree.withEnd [ indication ]
-                |> Tree.withTestId "questionnaire_chapter-nav"
+                |> Tree.withTestId ("questionnaire_chapter-nav_" ++ chapter.uuid)
     in
     if chapter.uuid == nav.activeChapterUuid then
         case nav.active of

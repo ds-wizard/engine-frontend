@@ -205,6 +205,7 @@ view appState model =
             (Button.iconOnly (Icon.solid "fa-xmark") (gettext "Close" appState.locale) Close
                 |> Button.quiet
                 |> Button.withTooltipAt Tooltip.End
+                |> Button.withTestId "project-version-view_close"
             )
         |> Modal.withActions []
         -- Named by its own id: the title is the change's, and while the dialog

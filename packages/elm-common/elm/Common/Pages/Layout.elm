@@ -521,24 +521,28 @@ userMenu appState config =
                 []
 
             else
-                [ Menu.withIcon (Icon.solid "fa-check-to-slot") (Menu.linkItem (gettext "Assigned comments" appState.locale) (Routes.toUrl appState Routes.commentsIndex)) ]
+                [ Menu.withIcon (Icon.solid "fa-check-to-slot") (Menu.linkItem (gettext "Assigned comments" appState.locale) (Routes.toUrl appState Routes.commentsIndex)) |> Menu.withTestId "user-menu_assigned-comments" ]
 
         newsItem =
             if Maybe.isJust appState.newsUrl && Feature.newsModal appState then
-                [ Menu.withIcon (Icon.regular "fa-lightbulb") (Menu.item (gettext "What's new" appState.locale) config.openNewsMsg) ]
+                [ Menu.withIcon (Icon.regular "fa-lightbulb") (Menu.item (gettext "What's new" appState.locale) config.openNewsMsg) |> Menu.withTestId "user-menu_news" ]
 
             else
                 []
     in
     { items =
-        Menu.withIcon (Icon.solid "fa-user-pen") (Menu.linkItem (gettext "User settings" appState.locale) (Routes.toUrl appState Routes.usersEditCurrent))
+        (Menu.withIcon (Icon.solid "fa-user-pen") (Menu.linkItem (gettext "User settings" appState.locale) (Routes.toUrl appState Routes.usersEditCurrent))
+            |> Menu.withTestId "user-menu_settings"
+        )
             :: assignedComments
             ++ [ Menu.withIcon (Icon.solid "fa-language") (Menu.linkItem (gettext "Change language" appState.locale) changeLanguageUrl)
+                    |> Menu.withTestId "user-menu_language"
 
                -- The palette is opened from the keyboard; this is where it can be
                -- found, and where the keys are learnt.
                , Menu.item (gettext "Go to…" appState.locale) config.openCommandPaletteMsg
                     |> Menu.withIcon (Icon.solid "fa-magnifying-glass")
+                    |> Menu.withTestId "user-menu_command-palette"
                     |> Menu.withShortcut
                         (if appState.navigator.isMac then
                             { label = "⌘K", keys = "Meta+K" }
@@ -548,10 +552,14 @@ userMenu appState config =
                         )
                ]
     , moreItems =
-        Menu.withIcon (Icon.solid "fa-info") (Menu.item (gettext "About" appState.locale) config.openAboutMsg)
+        (Menu.withIcon (Icon.solid "fa-info") (Menu.item (gettext "About" appState.locale) config.openAboutMsg)
+            |> Menu.withTestId "user-menu_about"
+        )
             :: newsItem
             ++ [ Menu.withIcon (Icon.solid "fa-triangle-exclamation") (Menu.item (gettext "Report issue" appState.locale) config.openReportIssueMsg)
+                    |> Menu.withTestId "user-menu_report-issue"
                , Menu.withIcon (Icon.solid "fa-right-from-bracket") (Menu.item (gettext "Log out" appState.locale) config.logoutMsg)
+                    |> Menu.withTestId "user-menu_logout"
                ]
     }
 

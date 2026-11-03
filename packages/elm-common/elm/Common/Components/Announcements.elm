@@ -24,6 +24,7 @@ import Common.Components.Markdown as Markdown
 import Html exposing (Html)
 import Ui.Alert as Alert
 import Ui.Layout as Layout
+import Ui.TestId as TestId
 
 
 {-| The announcements, one under another; nothing when there are none.
@@ -34,7 +35,7 @@ view announcements =
         Html.text ""
 
     else
-        Layout.stack (List.map viewAnnouncement announcements)
+        Html.div [ TestId.attribute "announcements" ] [ Layout.stack (List.map viewAnnouncement announcements) ]
 
 
 viewAnnouncement : Announcement -> Html msg
@@ -43,13 +44,13 @@ viewAnnouncement announcement =
         alert =
             case announcement.level of
                 AnnouncementLevel.Info ->
-                    Alert.info ""
+                    Alert.withTestId "announcement_info" (Alert.info "")
 
                 AnnouncementLevel.Warning ->
-                    Alert.warning ""
+                    Alert.withTestId "announcement_warning" (Alert.warning "")
 
                 AnnouncementLevel.Critical ->
-                    Alert.danger ""
+                    Alert.withTestId "announcement_critical" (Alert.danger "")
     in
     Alert.toHtmlWithContent
         [ Markdown.view { headingOffset = 1 } announcement.content ]

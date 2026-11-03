@@ -32,6 +32,7 @@ import Html exposing (Html, span, text)
 import Html.Attributes exposing (attribute, class)
 import Time
 import Ui.Icon as Icon
+import Ui.TestId as TestId
 import Ui.Text as Text
 import Ui.Tooltip as Tooltip
 
@@ -108,7 +109,25 @@ subscriptions model =
 
 toHtml : { a | locale : Gettext.Locale } -> Model -> Html msg
 toHtml appState model =
-    span [ class "c-project-saving", attribute "role" "status" ]
+    let
+        -- What the indicator shows, for a test to wait on without its words.
+        state =
+            case model of
+                Saving ->
+                    "saving"
+
+                SavedRecently _ ->
+                    "saved"
+
+                AllSaved ->
+                    "all-saved"
+    in
+    span
+        [ class "c-project-saving"
+        , attribute "role" "status"
+        , TestId.attribute "saving-indicator"
+        , attribute "data-state" state
+        ]
         (case model of
             Saving ->
                 [ Icon.toHtml Icon.spinner, text (gettext "Saving..." appState.locale) ]

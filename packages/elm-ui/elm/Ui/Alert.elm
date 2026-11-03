@@ -8,6 +8,7 @@ module Ui.Alert exposing
     , toHtmlWithContent
     , warning
     , withIcon
+    , withTestId
     )
 
 {-| Status is carried by an icon and a border as well as by color, so the alert
@@ -18,6 +19,7 @@ to assistive technology; success and info do not interrupt.
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (attribute, class)
 import Ui.Icon as Icon
+import Ui.TestId as TestId
 
 
 type Alert
@@ -26,6 +28,7 @@ type Alert
         , icon : Icon.Icon
         , message : String
         , assertive : Bool
+        , testId : Maybe String
         }
 
 
@@ -38,14 +41,19 @@ withIcon icon (Alert config) =
     Alert { config | icon = icon }
 
 
+withTestId : String -> Alert -> Alert
+withTestId testId (Alert config) =
+    Alert { config | testId = Just testId }
+
+
 success : String -> Alert
 success message =
-    Alert { modifier = "ui-alert--success", icon = Icon.solid "fa-circle-check", message = message, assertive = False }
+    Alert { modifier = "ui-alert--success", icon = Icon.solid "fa-circle-check", message = message, assertive = False, testId = Nothing }
 
 
 info : String -> Alert
 info message =
-    Alert { modifier = "", icon = Icon.solid "fa-circle-info", message = message, assertive = False }
+    Alert { modifier = "", icon = Icon.solid "fa-circle-info", message = message, assertive = False, testId = Nothing }
 
 
 {-| What only some of the people looking at a thing can see — an editor's note
@@ -58,17 +66,17 @@ is the one the rest of the private furniture wears.
 -}
 private : String -> Alert
 private message =
-    Alert { modifier = "ui-alert--private", icon = Icon.solid "fa-lock", message = message, assertive = False }
+    Alert { modifier = "ui-alert--private", icon = Icon.solid "fa-lock", message = message, assertive = False, testId = Nothing }
 
 
 warning : String -> Alert
 warning message =
-    Alert { modifier = "ui-alert--warning", icon = Icon.solid "fa-triangle-exclamation", message = message, assertive = True }
+    Alert { modifier = "ui-alert--warning", icon = Icon.solid "fa-triangle-exclamation", message = message, assertive = True, testId = Nothing }
 
 
 danger : String -> Alert
 danger message =
-    Alert { modifier = "ui-alert--danger", icon = Icon.solid "fa-circle-exclamation", message = message, assertive = True }
+    Alert { modifier = "ui-alert--danger", icon = Icon.solid "fa-circle-exclamation", message = message, assertive = True, testId = Nothing }
 
 
 toHtml : Alert -> Html msg
@@ -97,15 +105,16 @@ toHtmlWithContent content alert =
 view : Alert -> List (Html msg) -> Html msg
 view (Alert config) content =
     div
-        [ class ("ui-alert " ++ config.modifier)
-        , attribute "role"
-            (if config.assertive then
-                "alert"
+        (class ("ui-alert " ++ config.modifier)
+            :: attribute "role"
+                (if config.assertive then
+                    "alert"
 
-             else
-                "status"
-            )
-        ]
+                 else
+                    "status"
+                )
+            :: TestId.attributes config.testId
+        )
         [ div [ class "ui-alert__icon" ] [ Icon.toHtml config.icon ]
         , div [ class "ui-alert__content" ] content
         ]

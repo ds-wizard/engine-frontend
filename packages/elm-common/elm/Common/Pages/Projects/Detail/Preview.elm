@@ -65,6 +65,7 @@ import Ui.Button as Button
 import Ui.Icon as Icon
 import Ui.Illustration as Illustration
 import Ui.Page.Message as Message exposing (Message)
+import Ui.TestId as TestId
 import Uuid exposing (Uuid)
 
 
@@ -279,6 +280,7 @@ viewDocument appState urlResponse =
             -- A frame is a document inside a document, and one without a title
             -- is announced as "frame" and skipped.
             , title (gettext "Document preview" appState.locale)
+            , TestId.attribute "project-preview_frame"
             ]
             []
 
@@ -298,6 +300,7 @@ viewNotSupported appState documentUrl =
                 |> Button.withIcon (Icon.solid "fa-download")
                 |> Button.external
                 |> Button.withExternalNotice (gettext "(opens in a new tab)" appState.locale)
+                |> Button.withTestId "project-preview_download"
             )
         |> Message.withinPage
         |> Message.toHtml

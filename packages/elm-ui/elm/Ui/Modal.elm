@@ -319,6 +319,11 @@ slug value =
         |> String.join "-"
 
 
+{-| A `data-cy` on the dialog's element. The buttons the dialog draws itself
+take one derived from it: `<testId>_confirm` and `<testId>_cancel` for a
+`confirm`, `<testId>_close` for a plain dialog. A form's submit and cancel stay
+`form-submit` and `form-cancel`, inside the dialog's element.
+-}
 withTestId : String -> Modal msg -> Modal msg
 withTestId testId (Modal config) =
     Modal { config | testId = Just testId }
@@ -409,12 +414,24 @@ chrome config =
         cancelLabel default =
             Maybe.withDefault default config.cancelLabel
 
+        -- A dialog with a test id gives its own buttons one derived from it,
+        -- so a test presses "the confirm of this dialog" without its words.
+        withDerivedTestId suffix button =
+            case config.testId of
+                Just testId ->
+                    Button.withTestId (testId ++ "_" ++ suffix) button
+
+                Nothing ->
+                    button
+
         confirmButton action =
-            if config.dangerous then
+            (if config.dangerous then
                 Button.danger action.label action.onConfirm
 
-            else
+             else
                 Button.primary action.label action.onConfirm
+            )
+                |> withDerivedTestId "confirm"
 
         submitButton label =
             if config.dangerous then
@@ -436,13 +453,16 @@ chrome config =
 
                 ( Nothing, Nothing, Just action ) ->
                     [ Button.ghost (cancelLabel "Cancel") config.onClose
+                        |> withDerivedTestId "cancel"
                     , Button.withLoading config.loading (confirmButton action)
                     ]
 
                 -- Alone, the way out is the dialog's action: primary, so
                 -- that it takes the first focus and Enter presses it.
                 ( Nothing, Nothing, Nothing ) ->
-                    [ Button.primary (cancelLabel "Close") config.onClose ]
+                    [ Button.primary (cancelLabel "Close") config.onClose
+                        |> withDerivedTestId "close"
+                    ]
 
         body =
             div [ class "ui-dialog__body" ] config.body

@@ -306,5 +306,5 @@ deleteModal appState model =
         , onConfirm = Delete
         , onClose = ShowHideDelete Nothing
         , result = model.deletingUserGroup
-        , testId = Just "users-delete"
+        , testId = Just "user-groups-delete"
         }

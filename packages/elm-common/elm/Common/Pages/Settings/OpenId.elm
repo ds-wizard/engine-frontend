@@ -159,6 +159,7 @@ viewDelete : AppState -> OpenIdClient -> List (Button Msg)
 viewDelete appState openIdClient =
     [ Button.dangerIconOnly (Icon.solid "fa-trash") (gettext "Delete" appState.locale) (ShowHideDeleteOpenIdClient (Just openIdClient))
         |> Button.withAccessibleName (String.format (gettext "Delete %s" appState.locale) [ openIdClient.name ])
+        |> Button.withTestId "openid_delete"
     ]
 
 

@@ -59,6 +59,7 @@ import Ui.ItemIcon as ItemIcon
 import Ui.Page.Workspace as Workspace
 import Ui.Resizer as Resizer
 import Ui.Tag as Tag
+import Ui.TestId as TestId
 import Ui.Text as Text
 import Uuid exposing (Uuid)
 import Version
@@ -396,6 +397,8 @@ viewRow words collapsed row =
     li
         [ class "c-km-comparison__row"
         , class (stateClass row.state)
+        , TestId.attribute ("km-comparison_row_" ++ row.id)
+        , attribute "data-state" (stateName row.state)
         , attribute "style" ("--c-km-comparison-level:" ++ String.fromInt row.level)
         , attribute "aria-level" (String.fromInt (row.level + 1))
         ]
@@ -528,6 +531,27 @@ viewToggle words collapsed row =
 
     else
         span [ class "c-km-comparison__toggle c-km-comparison__toggle--none" ] []
+
+
+{-| The state for a test to read, as the class says it to the stylesheet.
+-}
+stateName : State -> String
+stateName state =
+    case state of
+        Added ->
+            "added"
+
+        Removed ->
+            "removed"
+
+        Changed ->
+            "changed"
+
+        Unchanged ->
+            "unchanged"
+
+        Section ->
+            "section"
 
 
 stateClass : State -> String

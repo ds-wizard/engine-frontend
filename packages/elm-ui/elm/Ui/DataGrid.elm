@@ -831,6 +831,8 @@ viewRow config index row =
     in
     tr
         (classList [ ( "ui-data-grid__row", True ), ( "ui-data-grid__row--sized", Maybe.isJust config.rowHeight ) ]
+            -- The row's own key, as a header is `header-<key>` and a cell `field-<key>`.
+            :: TestId.attribute ("row-" ++ config.rowKey row)
             :: heightAttributes
         )
         (numberCell

@@ -97,7 +97,7 @@ viewKnowledgeModelPackage appState kmPackage =
     ListItem.item
         (Layout.inline
             [ Link.toHtml (Link.link { label = kmPackage.name, url = Routes.toUrlIn appState kmPackage.workspaceUuid (Routes.knowledgeModelsDetail kmPackage.uuid) })
-            , Badge.toHtml (Badge.warning (gettext "update available" appState.locale))
+            , Badge.toHtml (Badge.withTestId "listing-item_badge_update-available" (Badge.warning (gettext "update available" appState.locale)))
             ]
         )
         |> ListItem.withIcon (ItemIcon.toHtml (UserAvatar.item kmPackage.name Nothing))

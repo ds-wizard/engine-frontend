@@ -164,6 +164,7 @@ toHtmlWithWords words config =
             [ Button.toHtml
                 (Button.withIcon (Icon.solid "fa-plus") (Button.secondary config.addLabel config.onAdd)
                     |> Button.small
+                    |> Button.withTestId (config.id ++ "_add")
                 )
             ]
 
@@ -197,7 +198,7 @@ withRowTestId testId (Row config) =
 
 viewRow :
     Words
-    -> { a | onRemove : Maybe (Int -> msg) }
+    -> { a | id : String, onRemove : Maybe (Int -> msg) }
     -> Int
     -> Row msg
     -> Html msg
@@ -213,6 +214,7 @@ viewRow words config index (Row entry) =
                     [ Button.dangerIconOnly (Icon.solid "fa-trash")
                         (words.remove (rowName words entry.label index))
                         (onRemove index)
+                        |> Button.withTestId (config.id ++ "_remove_" ++ String.fromInt index)
                     ]
 
                 Nothing ->

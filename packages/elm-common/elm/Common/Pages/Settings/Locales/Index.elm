@@ -440,10 +440,12 @@ viewActions appState locale =
             if locale.defaultLocale then
                 Button.iconOnly (Icon.solid "fa-xmark") (gettext "Unset default" appState.locale) (Change locale { enabled = locale.enabled, defaultLocale = False })
                     |> named (gettext "Unset %s as the default" appState.locale)
+                    |> Button.withTestId "locales_unset-default"
 
             else
                 Button.iconOnly (Icon.solid "fa-check") (gettext "Set as default" appState.locale) (Change locale { enabled = True, defaultLocale = True })
                     |> named (gettext "Set %s as the default" appState.locale)
+                    |> Button.withTestId "locales_set-default"
                     |> (if locale.enabled then
                             identity
 
@@ -455,6 +457,7 @@ viewActions appState locale =
             if locale.enabled then
                 Button.iconOnly (Icon.solid "fa-toggle-off") (gettext "Disable" appState.locale) (Change locale { enabled = False, defaultLocale = False })
                     |> named (gettext "Disable %s" appState.locale)
+                    |> Button.withTestId "locales_disable"
                     |> (if locale.defaultLocale then
                             Button.withDisabledReason { id = reasonId "disable", reason = gettext "The default translation cannot be disabled." appState.locale }
 
@@ -465,14 +468,17 @@ viewActions appState locale =
             else
                 Button.iconOnly (Icon.solid "fa-toggle-on") (gettext "Enable" appState.locale) (Change locale { enabled = True, defaultLocale = False })
                     |> named (gettext "Enable %s" appState.locale)
+                    |> Button.withTestId "locales_enable"
 
         downloadPo =
             Button.iconOnly (Icon.solid "fa-download") (gettext "Download PO" appState.locale) (DownloadPo locale)
                 |> named (gettext "Download PO of %s" appState.locale)
+                |> Button.withTestId "locales_download-po"
 
         delete =
             Button.dangerIconOnly (Icon.solid "fa-trash") (gettext "Delete" appState.locale) (ShowDelete (Just locale))
                 |> named (gettext "Delete %s" appState.locale)
+                |> Button.withTestId "locales_delete"
     in
     [ default, enabled, downloadPo, delete ]
 

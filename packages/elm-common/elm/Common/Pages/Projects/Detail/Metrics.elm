@@ -40,7 +40,7 @@ import Common.Components.UiWords as UiWords
 import Common.Data.AppState exposing (AppState)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (attribute, class)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Round
@@ -53,6 +53,7 @@ import Ui.Page.Content as Content
 import Ui.ProgressBar as ProgressBar
 import Ui.Separator as Separator
 import Ui.Table as Table
+import Ui.TestId as TestId
 import Ui.Text as Text
 
 
@@ -137,14 +138,14 @@ viewIndication : AppState -> IndicationReport -> Html msg
 viewIndication appState indicationReport =
     case indicationReport of
         AnsweredIndication data ->
-            viewAnsweredIndication appState (String.format (gettext "Answered: %s/%s" appState.locale)) data
+            viewAnsweredIndication appState "summary-report_answered" (String.format (gettext "Answered: %s/%s" appState.locale)) data
 
         PhasesAnsweredIndication data ->
-            viewAnsweredIndication appState (String.format (gettext "Answered (current phase): %s/%s" appState.locale)) data
+            viewAnsweredIndication appState "summary-report_answered-phase" (String.format (gettext "Answered (current phase): %s/%s" appState.locale)) data
 
 
-viewAnsweredIndication : AppState -> (List String -> String) -> AnsweredIndicationData -> Html msg
-viewAnsweredIndication appState toTitle data =
+viewAnsweredIndication : AppState -> String -> (List String -> String) -> AnsweredIndicationData -> Html msg
+viewAnsweredIndication appState testId toTitle data =
     let
         allQuestions =
             data.answeredQuestions + data.unansweredQuestions
@@ -152,14 +153,21 @@ viewAnsweredIndication appState toTitle data =
         title =
             toTitle [ String.fromInt data.answeredQuestions, String.fromInt allQuestions ]
     in
-    Layout.stack
-        [ Text.body title
-        , ProgressBar.toHtmlWithWords (UiWords.progressBar appState)
-            { label = title
-            , value = toFloat data.answeredQuestions
-            , max = toFloat allQuestions
-            , tone = ProgressBar.Brand
-            }
+    -- The figures as attributes too, so a test reads them without the words.
+    div
+        [ TestId.attribute testId
+        , attribute "data-answered" (String.fromInt data.answeredQuestions)
+        , attribute "data-total" (String.fromInt allQuestions)
+        ]
+        [ Layout.stack
+            [ Text.body title
+            , ProgressBar.toHtmlWithWords (UiWords.progressBar appState)
+                { label = title
+                , value = toFloat data.answeredQuestions
+                , max = toFloat allQuestions
+                , tone = ProgressBar.Brand
+                }
+            ]
         ]
 
 
