@@ -5,6 +5,7 @@ module Common.Components.Questionnaire.Panel.VersionHistory exposing
     , UpdateConfig
     , ViewConfig
     , addEvent
+    , collapseTyping
     , init
     , initMsg
     , removeVersion
@@ -24,6 +25,10 @@ it comes. The endpoint has always been paged.
 **A day folds.** Today is open; the rest are disclosure buttons that say what they
 fold and how many changes are in them, so a year of work is a list of days rather
 than a scroll (§11.7).
+
+**Typing is one change.** Every keystroke in a field is an event; within a day,
+only the newest change of a question by the same person is shown, unless an
+older one is a named version.
 
 **What a row offers** depends on who is looking: naming, renaming and deleting a
 version are the owner's, viewing the questionnaire at an event and making a
@@ -325,12 +330,16 @@ view appState cfg model =
                 |> List.filter
                     (\event ->
                         not cfg.namedOnly
-                            || Maybe.isJust (ProjectVersion.getVersionByEventUuid (ActionResult.withDefault [] model.versions) (ProjectEvent.getUuid event))
+                            || Maybe.isJust (ProjectVersion.getVersionByEventUuid versions (ProjectEvent.getUuid event))
                     )
                 |> List.reverse
 
+        versions =
+            ActionResult.withDefault [] model.versions
+
         days =
             groupByDay appState events
+                |> List.map (Tuple.mapSecond (collapseTyping versions))
     in
     div [ class "c-questionnaire-history" ]
         [ div [ class "c-questionnaire-history__filter" ]
@@ -446,6 +455,37 @@ groupByDay appState events =
         )
         []
         events
+
+
+{-| A day's changes, newest first, with the older changes of a question left out
+while the same person made the newer one — typing sends an event per keystroke,
+and the history shows what was typed, not every step of it. A named version is
+always kept, and so is anything without a question (a phase).
+-}
+collapseTyping : List ProjectVersion -> List ProjectEvent -> List ProjectEvent
+collapseTyping versions events =
+    let
+        isNamed event =
+            Maybe.isJust (ProjectVersion.getVersionByEventUuid versions (ProjectEvent.getUuid event))
+
+        authorOf event =
+            Maybe.map (.uuid >> Uuid.toString) (ProjectEvent.getCreatedBy event)
+
+        step event ( newerAuthors, kept ) =
+            case ProjectEvent.getPath event of
+                Just path ->
+                    if not (isNamed event) && Dict.get path newerAuthors == Just (authorOf event) then
+                        ( newerAuthors, kept )
+
+                    else
+                        ( Dict.insert path (authorOf event) newerAuthors, event :: kept )
+
+                Nothing ->
+                    ( newerAuthors, event :: kept )
+    in
+    List.foldl step ( Dict.empty, [] ) events
+        |> Tuple.second
+        |> List.reverse
 
 
 viewDay : AppState -> ViewConfig -> Model -> ( String, List ProjectEvent ) -> Html Msg
