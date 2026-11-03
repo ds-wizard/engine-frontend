@@ -16,13 +16,14 @@ module Common.Api.Models.BootstrapConfig exposing
 {-| What the application is started with, in two parts.
 
 The first (`decoder`) is there before anybody signs in: how to sign in, what
-the login screen says, the look of the instance, and who is signed in.
+the login screen says, the look of the instance, whether documents can be
+submitted, and who is signed in.
 
 The second (`workspaceDecoder`) is what somebody signed in works with: the menu
 links and announcements, how projects behave, where support is, whether
 documents can be submitted, and which plugins are switched off. It is read
 separately and laid over the first with `withWorkspace`; until it is, its
-fields hold their defaults.
+fields hold their defaults, or the first part's where it has them too.
 
 -}
 
@@ -80,6 +81,7 @@ type alias Replaced =
     , pluginSettings : Dict String String
     , dashboardAndMenu : DashboardAndMenuSettings
     , support : SupportSettings
+    , submission : SubmissionConfig
     }
 
 
@@ -128,18 +130,19 @@ decoder =
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "users" UsersSettings.decoder
         |> D.required "privacy" PrivacyConfig.decoder
-        |> D.optional "pluginSettings" (D.dict D.valueAsString) Dict.empty
+        |> D.required "pluginSettings" (D.dict D.valueAsString)
         |> D.required "plugins" (D.list PluginInfo.decoder)
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "tours" (D.list D.string)
         |> D.required "user" (D.nullable UserConfig.decoder)
-        -- The organization's own custom menu links and announcements, and
-        -- where its support is, for its pages outside a workspace, where the
-        -- server gives them.
-        |> D.optional "dashboardAndMenu" DashboardAndMenuSettings.decoder DashboardAndMenuSettings.default
+        -- The organization's own custom menu links and announcements, where
+        -- its support is and whether documents can be submitted, for its pages
+        -- outside a workspace. How projects behave and which plugins are off
+        -- are only ever a workspace's.
+        |> D.required "dashboardAndMenu" DashboardAndMenuSettings.decoder
         |> D.hardcoded ProjectConfig.default
-        |> D.optional "support" SupportSettings.decoder SupportSettings.default
-        |> D.hardcoded SubmissionConfig.default
+        |> D.required "support" SupportSettings.decoder
+        |> D.required "submission" SubmissionConfig.decoder
         |> D.hardcoded []
         |> D.hardcoded Nothing
 
@@ -199,7 +202,7 @@ withWorkspace workspace config =
         , support = workspace.support
         , submission = workspace.submission
         , disabledPlugins = workspace.disabledPlugins
-        , replaced = Just { lookAndFeel = base.lookAndFeel, pluginSettings = base.pluginSettings, dashboardAndMenu = base.dashboardAndMenu, support = base.support }
+        , replaced = Just { lookAndFeel = base.lookAndFeel, pluginSettings = base.pluginSettings, dashboardAndMenu = base.dashboardAndMenu, support = base.support, submission = base.submission }
     }
 
 
@@ -211,7 +214,7 @@ withLook : { logoUrl : Maybe String, primaryColor : Maybe Color } -> BootstrapCo
 withLook look config =
     let
         original =
-            Maybe.withDefault { lookAndFeel = config.lookAndFeel, pluginSettings = config.pluginSettings, dashboardAndMenu = config.dashboardAndMenu, support = config.support } config.replaced
+            Maybe.withDefault { lookAndFeel = config.lookAndFeel, pluginSettings = config.pluginSettings, dashboardAndMenu = config.dashboardAndMenu, support = config.support, submission = config.submission } config.replaced
 
         lookAndFeel =
             original.lookAndFeel
@@ -247,7 +250,7 @@ withoutWorkspace config =
                 , dashboardAndMenu = replaced.dashboardAndMenu
                 , project = ProjectConfig.default
                 , support = replaced.support
-                , submission = SubmissionConfig.default
+                , submission = replaced.submission
                 , disabledPlugins = []
                 , replaced = Nothing
             }

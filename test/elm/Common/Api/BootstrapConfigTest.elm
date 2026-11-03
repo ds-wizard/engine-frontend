@@ -37,6 +37,10 @@ bootstrap overrides =
             , ( "cloud", E.object [ ( "enabled", E.bool False ) ] )
             , ( "tours", E.list identity [] )
             , ( "user", E.null )
+            , ( "dashboardAndMenu", E.object [ ( "customMenuLinks", E.list identity [] ), ( "announcements", E.list identity [] ) ] )
+            , ( "support", E.object [ ( "supportEmail", E.null ), ( "supportSiteName", E.null ), ( "supportSiteUrl", E.null ), ( "supportSiteIcon", E.null ) ] )
+            , ( "submission", E.object [ ( "enabled", E.bool True ) ] )
+            , ( "pluginSettings", E.object [] )
             ]
 
         names =
@@ -106,6 +110,23 @@ bootstrapConfigTests =
                 \_ ->
                     D.decodeValue BootstrapConfig.decoder (without "privacy")
                         |> Expect.err
+            , test "reads whether documents can be submitted" <|
+                \_ ->
+                    D.decodeValue BootstrapConfig.decoder (bootstrap [])
+                        |> Result.map (.enabled << .submission)
+                        |> Expect.equal (Ok True)
+            , test "a missing dashboard and menu section is an error" <|
+                \_ ->
+                    D.decodeValue BootstrapConfig.decoder (without "dashboardAndMenu")
+                        |> Expect.err
+            , test "missing plugin settings are an error" <|
+                \_ ->
+                    D.decodeValue BootstrapConfig.decoder (without "pluginSettings")
+                        |> Expect.err
+            , test "a missing submission section is an error" <|
+                \_ ->
+                    D.decodeValue BootstrapConfig.decoder (without "submission")
+                        |> Expect.err
             , test "a user that cannot be read is an error, not nobody signed in" <|
                 \_ ->
                     D.decodeValue BootstrapConfig.decoder (bootstrap [ ( "user", E.object [] ) ])
@@ -161,6 +182,35 @@ bootstrapConfigTests =
                         )
                         |> Expect.equal (Ok [ "Workspace link" ])
             ]
+        , describe "submission"
+            [ test "the organization's is back once a workspace is left" <|
+                \_ ->
+                    Result.map2
+                        (\config workspaceConfig ->
+                            BootstrapConfig.withWorkspace workspaceConfig config
+                                |> BootstrapConfig.withoutWorkspace
+                                |> .submission
+                                |> .enabled
+                        )
+                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "submission", E.object [ ( "enabled", E.bool False ) ] ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok True)
+            , test "a workspace's is its own while in it" <|
+                \_ ->
+                    Result.map2
+                        (\config workspaceConfig ->
+                            BootstrapConfig.withWorkspace workspaceConfig config
+                                |> .submission
+                                |> .enabled
+                        )
+                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "submission", E.object [ ( "enabled", E.bool False ) ] ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok False)
+            ]
         , describe "support"
             [ test "the organization's, where the server gives it, is back once a workspace is left" <|
                 \_ ->
@@ -190,11 +240,10 @@ bootstrapConfigTests =
                             (workspace [ ( "support", support "workspace@example.com" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
                         )
                         |> Expect.equal (Ok (Just "workspace@example.com"))
-            , test "a server that gives none leaves it to the client's defaults" <|
+            , test "a missing support section is an error" <|
                 \_ ->
-                    D.decodeValue BootstrapConfig.decoder (bootstrap [])
-                        |> Result.map (.supportEmail << .support)
-                        |> Expect.equal (Ok Nothing)
+                    D.decodeValue BootstrapConfig.decoder (without "support")
+                        |> Expect.err
             ]
         ]
 
