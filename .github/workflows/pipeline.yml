@@ -18,6 +18,49 @@ permissions:
 jobs:
 
 # ----------------------------------------------------------------------------------------------------
+# Phase 0: the Elm packages, downloaded once and cached, before any job compiles Elm
+# ----------------------------------------------------------------------------------------------------
+  # package.elm-lang.org times out under load: a single job, retrying, downloads everything the
+  # apps and elm-test need; the jobs that compile Elm only restore it (node-setup).
+  # Compiling a module of the root project fetches its dependencies and test dependencies
+  elm-packages:
+    name: Setup / Elm packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      key: ${{ steps.key.outputs.value }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Key
+        id: key
+        run: echo "value=elm-packages-${{ hashFiles('elm.json', 'packages/elm-kernel-replacements/**/source.txt') }}" >> "$GITHUB_OUTPUT"
+      - name: Look up
+        id: cache
+        uses: actions/cache@v5
+        with:
+          path: elm-stuff/elm-home
+          key: ${{ steps.key.outputs.value }}
+          lookup-only: true
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - name: Download
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          npm run replace-kernel-packages
+          export ELM_HOME="$PWD/elm-stuff/elm-home"
+          for attempt in 1 2 3 4 5; do
+            npx --no-install elm make packages/elm-vendor/Triple.elm --output=/dev/null && exit 0
+            echo "::warning::Downloading the Elm packages failed (attempt $attempt), retrying"
+            sleep $((attempt * 15))
+          done
+          exit 1
+
+# ----------------------------------------------------------------------------------------------------
 # Phase 1: checks, tests and the builds, all in parallel
 # ----------------------------------------------------------------------------------------------------
   format:
@@ -43,6 +86,7 @@ jobs:
 
   test:
     name: Test / ${{ matrix.suite }}
+    needs: elm-packages
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -52,10 +96,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/node-setup
+        with:
+          elm-packages: ${{ matrix.suite == 'elm' && needs.elm-packages.outputs.key || '' }}
       - run: npm run test:${{ matrix.suite }}
 
   build:
     name: Build / ${{ matrix.component }}
+    needs: elm-packages
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -67,6 +114,8 @@ jobs:
         with:
           fetch-depth: 0   # the version stamped into the build is the tag or branch with the commit
       - uses: ./.github/actions/node-setup
+        with:
+          elm-packages: ${{ needs.elm-packages.outputs.key }}
       - run: npm run build:${{ matrix.component }}
       - name: Upload dist artifact
         uses: actions/upload-artifact@v7

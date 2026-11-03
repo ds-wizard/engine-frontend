@@ -1,5 +1,10 @@
 name: Node setup
-description: Node.js, the npm and Elm caches, the dependencies and the patched Elm kernel packages
+description: Node.js, the npm cache, the Elm packages, the dependencies and the patched Elm kernel packages
+
+inputs:
+  elm-packages:
+    description: The cache key of the Elm packages, from the elm-packages job's output; empty for a job that compiles no Elm
+    default: ''
 
 runs:
   using: composite
@@ -10,12 +15,15 @@ runs:
         cache: npm
         cache-dependency-path: package-lock.json
 
-    # The Elm packages: downloaded once per elm.json, whichever job asks first
-    - name: Cache Elm packages
-      uses: actions/cache@v5
+    # The Elm packages, complete, as the elm-packages job saved them: only ever restored
+    # here, so a job that needs fewer of them cannot save a cache that lacks the rest
+    - name: Restore Elm packages
+      if: inputs.elm-packages != ''
+      uses: actions/cache/restore@v5
       with:
         path: elm-stuff/elm-home
-        key: elm-home-${{ hashFiles('elm.json', 'packages/elm-kernel-replacements/**/source.txt') }}
+        key: ${{ inputs.elm-packages }}
+        fail-on-cache-miss: true
 
     - name: Elm kernel replacements
       shell: bash
