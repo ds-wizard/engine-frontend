@@ -37,6 +37,7 @@ words, not by its color.
 -}
 
 import ActionResult exposing (ActionResult(..))
+import Browser.Dom as Dom
 import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Common.Api.Models.Pagination exposing (Pagination)
@@ -63,6 +64,7 @@ import Html.Attributes exposing (attribute, class, classList, id)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import String.Format as String
+import Task
 import Time
 import Ui.Alert as Alert
 import Ui.AsyncBlock as AsyncBlock
@@ -161,6 +163,7 @@ type Msg
     | CopyLink String Uuid
     | ClearCopied
     | OpenThreadOf String
+    | Noop
 
 
 {-| What the panel asks the questionnaire for: another question's comments, or the
@@ -199,6 +202,35 @@ update appState cfg msg model =
 
         createdBy =
             Maybe.map UserConfig.toUserSuggestion appState.config.user
+
+        -- An item acts and leaves its menu open unless the menu is told to
+        -- close, so whatever an item sends closes the menus it may have come
+        -- from. Only an open one is closed: closing returns focus to its
+        -- trigger, and a menu that was not used should not take it.
+        closeMenus menuMsg keys ret =
+            let
+                closeOne key ( m, cmds ) =
+                    case Dict.get key m.menus of
+                        Just menu ->
+                            if Menu.isOpen menu then
+                                let
+                                    ( closed, menuCmd ) =
+                                        Menu.update key 8 menuMsg menu
+                                in
+                                ( { m | menus = Dict.insert key closed m.menus }
+                                , Cmd.map (cfg.wrapMsg << MenuMsg key) menuCmd :: cmds
+                                )
+
+                            else
+                                ( m, cmds )
+
+                        Nothing ->
+                            ( m, cmds )
+
+                ( newModel, menuCmds ) =
+                    List.foldl closeOne ( ret.model, [] ) keys
+            in
+            { ret | model = newModel, cmd = Cmd.batch (ret.cmd :: menuCmds) }
     in
     case msg of
         Typed path mbThread value ->
@@ -249,7 +281,11 @@ update appState cfg msg model =
                 }
 
         StartEdit comment ->
-            plain { model | editing = Just { comment = comment.uuid, text = comment.text } } Cmd.none
+            -- The text is where the keyboard goes, so the menu closes without
+            -- pulling focus back to its trigger.
+            plain { model | editing = Just { comment = comment.uuid, text = comment.text } }
+                (Task.attempt (always (cfg.wrapMsg Noop)) (Dom.focus (commentEditId comment.uuid)))
+                |> closeMenus Menu.closeWithoutFocus [ commentMenuId comment.uuid ]
 
         EditTyped value ->
             plain { model | editing = Maybe.map (\editing -> { editing | text = value }) model.editing } Cmd.none
@@ -278,7 +314,10 @@ update appState cfg msg model =
                     plain model Cmd.none
 
         AskDelete path thread mbComment ->
+            -- The dialog takes focus, so the menu leaves it alone.
             plain { model | deleting = Just { path = path, thread = thread, comment = mbComment } } Cmd.none
+                |> closeMenus Menu.closeWithoutFocus
+                    [ Maybe.unwrap (threadMenuId thread.uuid) (commentMenuId << .uuid) mbComment ]
 
         CancelDelete ->
             plain { model | deleting = Nothing } Cmd.none
@@ -341,6 +380,7 @@ update appState cfg msg model =
                         , createdBy = createdBy
                         }
                 )
+                |> closeMenus Menu.close [ threadMenuId thread.uuid ]
 
         Assign path thread mbUser ->
             withEvent { model | assignQuery = "", assignSuggestions = Unset }
@@ -355,6 +395,7 @@ update appState cfg msg model =
                         , createdBy = createdBy
                         }
                 )
+                |> closeMenus Menu.close [ threadMenuId thread.uuid, assignMenuId thread.uuid ]
 
         AssignQueryTyped private query ->
             let
@@ -434,6 +475,9 @@ update appState cfg msg model =
         OpenThreadOf path ->
             { seed = appState.seed, model = model, cmd = Cmd.none, event = Nothing, outcome = Just (OpenComments path) }
 
+        Noop ->
+            plain model Cmd.none
+
 
 inputKey : String -> Maybe Uuid -> String
 inputKey path mbThread =
@@ -448,6 +492,11 @@ assignMenuPrefix =
 assignMenuId : Uuid -> String
 assignMenuId threadUuid =
     assignMenuPrefix ++ Uuid.toString threadUuid
+
+
+commentEditId : Uuid -> String
+commentEditId commentUuid =
+    "comment-edit-" ++ Uuid.toString commentUuid
 
 
 commentMenuId : Uuid -> String
@@ -909,7 +958,7 @@ viewComment appState cfg model thread index comment =
                           div [ class "c-questionnaire-comments__editor" ]
                             [ Field.toHtml
                                 (Field.textarea
-                                    { id = "comment-edit-" ++ Uuid.toString comment.uuid
+                                    { id = commentEditId comment.uuid
                                     , label = gettext "Edit the comment" appState.locale
                                     , value = editing.text
                                     , onInput = EditTyped
