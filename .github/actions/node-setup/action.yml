@@ -19,7 +19,7 @@ runs:
     # here, so a job that needs fewer of them cannot save a cache that lacks the rest
     - name: Restore Elm packages
       if: inputs.elm-packages != ''
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       with:
         path: elm-stuff/elm-home
         key: ${{ inputs.elm-packages }}
