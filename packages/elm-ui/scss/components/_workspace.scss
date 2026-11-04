@@ -84,6 +84,23 @@
   margin-block-end: 0;
 }
 
+// A toolbar with a trail is one row: the trail takes what the end leaves and
+// shrinks into it, rather than pushing the end's controls to a line of their
+// own.
+.ui-workspace__toolbar:has(.ui-breadcrumbs) {
+  flex-wrap: nowrap;
+
+  .ui-workspace__toolbar-start {
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+  }
+
+  .ui-workspace__toolbar-end {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+}
+
 // The navigation's toggle, and a row holding nothing else, exist only while the
 // navigation is an overlay.
 .ui-workspace__nav-toggle,

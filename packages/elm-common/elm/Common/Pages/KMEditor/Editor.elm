@@ -2355,8 +2355,9 @@ trailMenuId =
 to the root.
 
 A knowledge model nests as deep as anyone cares to nest it, and a trail that
-long wraps the toolbar; so only the last four places are drawn, and what came
-before them is a menu on an ellipsis in their place — the same cut the wizard
+long wraps the toolbar; so only the last four places are drawn, each cut to a
+share of the row (`.c-km-editor-trail`), and what came before them is a menu on
+an ellipsis in their place — the same cut the wizard
 makes, except that there the ellipsis is dead text and the way back to the top
 of a deep tree is to scroll the navigation and find it.
 
@@ -2415,7 +2416,8 @@ trail appState model editorContext =
                 )
                 shown
     in
-    Breadcrumbs.toHtmlWithWords (UiWords.breadcrumbs appState) (overflow ++ crumbs)
+    div [ class "c-km-editor-trail" ]
+        [ Breadcrumbs.toHtmlWithWords (UiWords.breadcrumbs appState) (overflow ++ crumbs) ]
 
 
 {-| How many places of the trail are drawn before the rest goes into the menu.

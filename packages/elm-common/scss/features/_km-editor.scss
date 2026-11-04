@@ -65,6 +65,38 @@
   gap: var(--ui-space-2);
 }
 
+// THE TRAIL
+//
+// A crumb gets at most a sixth of the trail and ellipsizes past it, so a long
+// name does not crowd out the rest of the path. The trail is not clipped as a
+// whole: the menu holding the rest of the path drops out of it. That the
+// toolbar stays one row is the workspace's (`.ui-workspace__toolbar`).
+.c-km-editor-trail {
+  flex: 1 1 0;
+  min-inline-size: 0;
+
+  .ui-breadcrumbs__list {
+    flex-wrap: nowrap;
+  }
+
+  .ui-breadcrumbs__item {
+    max-inline-size: 17%;
+
+    &:has(.ui-menu) {
+      flex: 0 0 auto;
+      max-inline-size: none;
+    }
+  }
+
+  a.ui-breadcrumbs__link,
+  .ui-breadcrumbs__current {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
 // AN INTEGRATION
 //
 // A secret is a name and the reference that uses it, framed as a row so a
