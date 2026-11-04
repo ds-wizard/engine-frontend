@@ -1,5 +1,6 @@
 module Common.Api.BootstrapConfigTest exposing (bootstrapConfigTests)
 
+import Color
 import Common.Api.Models.BootstrapConfig as BootstrapConfig
 import Common.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig(..))
 import Expect
@@ -60,8 +61,7 @@ without name =
 workspace : List ( String, E.Value ) -> E.Value
 workspace overrides =
     E.object
-        ([ ( "logoUrl", E.null )
-         , ( "primaryColor", E.null )
+        ([ ( "primaryColor", E.null )
          , ( "dashboardAndMenu", E.object [ ( "customMenuLinks", E.list identity [] ), ( "announcements", E.list identity [] ) ] )
          , ( "projects"
            , E.object
@@ -143,55 +143,69 @@ bootstrapConfigTests =
                 \_ ->
                     D.decodeValue BootstrapConfig.workspaceDecoder (workspace [])
                         |> Expect.err
-            , test "reads the logo" <|
-                \_ ->
-                    D.decodeValue BootstrapConfig.workspaceDecoder
-                        (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
-                        |> Result.map .logoUrl
-                        |> Expect.equal (Ok (Just "https://example.com/logo.png"))
             ]
-        , describe "withLook"
-            [ test "keeps the workspace's logo where the look has none" <|
+        , describe "the application's logo"
+            [ test "stays the organization's in a workspace with a logo of its own" <|
                 \_ ->
                     Result.map2
                         (\config workspaceConfig ->
                             BootstrapConfig.withWorkspace workspaceConfig config
-                                |> BootstrapConfig.withLook { logoUrl = Nothing, primaryColor = Nothing }
+                                |> BootstrapConfig.withPrimaryColor Nothing
                                 |> .lookAndFeel
                                 |> .logoUrl
                         )
-                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
-                        (D.decodeValue BootstrapConfig.workspaceDecoder
-                            (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        (D.decodeValue BootstrapConfig.decoder
+                            (bootstrap [ ( "lookAndFeel", E.object [ ( "appTitle", E.null ), ( "logoUrl", E.string "https://example.com/organization.png" ), ( "primaryColor", E.null ) ] ) ])
                         )
-                        |> Expect.equal (Ok (Just "https://example.com/logo.png"))
-            , test "the look's logo goes over the workspace's" <|
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "logoUrl", E.string "https://example.com/workspace.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok (Just "https://example.com/organization.png"))
+            ]
+        , describe "withPrimaryColor"
+            [ test "keeps the workspace's color where the place has none" <|
                 \_ ->
                     Result.map2
                         (\config workspaceConfig ->
                             BootstrapConfig.withWorkspace workspaceConfig config
-                                |> BootstrapConfig.withLook { logoUrl = Just "https://example.com/new.png", primaryColor = Nothing }
+                                |> BootstrapConfig.withPrimaryColor Nothing
                                 |> .lookAndFeel
-                                |> .logoUrl
+                                |> .primaryColor
+                                |> Maybe.map Color.toCssString
                         )
                         (D.decodeValue BootstrapConfig.decoder (bootstrap []))
                         (D.decodeValue BootstrapConfig.workspaceDecoder
-                            (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                            (workspace [ ( "primaryColor", E.string "#d81b60" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
                         )
-                        |> Expect.equal (Ok (Just "https://example.com/new.png"))
-            , test "the organization's logo is back once the workspace is left" <|
+                        |> Expect.equal (Ok (Just (Color.toCssString (Color.rgb255 216 27 96))))
+            , test "the place's color goes over the workspace's" <|
                 \_ ->
                     Result.map2
                         (\config workspaceConfig ->
                             BootstrapConfig.withWorkspace workspaceConfig config
-                                |> BootstrapConfig.withLook { logoUrl = Just "https://example.com/new.png", primaryColor = Nothing }
+                                |> BootstrapConfig.withPrimaryColor (Just (Color.rgb255 0 0 255))
+                                |> .lookAndFeel
+                                |> .primaryColor
+                                |> Maybe.map Color.toCssString
+                        )
+                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "primaryColor", E.string "#d81b60" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok (Just (Color.toCssString (Color.rgb255 0 0 255))))
+            , test "the organization's color is back once the workspace is left" <|
+                \_ ->
+                    Result.map2
+                        (\config workspaceConfig ->
+                            BootstrapConfig.withWorkspace workspaceConfig config
+                                |> BootstrapConfig.withPrimaryColor (Just (Color.rgb255 0 0 255))
                                 |> BootstrapConfig.withoutWorkspace
                                 |> .lookAndFeel
-                                |> .logoUrl
+                                |> .primaryColor
                         )
                         (D.decodeValue BootstrapConfig.decoder (bootstrap []))
                         (D.decodeValue BootstrapConfig.workspaceDecoder
-                            (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                            (workspace [ ( "primaryColor", E.string "#d81b60" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
                         )
                         |> Expect.equal (Ok Nothing)
             ]

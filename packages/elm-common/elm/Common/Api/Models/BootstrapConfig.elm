@@ -7,7 +7,7 @@ module Common.Api.Models.BootstrapConfig exposing
     , default
     , ownLookAndFeel
     , withDefaultAppTitle
-    , withLook
+    , withPrimaryColor
     , withWorkspace
     , withoutWorkspace
     , workspaceDecoder
@@ -19,9 +19,11 @@ The first (`decoder`) is there before anybody signs in: how to sign in, what
 the login screen says, the look of the instance, whether documents can be
 submitted, and who is signed in.
 
-The second (`workspaceDecoder`) is what somebody signed in works with: the menu
-links and announcements, how projects behave, where support is, whether
-documents can be submitted, and which plugins are switched off. It is read
+The second (`workspaceDecoder`) is what somebody signed in works with: the
+primary color, the menu links and announcements, how projects behave, where
+support is, whether documents can be submitted, and which plugins are switched
+off. The logo is not in it: the application's logo is the instance's wherever
+the user is. It is read
 separately and laid over the first with `withWorkspace`; until it is, its
 fields hold their defaults, or the first part's where it has them too.
 
@@ -86,8 +88,7 @@ type alias Replaced =
 
 
 type alias WorkspaceConfig =
-    { logoUrl : Maybe String
-    , primaryColor : Maybe Color
+    { primaryColor : Maybe Color
     , dashboardAndMenu : DashboardAndMenuSettings
     , project : ProjectConfig
     , support : SupportSettings
@@ -168,7 +169,6 @@ registryDecoder =
 workspaceDecoder : Decoder WorkspaceConfig
 workspaceDecoder =
     D.succeed WorkspaceConfig
-        |> D.required "logoUrl" (D.nullable D.string)
         |> D.required "primaryColor" (D.nullable D.hexColor)
         |> D.required "dashboardAndMenu" DashboardAndMenuSettings.decoder
         |> D.required "projects" ProjectConfig.decoder
@@ -178,8 +178,8 @@ workspaceDecoder =
         |> D.required "pluginSettings" (D.dict D.valueAsString)
 
 
-{-| Lay the second part over the first. Its logo and color, where it has them,
-and its plugin settings take the place of the first part's.
+{-| Lay the second part over the first. Its color, where it has one, and its
+plugin settings take the place of the first part's.
 -}
 withWorkspace : WorkspaceConfig -> BootstrapConfig -> BootstrapConfig
 withWorkspace workspace config =
@@ -192,10 +192,7 @@ withWorkspace workspace config =
     in
     { base
         | lookAndFeel =
-            { lookAndFeel
-                | logoUrl = Maybe.or workspace.logoUrl lookAndFeel.logoUrl
-                , primaryColor = Maybe.or workspace.primaryColor lookAndFeel.primaryColor
-            }
+            { lookAndFeel | primaryColor = Maybe.or workspace.primaryColor lookAndFeel.primaryColor }
         , pluginSettings = workspace.pluginSettings
         , dashboardAndMenu = workspace.dashboardAndMenu
         , project = workspace.project
@@ -206,13 +203,13 @@ withWorkspace workspace config =
     }
 
 
-{-| A logo and a color over the ones in force, where the place the user is in has
-its own and they are known before — or apart from — the second part. Where it
-has none, the second part's stay, and the first part's under them. Like the
-second part's, they are taken away by `withoutWorkspace`.
+{-| A color over the one in force, where the place the user is in has its own
+and it is known before — or apart from — the second part. Where it has none,
+the second part's stays, and the first part's under it. Like the second part's,
+it is taken away by `withoutWorkspace`.
 -}
-withLook : { logoUrl : Maybe String, primaryColor : Maybe Color } -> BootstrapConfig -> BootstrapConfig
-withLook look config =
+withPrimaryColor : Maybe Color -> BootstrapConfig -> BootstrapConfig
+withPrimaryColor primaryColor config =
     let
         original =
             Maybe.withDefault { lookAndFeel = config.lookAndFeel, pluginSettings = config.pluginSettings, dashboardAndMenu = config.dashboardAndMenu, support = config.support, submission = config.submission } config.replaced
@@ -222,16 +219,13 @@ withLook look config =
     in
     { config
         | lookAndFeel =
-            { lookAndFeel
-                | logoUrl = Maybe.or look.logoUrl lookAndFeel.logoUrl
-                , primaryColor = Maybe.or look.primaryColor lookAndFeel.primaryColor
-            }
+            { lookAndFeel | primaryColor = Maybe.or primaryColor lookAndFeel.primaryColor }
         , replaced = Just original
     }
 
 
-{-| The first part's own look, whatever is laid over it: the instance's logo and
-color while somebody is where another one applies.
+{-| The first part's own look, whatever is laid over it: the instance's color
+while somebody is where another one applies.
 -}
 ownLookAndFeel : BootstrapConfig -> LookAndFeelConfig
 ownLookAndFeel config =
