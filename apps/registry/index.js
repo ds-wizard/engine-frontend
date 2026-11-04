@@ -1,7 +1,7 @@
 'use strict'
 
 // The registry's web client, on the design system. It asks the registry what it
-// offers (`/configs/bootstrap`), applies the stylesheet, and starts the Elm
+// offers (`/bootstrap`), applies the stylesheet, and starts the Elm
 // program with the flags `Registry.Data.AppState` reads. The ports are the
 // shared ones it uses: the session, the appearance, the navigation's width,
 // copying, and the form and focus helpers.
@@ -105,7 +105,7 @@ function startWithoutConfig() {
 }
 
 window.onload = function () {
-    Promise.all([axios.get(apiUrl() + '/configs/bootstrap'), applyStylesheets()])
+    Promise.all([axios.get(apiUrl() + '/bootstrap'), applyStylesheets()])
         .then(function ([response]) {
             start(response.data)
         })
