@@ -8,9 +8,8 @@ module Common.Api.Models.Settings.LookAndFeelSettings exposing
     , validation
     )
 
-{-| The look of an instance: its title and its color. The logo is a file, sent
-and removed on its own (`Common.Api.Settings.putLogo`); `logoUrl` is where the
-one in use is, and is only read.
+{-| The look of an instance: its title and its color. The logo is not a setting:
+`logoUrl` is where the one in use is, and is only read.
 -}
 
 import Common.Utils.Form.Field as Field

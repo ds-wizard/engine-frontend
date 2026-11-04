@@ -1,10 +1,8 @@
 module Common.Api.Settings exposing
     ( Section
     , delete
-    , deleteLogo
     , get
     , put
-    , putLogo
     )
 
 {-| The settings, one section at a time: `/settings/<section>`.
@@ -18,7 +16,6 @@ import Common.Api.Context as Context exposing (Context)
 import Common.Api.Models.Settings as Settings exposing (Settings)
 import Common.Api.Params as Params
 import Common.Api.Request as Request exposing (ToMsg)
-import File exposing (File)
 import Json.Decode exposing (Decoder)
 import Json.Encode as E
 
@@ -54,23 +51,6 @@ delete appState section =
         (Params.apply appState "DELETE" (url section))
 
 
-putLogo : Context ctx -> File -> ToMsg () msg -> Cmd msg
-putLogo appState =
-    Request.putFile (Context.toServerInfo appState)
-        (Params.apply appState "PUT" logoUrl)
-
-
-deleteLogo : Context ctx -> ToMsg () msg -> Cmd msg
-deleteLogo appState =
-    Request.delete (Context.toServerInfo appState)
-        (Params.apply appState "DELETE" logoUrl)
-
-
 url : Section value -> String
 url section =
     "/settings/" ++ section.name
-
-
-logoUrl : String
-logoUrl =
-    "/settings/look-and-feel/logo"
