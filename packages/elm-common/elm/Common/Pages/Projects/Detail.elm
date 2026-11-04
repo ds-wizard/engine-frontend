@@ -1,6 +1,7 @@
 module Common.Pages.Projects.Detail exposing
     ( Model
     , Msg
+    , SaveError
     , entityName
     , init
     , initialModel
@@ -67,7 +68,6 @@ import Common.Api.Models.WebSockets.WebSocketServerAction as WebSocketServerActi
 import Common.Api.Projects as ProjectsApi
 import Common.Api.ServerError as ServerError
 import Common.Api.WebSocket as WebSocket exposing (WebSocket)
-import Common.Components.ApiErrorAlert as ApiErrorAlert
 import Common.Components.ConfirmModal as ConfirmModal
 import Common.Components.DetailPage as DetailPage
 import Common.Components.ItemActions as ItemActions
@@ -109,9 +109,11 @@ import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import String.Format as String
 import Task.Extra as Task
 import Ui.Alert as Alert
 import Ui.Badge as Badge
@@ -120,6 +122,7 @@ import Ui.Icon as Icon
 import Ui.Illustration as Illustration
 import Ui.Layout as Layout
 import Ui.Menu as Menu
+import Ui.Modal as Modal
 import Ui.Page.Message as Message
 import Ui.Text as Text
 import Uuid exposing (Uuid)
@@ -143,7 +146,7 @@ type alias Model =
     , onlineUsers : List OnlineUserInfo
     , websocket : WebSocket
     , offline : Bool
-    , error : Bool
+    , saveError : Maybe SaveError
     , forceDisconnect : Bool
     , actionsMenu : Menu.Model
     , shareModal : ShareModal.Model
@@ -174,7 +177,7 @@ initialModel appState uuid =
     , onlineUsers = []
     , websocket = ProjectsApi.websocket uuid
     , offline = False
-    , error = False
+    , saveError = Nothing
     , forceDisconnect = False
     , actionsMenu = Menu.init
     , shareModal = ShareModal.initialModel
@@ -283,6 +286,7 @@ type Msg
     | ReplyDebounceMsg String Debounce.Msg
     | AddSavingEvent ProjectEvent
     | SavingIndicatorMsg SavingIndicator.Msg
+    | CloseSaveError
     | Refresh
 
 
@@ -691,11 +695,11 @@ updatePage cfg appState msg model =
                     ( { model | addingToMyProjects = Success () }, Window.refresh () )
 
                 Err error ->
-                    ( { model | addingToMyProjects = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
-                    , Cmd.batch
-                        [ ApiErrorAlert.focus (cfg.wrapMsg NoOp)
-                        , RequestHelpers.getResultCmd cfg.logoutMsg result
-                        ]
+                    ( { model
+                        | addingToMyProjects = Unset
+                        , saveError = Just (apiSaveErrorOf appState (gettext "The project could not be added to your projects." appState.locale) error)
+                      }
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         NoOp ->
@@ -776,6 +780,9 @@ updatePage cfg appState msg model =
             in
             ( { model | settings = settings }, cmd )
 
+        CloseSaveError ->
+            ( { model | saveError = Nothing }, Cmd.none )
+
         Refresh ->
             ( model, Window.refresh () )
 
@@ -847,15 +854,15 @@ handleWebSocketMsg appState websocketMsg model =
                         ServerProjectMessage.AddFile file ->
                             ( { model | questionnaireModel = ActionResult.map (Questionnaire.addFile file) model.questionnaireModel }, Cmd.none )
 
-                WebSocketServerAction.Error (ServerError.UserSimpleError message) ->
+                WebSocketServerAction.Error ((ServerError.UserSimpleError message) as serverError) ->
                     if message.code == forceDisconnectCode then
                         ( { model | forceDisconnect = True }, Cmd.none )
 
                     else
-                        ( { model | error = True }, Cmd.none )
+                        ( savingFailed appState serverError model, Cmd.none )
 
-                WebSocketServerAction.Error _ ->
-                    ( { model | error = True }, Cmd.none )
+                WebSocketServerAction.Error serverError ->
+                    ( savingFailed appState serverError model, Cmd.none )
 
         WebSocket.Reconnect ->
             ( model, WebSocket.open appState model.websocket )
@@ -869,7 +876,90 @@ handleWebSocketMsg appState websocketMsg model =
 
 forceDisconnectCode : String
 forceDisconnectCode =
-    "error.service.qtn.collaboration.force_disconnect"
+    "error.service.project.collaboration.force_disconnect"
+
+
+{-| Why something on the project could not be saved, for the dialog that says
+so (`saveErrorModal`). `stale` is whether what the page shows may no longer be
+what the server has, so the way on is a refresh.
+-}
+type alias SaveError =
+    { message : String
+    , details : List String
+    , stale : Bool
+    }
+
+
+{-| The server refused a change sent over the socket. It does not say which
+one, so the changes still waiting stay waiting; the indicator just stops saying
+"Saving..." for one that is not coming. The questionnaire stays on the screen,
+to be looked at or copied, with the error in a dialog over it.
+-}
+savingFailed : AppState -> ServerError.ServerError -> Model -> Model
+savingFailed appState serverError model =
+    { model
+        | saveError = Just (saveErrorOf appState True (gettext "The change could not be saved." appState.locale) serverError)
+        , saving = SavingIndicator.init
+    }
+
+
+{-| A request that failed. A refused one says why in its body, which is read
+even for a 403, whose reason (what the user is not allowed to do) is more use
+than that they are not allowed something. The request changed nothing, so
+what is on the screen is still what is saved.
+-}
+apiSaveErrorOf : AppState -> String -> ApiError -> SaveError
+apiSaveErrorOf appState defaultMessage error =
+    let
+        serverError =
+            case error of
+                BadStatus 403 body ->
+                    Maybe.or (Result.toMaybe (D.decodeString ServerError.decoder body)) (Just ServerError.ForbiddenError)
+
+                _ ->
+                    ApiError.toServerError error
+    in
+    case serverError of
+        Just refused ->
+            saveErrorOf appState False defaultMessage refused
+
+        Nothing ->
+            { message = defaultMessage, details = [], stale = False }
+
+
+{-| What the server said, in the user's language when it is a message we know
+and in the server's own words when it is not (`ServerError.messageToText`);
+our own sentence only when the server said nothing usable.
+-}
+saveErrorOf : AppState -> Bool -> String -> ServerError.ServerError -> SaveError
+saveErrorOf appState stale defaultMessage serverError =
+    let
+        simple message =
+            { message = message, details = [], stale = stale }
+
+        text message =
+            Maybe.withDefault message.code (ServerError.messageToText appState message)
+    in
+    case serverError of
+        ServerError.UserSimpleError message ->
+            simple (Maybe.withDefault defaultMessage (ServerError.messageToText appState message))
+
+        ServerError.UserFormError data ->
+            { message = gettext "The server rejected the change." appState.locale
+            , details =
+                List.map text data.formErrors
+                    ++ List.map text (List.concat (Dict.values data.fieldErrors))
+            , stale = stale
+            }
+
+        ServerError.SystemLogError data ->
+            simple (String.format data.defaultMessage data.params)
+
+        ServerError.ForbiddenError ->
+            simple (gettext "You do not have permission to do this." appState.locale)
+
+        ServerError.TooManyRequestsError data ->
+            simple (ServerError.tooManyRequestsMessage appState data)
 
 
 
@@ -953,10 +1043,7 @@ isGuarded appState route mbNextRoute model =
 
 view : AppState -> ProjectDetailRoute -> Model -> Html Msg
 view appState route model =
-    if model.error then
-        viewError appState
-
-    else if model.offline then
+    if model.offline then
         viewOffline appState
 
     else
@@ -977,17 +1064,6 @@ viewOffline appState =
         |> Message.toHtml
 
 
-viewError : AppState -> Html Msg
-viewError appState =
-    Message.message
-        { title = gettext "Oops!" appState.locale
-        , description = gettext "Something went wrong, try to refresh the page." appState.locale
-        }
-        |> Message.withIllustration (Illustration.toHtml Illustration.error)
-        |> Message.withAction (Button.primary (gettext "Refresh" appState.locale) Refresh)
-        |> Message.toHtml
-
-
 viewProject : AppState -> ProjectDetailRoute -> Model -> ProjectCommon -> DetailPage.DetailPage Msg
 viewProject appState route model common =
     let
@@ -1000,26 +1076,13 @@ viewProject appState route model common =
 
         flushContent =
             isFlushContent appState route model
-
-        addingToMyProjectsAlert =
-            ApiErrorAlert.view appState model.addingToMyProjects
-
-        -- A flush tab's surface is the first thing in the content, because the
-        -- first thing takes the whole height; the alert, if there is one, goes
-        -- under it rather than taking the height itself. It takes focus when it
-        -- appears, so where it sits does not decide whether it is found.
-        tabContent =
-            if flushContent then
-                content appState route model common ++ [ addingToMyProjectsAlert ]
-
-            else
-                addingToMyProjectsAlert :: content appState route model common
     in
     DetailPage.detailPage
         { title = common.name
         , content =
-            tabContent
+            content appState route model common
                 ++ [ disconnectedModal appState model
+                   , saveErrorModal appState model
                    , Html.map ShareModalMsg (ShareModal.view appState model.shareModal)
                    , Html.map VersionViewModalMsg (VersionViewModal.view appState model.versionViewModal)
                    , Html.map RevertModalMsg (RevertModal.view appState model.revertModal)
@@ -1110,6 +1173,58 @@ disconnectedModal appState model =
         , result = Unset
         , testId = Just "disconnected_modal"
         }
+
+
+{-| Why something on the project could not be saved, in a dialog rather than
+instead of the page or in an alert under it: what is on the screen stays there
+to be looked at or copied, and the error is not missed below a long
+questionnaire. When what is on the screen may no longer be what the server
+has, the way on is a refresh.
+-}
+saveErrorModal : AppState -> Model -> Html Msg
+saveErrorModal appState model =
+    let
+        stale =
+            Maybe.unwrap False .stale model.saveError
+
+        refreshAction =
+            if stale then
+                [ Button.primary (gettext "Refresh" appState.locale) Refresh
+                    |> Button.withTestId "project_detail_save-error-refresh"
+                ]
+
+            else
+                []
+    in
+    Modal.plain
+        { title = gettext "Unable to save" appState.locale
+        , open = Maybe.isJust model.saveError
+        , onClose = CloseSaveError
+        , body =
+            case model.saveError of
+                Just saveError ->
+                    (Alert.danger ""
+                        |> Alert.toHtmlWithContent
+                            (Html.p [] [ Html.strong [] [ Html.text saveError.message ] ]
+                                :: List.map (\detail -> Html.p [] [ Html.text detail ]) saveError.details
+                            )
+                    )
+                        :: (if saveError.stale then
+                                [ Html.p [] [ Html.text (gettext "The project no longer shows what is saved. Refresh the page to continue with the saved project." appState.locale) ] ]
+
+                            else
+                                []
+                           )
+
+                Nothing ->
+                    []
+        }
+        |> Modal.withActions
+            (Button.ghost (gettext "Close" appState.locale) CloseSaveError
+                :: refreshAction
+            )
+        |> Modal.withTestId "project_detail_save-error-modal"
+        |> Modal.toHtml
 
 
 

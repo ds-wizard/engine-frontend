@@ -8,6 +8,7 @@ module Common.Api.ServerError exposing
     , forbiddenMessage
     , getUserFormErrorData
     , messageToReadable
+    , messageToText
     , tooManyRequestsErrorDecoder
     , tooManyRequestsMessage
     )
@@ -31,6 +32,7 @@ type ServerError
 
 type alias Message =
     { code : String
+    , defaultMessage : String
     , params : List String
     }
 
@@ -116,6 +118,7 @@ messageDecoder : Decoder Message
 messageDecoder =
     D.succeed Message
         |> D.required "code" D.string
+        |> D.optional "defaultMessage" D.string ""
         |> D.required "params" (D.list D.string)
 
 
@@ -147,6 +150,24 @@ tooManyRequestsMessage appState data =
     String.format
         (gettext "Too many requests. Try again after %s seconds." appState.locale)
         [ String.fromInt data.retryAfterSeconds ]
+
+
+{-| The message as the user reads it: in their language when it is one we know,
+in the server's own words when it is not, and nothing when the server sent no
+words either.
+-}
+messageToText : { a | locale : Gettext.Locale } -> Message -> Maybe String
+messageToText appState message =
+    case messageToReadable appState message of
+        Just readable ->
+            Just readable
+
+        Nothing ->
+            if String.isEmpty (String.trim message.defaultMessage) then
+                Nothing
+
+            else
+                Just (String.format message.defaultMessage message.params)
 
 
 messageToReadable : { a | locale : Gettext.Locale } -> Message -> Maybe String
@@ -201,6 +222,24 @@ messageToReadable appState message =
 
                 Just "package" ->
                     Just <| gettext "Knowledge model not found." appState.locale
+
+                Just "project" ->
+                    Just <| gettext "Project not found." appState.locale
+
+                Just "project_comment" ->
+                    Just <| gettext "Comment not found." appState.locale
+
+                Just "project_comment_thread" ->
+                    Just <| gettext "Comment thread not found." appState.locale
+
+                Just "project_event" ->
+                    Just <| gettext "Project change not found." appState.locale
+
+                Just "project_file" ->
+                    Just <| gettext "Project file not found." appState.locale
+
+                Just "project_version" ->
+                    Just <| gettext "Project version not found." appState.locale
 
                 Just "questionnaire" ->
                     Just <| gettext "Project not found." appState.locale
@@ -292,6 +331,127 @@ messageToReadable appState message =
 
         "error.validation.qtn_migration_uniqueness" ->
             Just <| gettext "There is already an ongoing project migration." appState.locale
+
+        -- Projects
+        "error.validation.forbidden" ->
+            Just <|
+                case message.params of
+                    [ "View Project" ] ->
+                        gettext "You do not have permission to view this project." appState.locale
+
+                    [ "Comment Project" ] ->
+                        gettext "You do not have permission to comment on this project." appState.locale
+
+                    [ "Edit Project" ] ->
+                        gettext "You do not have permission to edit this project." appState.locale
+
+                    [ "Administrate Project" ] ->
+                        gettext "You do not have permission to manage this project." appState.locale
+
+                    [ "Migrate Project" ] ->
+                        gettext "You do not have permission to migrate this project." appState.locale
+
+                    [ "Project Template" ] ->
+                        gettext "This project is not a template." appState.locale
+
+                    [ "Read Document" ] ->
+                        gettext "You do not have permission to view this document." appState.locale
+
+                    [ "Edit Document" ] ->
+                        gettext "You do not have permission to edit this document." appState.locale
+
+                    _ ->
+                        gettext "You do not have permission to do this." appState.locale
+
+        "error.service.common.feature_is_disabled" ->
+            Just <|
+                case message.params of
+                    [ "Project Template" ] ->
+                        gettext "Project templates are disabled." appState.locale
+
+                    _ ->
+                        gettext "This feature is disabled." appState.locale
+
+        "error.service.workspace.not_member" ->
+            Just <|
+                case message.params of
+                    [ email ] ->
+                        String.format (gettext "User %s is not a member of the workspace." appState.locale) [ email ]
+
+                    _ ->
+                        gettext "The user is not a member of the workspace." appState.locale
+
+        "error.validation.user_absence" ->
+            Just <| String.format (gettext "User %s does not exist." appState.locale) message.params
+
+        "error.validation.knowledge_model_package_absence" ->
+            Just <| String.format (gettext "Knowledge model %s does not exist." appState.locale) message.params
+
+        "error.validation.document_template_absence" ->
+            Just <| String.format (gettext "Document template %s does not exist." appState.locale) message.params
+
+        "error.validation.forbidden_characters" ->
+            Just <| String.format (gettext "\"%s\" contains characters that are not allowed." appState.locale) message.params
+
+        "error.validation.project_event_path_absence" ->
+            Just <| gettext "The question no longer exists in the knowledge model of the project." appState.locale
+
+        "error.validation.project_event_item_absence" ->
+            Just <| gettext "The item no longer exists." appState.locale
+
+        "error.validation.project_event_reply_type_mismatch" ->
+            Just <| gettext "The answer does not match the type of the question." appState.locale
+
+        "error.validation.project_event_answer_absence" ->
+            Just <| gettext "The selected answer does not belong to the question." appState.locale
+
+        "error.validation.project_event_choice_absence" ->
+            Just <| gettext "A selected choice does not belong to the question." appState.locale
+
+        "error.validation.project_event_selected_item_absence" ->
+            Just <| gettext "The selected item no longer exists in the referenced list." appState.locale
+
+        "error.validation.project_event_file_absence" ->
+            Just <| gettext "The file does not belong to the project." appState.locale
+
+        "error.validation.project_event_value_type" ->
+            Just <| gettext "The value does not match the type of the question." appState.locale
+
+        "error.validation.project_event_value_validation" ->
+            Just <| gettext "The value does not pass the validation of the question." appState.locale
+
+        "error.validation.project_file_question_absence_or_wrong_type" ->
+            Just <| gettext "The question does not exist or is not a file question." appState.locale
+
+        "error.validation.project_file_size_exceeds_limit" ->
+            Just <|
+                case List.map (Maybe.unwrap "0" ByteUnits.toReadable << String.toInt) message.params of
+                    [ fileSize, maxFileSize ] ->
+                        String.format (gettext "The file is too large (%s, the limit is %s)." appState.locale) [ fileSize, maxFileSize ]
+
+                    _ ->
+                        gettext "The file is too large." appState.locale
+
+        "error.service.project.comment.not_author" ->
+            Just <| gettext "Only the author of the comment can do this." appState.locale
+
+        "error.service.project.comment.thread_resolved" ->
+            Just <| gettext "The comment thread is resolved. Reopen it first." appState.locale
+
+        "error.service.project.comment.assignee_without_access" ->
+            Just <| gettext "The assigned user cannot comment on the project." appState.locale
+
+        "error.service.project.version.uuid_taken" ->
+            Just <| gettext "The version already exists." appState.locale
+
+        "error.service.project.version.version_uniqueness" ->
+            Just <| gettext "There is already a version for this change." appState.locale
+
+        "error.service.project.version.non_existent_event_uuid" ->
+            Just <| gettext "The version cannot be created for a change that does not exist." appState.locale
+
+        "error.service.project.collaboration.force_disconnect" ->
+            Just <| gettext "Another user has made significant changes to the project. Refresh the page to reconnect." appState.locale
 
         "error.service.openid.identity_linked_to_different_user" ->
             Just <| gettext "This account is already linked to a different user." appState.locale

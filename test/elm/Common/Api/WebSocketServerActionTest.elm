@@ -26,10 +26,10 @@ webSocketServerActionTests =
                         (Ok
                             (Error
                                 (ServerError.UserFormError
-                                    { formErrors = [ { code = "error.validation.km_event_rejected", params = [ "47679be7-01c7-4213-ba95-2a53da329ecf" ] } ]
+                                    { formErrors = [ { code = "error.validation.km_event_rejected", defaultMessage = "The event '%s' was rejected; reload the editor", params = [ "47679be7-01c7-4213-ba95-2a53da329ecf" ] } ]
                                     , fieldErrors =
                                         Dict.fromList
-                                            [ ( "parentUuid", [ { code = "error.validation.km_event_entity_absence", params = [ "00000000-0000-0000-0000-000000000000", "knowledge model" ] } ] ) ]
+                                            [ ( "parentUuid", [ { code = "error.validation.km_event_entity_absence", defaultMessage = "'%s' is not an existing %s", params = [ "00000000-0000-0000-0000-000000000000", "knowledge model" ] } ] ) ]
                                     }
                                 )
                             )
@@ -40,9 +40,9 @@ webSocketServerActionTests =
                     """
                     {"data":{"error":{"code":"error.api.websocket.cant_deserialize_obj","defaultMessage":"Deserialization failed","params":[]},"status":400,"type":"UserSimpleError"},"type":"Error_ServerAction"}
                     """
-                    |> Expect.equal (Ok (Error (ServerError.UserSimpleError { code = "error.api.websocket.cant_deserialize_obj", params = [] })))
+                    |> Expect.equal (Ok (Error (ServerError.UserSimpleError { code = "error.api.websocket.cant_deserialize_obj", defaultMessage = "Deserialization failed", params = [] })))
         , test "an error with nothing but a code is still an error" <|
             \_ ->
-                decode """{"data":{"message":{"code":"error.service.qtn.collaboration.force_disconnect"}},"type":"Error_ServerAction"}"""
-                    |> Expect.equal (Ok (Error (ServerError.UserSimpleError { code = "error.service.qtn.collaboration.force_disconnect", params = [] })))
+                decode """{"data":{"message":{"code":"error.service.project.collaboration.force_disconnect"}},"type":"Error_ServerAction"}"""
+                    |> Expect.equal (Ok (Error (ServerError.UserSimpleError { code = "error.service.project.collaboration.force_disconnect", defaultMessage = "", params = [] })))
         ]

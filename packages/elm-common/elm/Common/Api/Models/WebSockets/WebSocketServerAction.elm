@@ -42,5 +42,5 @@ errorDecoder =
     D.oneOf
         [ ServerError.decoder
         , D.at [ "message", "code" ] D.string
-            |> D.map (\code -> ServerError.UserSimpleError { code = code, params = [] })
+            |> D.map (\code -> ServerError.UserSimpleError { code = code, defaultMessage = "", params = [] })
         ]
