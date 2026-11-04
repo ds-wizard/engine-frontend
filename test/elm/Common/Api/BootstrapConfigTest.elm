@@ -60,7 +60,7 @@ without name =
 workspace : List ( String, E.Value ) -> E.Value
 workspace overrides =
     E.object
-        ([ ( "logo", E.null )
+        ([ ( "logoUrl", E.null )
          , ( "primaryColor", E.null )
          , ( "dashboardAndMenu", E.object [ ( "customMenuLinks", E.list identity [] ), ( "announcements", E.list identity [] ) ] )
          , ( "projects"
@@ -143,12 +143,57 @@ bootstrapConfigTests =
                 \_ ->
                     D.decodeValue BootstrapConfig.workspaceDecoder (workspace [])
                         |> Expect.err
-            , test "reads the logo as the server names it" <|
+            , test "reads the logo" <|
                 \_ ->
                     D.decodeValue BootstrapConfig.workspaceDecoder
-                        (workspace [ ( "logo", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
                         |> Result.map .logoUrl
                         |> Expect.equal (Ok (Just "https://example.com/logo.png"))
+            ]
+        , describe "withLook"
+            [ test "keeps the workspace's logo where the look has none" <|
+                \_ ->
+                    Result.map2
+                        (\config workspaceConfig ->
+                            BootstrapConfig.withWorkspace workspaceConfig config
+                                |> BootstrapConfig.withLook { logoUrl = Nothing, primaryColor = Nothing }
+                                |> .lookAndFeel
+                                |> .logoUrl
+                        )
+                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok (Just "https://example.com/logo.png"))
+            , test "the look's logo goes over the workspace's" <|
+                \_ ->
+                    Result.map2
+                        (\config workspaceConfig ->
+                            BootstrapConfig.withWorkspace workspaceConfig config
+                                |> BootstrapConfig.withLook { logoUrl = Just "https://example.com/new.png", primaryColor = Nothing }
+                                |> .lookAndFeel
+                                |> .logoUrl
+                        )
+                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok (Just "https://example.com/new.png"))
+            , test "the organization's logo is back once the workspace is left" <|
+                \_ ->
+                    Result.map2
+                        (\config workspaceConfig ->
+                            BootstrapConfig.withWorkspace workspaceConfig config
+                                |> BootstrapConfig.withLook { logoUrl = Just "https://example.com/new.png", primaryColor = Nothing }
+                                |> BootstrapConfig.withoutWorkspace
+                                |> .lookAndFeel
+                                |> .logoUrl
+                        )
+                        (D.decodeValue BootstrapConfig.decoder (bootstrap []))
+                        (D.decodeValue BootstrapConfig.workspaceDecoder
+                            (workspace [ ( "logoUrl", E.string "https://example.com/logo.png" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        )
+                        |> Expect.equal (Ok Nothing)
             ]
         , describe "custom menu links"
             [ test "the organization's, where the server gives them, are back once a workspace is left" <|

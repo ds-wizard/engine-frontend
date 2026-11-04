@@ -168,7 +168,7 @@ registryDecoder =
 workspaceDecoder : Decoder WorkspaceConfig
 workspaceDecoder =
     D.succeed WorkspaceConfig
-        |> D.required "logo" (D.nullable D.string)
+        |> D.required "logoUrl" (D.nullable D.string)
         |> D.required "primaryColor" (D.nullable D.hexColor)
         |> D.required "dashboardAndMenu" DashboardAndMenuSettings.decoder
         |> D.required "projects" ProjectConfig.decoder
@@ -206,8 +206,9 @@ withWorkspace workspace config =
     }
 
 
-{-| A logo and a color over the first part's, where the place the user is in has
-its own and they are known before — or apart from — the second part. Like the
+{-| A logo and a color over the ones in force, where the place the user is in has
+its own and they are known before — or apart from — the second part. Where it
+has none, the second part's stay, and the first part's under them. Like the
 second part's, they are taken away by `withoutWorkspace`.
 -}
 withLook : { logoUrl : Maybe String, primaryColor : Maybe Color } -> BootstrapConfig -> BootstrapConfig
@@ -217,7 +218,7 @@ withLook look config =
             Maybe.withDefault { lookAndFeel = config.lookAndFeel, pluginSettings = config.pluginSettings, dashboardAndMenu = config.dashboardAndMenu, support = config.support, submission = config.submission } config.replaced
 
         lookAndFeel =
-            original.lookAndFeel
+            config.lookAndFeel
     in
     { config
         | lookAndFeel =
