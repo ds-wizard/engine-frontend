@@ -1219,9 +1219,16 @@ applyAndSend cfg appState shouldDebounce mbFocusSelector parentUuid mbEntityUuid
                 Nothing ->
                     Uuid.stepString seed2
 
+        -- The knowledge model itself has no parent: the server wants the nil
+        -- uuid there, not the empty string the parent map answers with.
         event =
             { uuid = eventUuid
-            , parentUuid = parentUuid
+            , parentUuid =
+                if String.isEmpty parentUuid then
+                    Uuid.toString Uuid.nil
+
+                else
+                    parentUuid
             , entityUuid = entityUuid
             , content = content
             , createdAt = appState.currentTime
