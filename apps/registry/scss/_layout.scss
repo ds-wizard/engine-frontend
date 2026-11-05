@@ -1,0 +1,105 @@
+// The registry's frame (`Registry.Layout`): a bar across the top with the
+// brand, the navigation and the account, and under it the page filling the rest
+// of the window, as `.ui-public--region` lays it out. The window never scrolls;
+// the page inside does, where it wants to.
+
+.registry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  block-size: 100vh;
+  overflow: clip;
+  background: var(--ui-surface);
+}
+
+// The bar: brand, navigation and account on one row, each centered on it.
+.registry__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  column-gap: var(--ui-space-7);
+  min-block-size: 3.5rem;
+  padding-inline: var(--ui-space-6);
+  border-block-end: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface);
+}
+
+.registry__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  color: var(--ui-text);
+  font-family: var(--ui-font-display);
+  font-size: var(--ui-text-subtitle);
+  font-weight: var(--ui-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.registry__logo {
+  display: block;
+  block-size: 1.75rem;
+  inline-size: auto;
+}
+
+// The navigation is the design system's tabs (`Ui.NavTabs`), as on a project's
+// page: each tab as tall as the bar, so the line under the current one sits on
+// the bar's bottom edge, and no border of their own, since the bar has one.
+.registry__nav {
+  display: flex;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+
+  .ui-tabs {
+    min-inline-size: 0;
+    border-block-end: none;
+  }
+
+  .ui-tabs__tab {
+    min-block-size: 3.5rem;
+    padding-inline: var(--ui-space-4);
+  }
+}
+
+.registry__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-space-2);
+  margin-inline-start: auto;
+}
+
+.registry__main {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-block-size: 0;
+  min-inline-size: 0;
+  // The templates stack by the room they have, as in the shell.
+  container: ui-main / inline-size;
+
+  &:focus-visible {
+    outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+    outline-offset: calc(var(--ui-focus-ring-offset) * -1);
+  }
+}
+
+// Signing in, signing up, a forgotten password: a panel in the middle of the
+// page, scrolling on its own when the window is short.
+.registry__form {
+  overflow-y: auto;
+  padding: var(--ui-space-7) var(--ui-space-5);
+  background: var(--ui-frame);
+}
+
+.registry__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+  inline-size: 100%;
+  max-inline-size: 26rem;
+  margin-inline: auto;
+  padding: var(--ui-space-7);
+  border: 1px solid var(--ui-border-elevated);
+  border-radius: var(--ui-radius-large);
+  background: var(--ui-elevation-2-surface);
+  box-shadow: var(--ui-elevation-2);
+}

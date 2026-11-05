@@ -25,11 +25,10 @@ import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Navigation exposing (Key)
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.Token as Token
-import Common.Components.AppFrame as AppFrame
+import Common.Components.AboutModal as AboutModal
 import Common.Components.Page as Page
 import Common.Data.Session as Session
 import Common.Ports.Session as SessionPorts
-import Common.Ports.SideNav as SideNavPorts
 import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html)
@@ -55,7 +54,7 @@ import Registry.Pages.Users as Users
 import Registry.Routes as Routes exposing (Route)
 import Time
 import Ui.AppShell as AppShell
-import Ui.Theme as Theme
+import Ui.Menu as Menu
 import Url exposing (Url)
 
 
@@ -95,7 +94,8 @@ type alias Model =
     { appState : AppState
     , route : Route
     , page : Page
-    , frame : AppFrame.Model
+    , userMenu : Menu.Model
+    , aboutModal : AboutModal.Model
 
     -- The address the registry was opened at, while the person signed in is
     -- still being asked for.
@@ -115,7 +115,8 @@ init flags url key =
             { appState = appState
             , route = Routes.NotFound
             , page = NotFoundPage
-            , frame = AppFrame.init { collapsed = appState.session.sidebarCollapsed, width = appState.sideNavWidth }
+            , userMenu = Menu.init
+            , aboutModal = AboutModal.initialModel
             , pendingUrl = Nothing
             , navigated = False
             , navigationId = 0
@@ -157,8 +158,9 @@ type Msg
     | FocusHeadingRetry Int AppShell.FocusRetry
     | GetCurrentUserCompleted (Result ApiError User)
     | Logout
-    | FrameMsg AppFrame.Msg
-    | SetMode Theme.Mode
+    | UserMenuMsg Menu.Msg
+    | OpenAbout
+    | AboutModalMsg AboutModal.Msg
     | ItemsMsg Items.Msg
     | ItemDetailMsg ItemDetail.Msg
     | LoginMsg Login.Msg
@@ -183,7 +185,7 @@ update msg model =
                     model.navigationId + 1
 
                 ( newModel, pageCmd ) =
-                    goTo url { model | navigationId = navigationId }
+                    goTo url { model | navigationId = navigationId, userMenu = Menu.init }
 
                 focusCmd =
                     -- After every navigation but the first, a redirect included:
@@ -251,21 +253,18 @@ update msg model =
         ( Logout, _ ) ->
             ( model, Cmd.batch [ SessionPorts.clearSession (), Navigation.load (Routes.toUrl Routes.Home) ] )
 
-        ( FrameMsg frameMsg, _ ) ->
+        ( UserMenuMsg menuMsg, _ ) ->
             let
-                ( frame, cmd ) =
-                    AppFrame.update
-                        { storeCollapsed = storeCollapsed model
-                        , storeWidth = \width -> SideNavPorts.uiStoreSideNav { collapsed = AppFrame.isCollapsed model.frame, width = width }
-                        , toMsg = FrameMsg
-                        }
-                        frameMsg
-                        model.frame
+                ( userMenu, cmd ) =
+                    Menu.update Layout.userMenuId (Layout.userMenuCount model.appState) menuMsg model.userMenu
             in
-            ( { model | frame = frame }, cmd )
+            ( { model | userMenu = userMenu }, Cmd.map UserMenuMsg cmd )
 
-        ( SetMode mode, _ ) ->
-            ( updateAppState (\appState -> { appState | uiMode = mode }) model, Theme.setMode mode )
+        ( OpenAbout, _ ) ->
+            updateAboutModal AboutModal.open model
+
+        ( AboutModalMsg aboutMsg, _ ) ->
+            updateAboutModal aboutMsg model
 
         ( ItemsMsg pageMsg, ItemsPage pageModel ) ->
             ( { model | page = ItemsPage (Items.update model.appState pageMsg pageModel) }, Cmd.none )
@@ -375,13 +374,13 @@ updateAppState f model =
     { model | appState = f model.appState }
 
 
-storeCollapsed : Model -> Bool -> Cmd Msg
-storeCollapsed model collapsed =
+updateAboutModal : AboutModal.Msg -> Model -> ( Model, Cmd Msg )
+updateAboutModal aboutMsg model =
     let
-        session =
-            model.appState.session
+        ( aboutModal, cmd ) =
+            AboutModal.update model.appState { getBuildInfo = Api.getBuildInfo model.appState } aboutMsg model.aboutModal
     in
-    SessionPorts.storeSession (Session.encode { session | sidebarCollapsed = collapsed })
+    ( { model | aboutModal = aboutModal }, Cmd.map AboutModalMsg cmd )
 
 
 focusRetryConfig : Int -> { onRetry : AppShell.FocusRetry -> Msg, onDone : Msg }
@@ -389,7 +388,8 @@ focusRetryConfig navigationId =
     { onRetry = FocusHeadingRetry navigationId, onDone = NoOp }
 
 
-{-| The page of an address. Someone signed in is sent home from the pages for
+{-| The page of an address. An address from before accounts is sent where it
+went (`Routes.redirect`). Someone signed in is sent home from the pages for
 signing in; someone not signed in is sent to log in from a page that needs an
 account, and brought back afterwards.
 -}
@@ -402,11 +402,25 @@ goTo url model =
         route =
             Routes.parse appState url
 
-        signedIn =
-            AppState.isSignedIn appState
-
         withPage page =
             { model | route = route, page = page }
+    in
+    case Routes.redirect url of
+        Just target ->
+            ( model, Navigation.replaceUrl appState.key target )
+
+        Nothing ->
+            goToRoute url route model withPage
+
+
+goToRoute : Url -> Route -> Model -> (Page -> Model) -> ( Model, Cmd Msg )
+goToRoute url route model withPage =
+    let
+        appState =
+            model.appState
+
+        signedIn =
+            AppState.isSignedIn appState
     in
     if signedIn && Routes.isPublicOnly route then
         ( model, Navigation.replaceUrl appState.key (Routes.toUrl Routes.Home) )
@@ -481,11 +495,15 @@ stripOrigin url =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    if AppState.isSignedIn model.appState then
-        Sub.map FrameMsg (AppFrame.subscriptions model.frame)
+    Sub.batch
+        [ Sub.map UserMenuMsg (Menu.subscriptions Layout.userMenuId model.userMenu)
+        , case model.page of
+            ItemDetailPage pageModel ->
+                Sub.map ItemDetailMsg (ItemDetail.subscriptions pageModel)
 
-    else
-        Sub.none
+            _ ->
+                Sub.none
+        ]
 
 
 
@@ -499,7 +517,11 @@ view model =
             model.appState
 
         documentTitle pageTitle =
-            pageTitle ++ " | " ++ gettext "Registry" appState.locale
+            if pageTitle == appState.appTitle then
+                pageTitle
+
+            else
+                pageTitle ++ " | " ++ appState.appTitle
     in
     if not appState.valid then
         { title = gettext "Configuration Error" appState.locale
@@ -507,7 +529,7 @@ view model =
         }
 
     else if Maybe.isJust model.pendingUrl then
-        { title = gettext "Registry" appState.locale
+        { title = appState.appTitle
         , body = [ Page.loading appState ]
         }
 
@@ -536,7 +558,7 @@ view model =
         case formPage of
             Just page ->
                 { title = documentTitle page.title
-                , body = [ Layout.form appState page ]
+                , body = [ Layout.form appState (layoutConfig model) page, viewAboutModal model ]
                 }
 
             Nothing ->
@@ -544,7 +566,7 @@ view model =
                     content =
                         case model.page of
                             HomePage ->
-                                ( gettext "Registry" appState.locale, Home.view appState )
+                                ( appState.appTitle, Home.view appState )
 
                             ItemsPage pageModel ->
                                 ( kindTitle appState pageModel.kind, Html.map ItemsMsg (Items.view appState pageModel) )
@@ -572,20 +594,30 @@ view model =
                 in
                 { title = documentTitle pageTitle
                 , body =
-                    [ if AppState.isSignedIn appState then
-                        Layout.signedIn appState
-                            { frame = model.frame
-                            , frameMsg = FrameMsg
-                            , setMode = SetMode
-                            , logoutMsg = Logout
-                            , route = model.route
-                            }
-                            [ html ]
-
-                      else
-                        Layout.browse appState [ html ]
-                    ]
+                    [ Layout.view appState (layoutConfig model) { content = [ html ], overlays = [ viewAboutModal model ] } ]
                 }
+
+
+layoutConfig : Model -> Layout.Config Msg
+layoutConfig model =
+    { route = model.route
+    , userMenu = model.userMenu
+    , userMenuMsg = UserMenuMsg
+    , openAbout = OpenAbout
+    , logout = Logout
+    }
+
+
+viewAboutModal : Model -> Html Msg
+viewAboutModal model =
+    AboutModal.view model.appState
+        { appTitle = Nothing
+        , apiUrl = model.appState.apiUrl
+        , swaggerUrl = Just (model.appState.apiUrl ++ "/swagger-ui/")
+        , plugins = []
+        , toMsg = AboutModalMsg
+        }
+        model.aboutModal
 
 
 mapForm : (msg -> Msg) -> { title : String, content : List (Html msg) } -> { title : String, content : List (Html Msg) }

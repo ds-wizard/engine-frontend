@@ -35,13 +35,13 @@ type alias AppState =
     , apiUrl : String
     , session : Session
     , config : BootstrapConfig
+    , appTitle : String
     , valid : Bool
     , locale : Gettext.Locale
     , navigator : Navigator
     , currentTime : Time.Posix
     , timeZone : Time.Zone
     , uiMode : Theme.Mode
-    , sideNavWidth : Maybe Float
     , user : Maybe User
     }
 
@@ -49,9 +49,9 @@ type alias AppState =
 type alias Flags =
     { apiUrl : String
     , config : BootstrapConfig
+    , appTitle : Maybe String
     , session : Maybe Session
     , navigator : Navigator
-    , sideNavWidth : Maybe Float
     , uiMode : Maybe String
     }
 
@@ -61,9 +61,9 @@ flagsDecoder =
     D.succeed Flags
         |> D.required "apiUrl" D.string
         |> D.required "config" BootstrapConfig.decoder
+        |> D.optional "appTitle" (D.maybe D.string) Nothing
         |> D.required "session" (D.nullable Session.decoder)
         |> D.required "navigator" Navigator.decoder
-        |> D.optional "sideNavWidth" (D.maybe D.float) Nothing
         |> D.optional "uiMode" (D.maybe D.string) Nothing
 
 
@@ -82,13 +82,13 @@ init flagsValue key =
             , apiUrl = flags.apiUrl
             , session = Maybe.withDefault (Session.init flags.apiUrl) flags.session
             , config = flags.config
+            , appTitle = Maybe.withDefault defaultAppTitle (Maybe.andThen String.toMaybe flags.appTitle)
             , valid = True
             , locale = Gettext.defaultLocale
             , navigator = flags.navigator
             , currentTime = Time.millisToPosix 0
             , timeZone = Time.utc
             , uiMode = modeFromFlag flags.uiMode
-            , sideNavWidth = flags.sideNavWidth
             , user = Nothing
             }
 
@@ -101,15 +101,23 @@ init flagsValue key =
             , apiUrl = apiUrl
             , session = Session.init apiUrl
             , config = BootstrapConfig.default
+            , appTitle = defaultAppTitle
             , valid = False
             , locale = Gettext.defaultLocale
             , navigator = Navigator.default
             , currentTime = Time.millisToPosix 0
             , timeZone = Time.utc
             , uiMode = Theme.System
-            , sideNavWidth = Nothing
             , user = Nothing
             }
+
+
+{-| The registry's name where the deployment gives none (`appTitle` in
+`config.js`, which the image writes from `APP_TITLE`).
+-}
+defaultAppTitle : String
+defaultAppTitle =
+    "DSW Registry"
 
 
 modeFromFlag : Maybe String -> Theme.Mode

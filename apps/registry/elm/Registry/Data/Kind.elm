@@ -1,17 +1,25 @@
 module Registry.Data.Kind exposing
-    ( all
+    ( Section
     , count
     , description
-    , icon
     , idLabel
     , isTranslation
     , nothingPublished
+    , sections
+    , tabTitle
     , title
+    , translations
+    , translationsDescription
+    , translationsTitle
     , unableToGet
     )
 
 {-| The words and the icon of each kind of thing the registry publishes. The
 msgids are the client's where they say the same.
+
+The two kinds of translations are one place, Translations, with Application and
+Emails in it, as in a wizard's settings.
+
 -}
 
 import Gettext exposing (gettext, ngettext)
@@ -33,6 +41,67 @@ all appState =
             else
                 []
            )
+
+
+{-| The kinds of translations this registry offers, in the order of their tabs.
+-}
+translations : AppState -> List Kind
+translations appState =
+    List.filter isTranslation (all appState)
+
+
+{-| The registry's places, on the home page and in the navigation: knowledge
+models, document templates and, where the registry has them, translations,
+which open on their first kind. `kinds` are what a place holds, so the
+navigation knows where a page belongs.
+-}
+type alias Section =
+    { title : String
+    , description : String
+    , icon : Icon
+    , kind : Kind
+    , kinds : List Kind
+    , testId : String
+    }
+
+
+sections : AppState -> List Section
+sections appState =
+    let
+        one kind testId =
+            { title = title appState kind
+            , description = description appState kind
+            , icon = icon kind
+            , kind = kind
+            , kinds = [ kind ]
+            , testId = testId
+            }
+    in
+    [ one KnowledgeModel "knowledge-models", one DocumentTemplate "document-templates" ]
+        ++ (case translations appState of
+                first :: _ ->
+                    [ { title = translationsTitle appState
+                      , description = translationsDescription appState
+                      , icon = Icon.solid "fa-language"
+                      , kind = first
+                      , kinds = translations appState
+                      , testId = "translations"
+                      }
+                    ]
+
+                [] ->
+                    []
+           )
+
+
+translationsTitle : AppState -> String
+translationsTitle appState =
+    gettext "Translations" appState.locale
+
+
+translationsDescription : AppState -> String
+translationsDescription appState =
+    gettext "Adapt the user interface and the emails to different languages for a more inclusive experience." appState.locale
 
 
 {-| Translations are a language and a version, with no page of their own.
@@ -60,10 +129,25 @@ title appState kind =
             gettext "Document Templates" appState.locale
 
         Locale ->
-            gettext "Locales" appState.locale
+            gettext "Application Translations" appState.locale
 
         MailTemplateLocale ->
-            gettext "Mail Translations" appState.locale
+            gettext "Email Translations" appState.locale
+
+
+{-| A translation's tab under Translations.
+-}
+tabTitle : AppState -> Kind -> String
+tabTitle appState kind =
+    case kind of
+        MailTemplateLocale ->
+            gettext "Emails" appState.locale
+
+        Locale ->
+            gettext "Application" appState.locale
+
+        _ ->
+            title appState kind
 
 
 description : AppState -> Kind -> String
@@ -124,10 +208,10 @@ unableToGet appState kind =
             gettext "Unable to get document templates." appState.locale
 
         Locale ->
-            gettext "Unable to get locales." appState.locale
+            gettext "Unable to get application translations." appState.locale
 
         MailTemplateLocale ->
-            gettext "Unable to get mail translations." appState.locale
+            gettext "Unable to get email translations." appState.locale
 
 
 nothingPublished : AppState -> Kind -> String
@@ -140,10 +224,10 @@ nothingPublished appState kind =
             gettext "No document templates are published yet." appState.locale
 
         Locale ->
-            gettext "No locales are published yet." appState.locale
+            gettext "No application translations are published yet." appState.locale
 
         MailTemplateLocale ->
-            gettext "No mail translations are published yet." appState.locale
+            gettext "No email translations are published yet." appState.locale
 
 
 count : AppState -> Kind -> Int -> String
@@ -158,9 +242,9 @@ count appState kind n =
                     ( "%s document template", "%s document templates" )
 
                 Locale ->
-                    ( "%s locale", "%s locales" )
+                    ( "%s application translation", "%s application translations" )
 
                 MailTemplateLocale ->
-                    ( "%s mail translation", "%s mail translations" )
+                    ( "%s email translation", "%s email translations" )
     in
     String.format (ngettext msgids n appState.locale) [ String.fromInt n ]

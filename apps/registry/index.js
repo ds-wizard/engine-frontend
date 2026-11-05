@@ -3,8 +3,8 @@
 // The registry's web client, on the design system. It asks the registry what it
 // offers (`/bootstrap`), applies the stylesheet, and starts the Elm
 // program with the flags `Registry.Data.AppState` reads. The ports are the
-// shared ones it uses: the session, the appearance, the navigation's width,
-// copying, and the form and focus helpers.
+// shared ones it uses: the session, the appearance, copying, and the form and
+// focus helpers.
 
 const axios = require('axios').default
 const axiosRetry = require('axios-retry').default
@@ -16,7 +16,6 @@ const registerCommonFormPorts = require('../../packages/elm-common/js/ports/form
 const registerConsolePorts = require('../../packages/elm-common/js/ports/console')
 const registerUiCopyPort = require('../../packages/elm-ui/js/copy')
 const registerUiThemePorts = require('../../packages/elm-ui/js/theme')
-const sideNavStorage = require('../../packages/elm-ui/js/side-nav-storage')
 
 require('../../packages/elm-ui/js/ui-dialog')
 require('../../packages/elm-ui/js/tooltip')
@@ -77,14 +76,16 @@ function start(config) {
     // A session of another API is not this registry's.
     const ownSession = session && session.apiUrl === apiUrl() ? session : null
 
+    // The loader goes before the program takes the body over.
+    document.body.innerHTML = ''
     const elmApp = program.Elm.Registry.init({
         node: document.body,
         flags: {
             apiUrl: apiUrl(),
+            appTitle: (window.app && window.app.appTitle) || null,
             config: config,
             session: ownSession,
             navigator: createNavigatorData(),
-            sideNavWidth: sideNavStorage.read().sideNavWidth,
             uiMode: readUiMode()
         }
     })
@@ -96,11 +97,11 @@ function start(config) {
     registerSessionPorts(app)
     registerUiCopyPort(app)
     registerUiThemePorts(app)
-    sideNavStorage.register(app)
 }
 
 function startWithoutConfig() {
     // The program says the registry cannot start: flags it cannot read.
+    document.body.innerHTML = ''
     program.Elm.Registry.init({node: document.body, flags: {apiUrl: apiUrl()}})
 }
 

@@ -86,7 +86,7 @@ detailDecoder kind =
                     D.map (Just << String.fromInt) (D.field "metamodelVersion" D.int)
 
                 DocumentTemplate ->
-                    D.map (Just << Version.toString) (D.field "metamodelVersion" Version.decoder)
+                    D.map Just (D.field "metamodelVersion" D.string)
 
                 _ ->
                     D.succeed Nothing

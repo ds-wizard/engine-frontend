@@ -2,6 +2,7 @@ module Registry.Pages.ItemDetail exposing
     ( Model
     , Msg
     , init
+    , subscriptions
     , update
     , view
     )
@@ -90,6 +91,14 @@ update appState msg model =
             ( { model | resizer = Resizer.update resizerMsg model.resizer }, Cmd.none )
 
 
+{-| Dragging the side panel's edge, which follows the pointer across the
+whole window.
+-}
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map ResizerMsg (Resizer.subscriptions model.resizer)
+
+
 view : AppState -> Model -> Html Msg
 view appState model =
     case model.item of
@@ -145,8 +154,7 @@ viewItem appState model item =
 
         identifierSection =
             DetailPage.sectionHtml (Kind.idLabel appState model.kind)
-                [ Text.code reference
-                , Copyable.button appState
+                [ Copyable.inline appState
                     { key = "reference"
                     , label = gettext "Copy the identifier" appState.locale
                     , value = reference

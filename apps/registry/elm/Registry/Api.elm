@@ -2,6 +2,7 @@ module Registry.Api exposing
     ( deleteApiKey
     , deleteUser
     , getApiKeys
+    , getBuildInfo
     , getCurrentUser
     , getItem
     , getItems
@@ -15,7 +16,6 @@ module Registry.Api exposing
     , putCurrentUser
     , putPassword
     , putUserActivation
-    , putUserState
     , translationPoUrl
     )
 
@@ -27,6 +27,8 @@ accounts an administrator manages need the session's token, which
 
 -}
 
+import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
 import Json.Decode.Extra as D
@@ -37,6 +39,17 @@ import Registry.Api.Models.User as User exposing (ApiKey, User)
 import Registry.Data.AppState as AppState exposing (AppState)
 import Time
 import Uuid exposing (Uuid)
+
+
+
+-- THE SERVER
+
+
+{-| Which version of the registry's server is running, for the About dialog.
+-}
+getBuildInfo : AppState -> ToMsg BuildInfo msg -> Cmd msg
+getBuildInfo appState =
+    Request.get (AppState.toServerInfo appState) "" BuildInfo.decoder
 
 
 
@@ -89,7 +102,8 @@ translationPoUrl appState kind translation =
 -- SIGNING IN AND THE ACCOUNT
 
 
-{-| The session's token and when it ends.
+{-| The session's token and when it ends. A token without an end is kept as
+one that ends in the distant future.
 -}
 postToken : AppState -> { email : String, password : String } -> ToMsg { token : String, expiresAt : Time.Posix } msg -> Cmd msg
 postToken appState credentials =
@@ -103,9 +117,15 @@ postToken appState credentials =
         decoder =
             D.map2 (\token expiresAt -> { token = token, expiresAt = expiresAt })
                 (D.field "token" D.string)
-                (D.field "expiresAt" D.datetime)
+                (D.field "expiresAt" (D.map (Maybe.withDefault never) (D.nullable D.datetime)))
     in
     Request.post (AppState.toServerInfo appState) "/tokens" decoder body
+
+
+never : Time.Posix
+never =
+    -- 9999-12-31
+    Time.millisToPosix 253402214400000
 
 
 postUser : AppState -> { email : String, firstName : String, lastName : String, password : String } -> ToMsg () msg -> Cmd msg
@@ -134,7 +154,7 @@ postForgottenPassword : AppState -> String -> ToMsg () msg -> Cmd msg
 postForgottenPassword appState email =
     Request.postWhatever (AppState.toServerInfo appState)
         "/user-email-links"
-        (E.object [ ( "type", E.string "ForgottenPasswordUserEmailLink" ), ( "email", E.string email ) ])
+        (E.object [ ( "type", E.string "ForgottenPasswordUserEmailLinkType" ), ( "email", E.string email ) ])
 
 
 {-| The link in the e-mail sent for a forgotten password.
@@ -192,16 +212,18 @@ deleteApiKey appState uuid =
 -- ACCOUNTS, FOR AN ADMINISTRATOR
 
 
-getUsers : AppState -> ToMsg (List User) msg -> Cmd msg
-getUsers appState =
-    Request.get (AppState.toServerInfo appState) "/users" (D.list User.decoder)
+{-| One page of the accounts, by e-mail, the first page being 0.
+-}
+getUsers : AppState -> Int -> ToMsg (Pagination User) msg -> Cmd msg
+getUsers appState page =
+    Request.get (AppState.toServerInfo appState)
+        ("/users?sort=email,asc&size=" ++ String.fromInt usersPageSize ++ "&page=" ++ String.fromInt page)
+        (Pagination.decoder "users" User.decoder)
 
 
-putUserState : AppState -> Uuid -> Bool -> ToMsg () msg -> Cmd msg
-putUserState appState uuid active =
-    Request.putWhatever (AppState.toServerInfo appState)
-        ("/users/" ++ Uuid.toString uuid ++ "/state")
-        (E.object [ ( "active", E.bool active ) ])
+usersPageSize : Int
+usersPageSize =
+    20
 
 
 deleteUser : AppState -> Uuid -> ToMsg () msg -> Cmd msg

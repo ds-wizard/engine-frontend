@@ -13,7 +13,8 @@ the server nothing.
 
 Knowledge models and templates come newest first, narrowed by name, id or
 description, each linking to its page. Translations come by name, narrowed by
-name or language code, each with its PO file to download.
+name or language code, each with its PO file to download; the two kinds are tabs
+of one Translations page, Application and Emails, as in a wizard's settings.
 
 -}
 
@@ -36,8 +37,10 @@ import Ui.Button as Button
 import Ui.EmptyState as EmptyState
 import Ui.Field as Field
 import Ui.Illustration as Illustration
+import Ui.Layout as Layout
 import Ui.Link as Link
 import Ui.ListItem as ListItem
+import Ui.NavTabs as NavTabs
 import Ui.Page.List as ListPage
 import Ui.Text as Text
 import Version
@@ -140,16 +143,44 @@ viewList appState model searched viewOne items =
 
                 else
                     [ ListItem.list (List.map viewOne shown) ]
+
+        ( pageTitle, pageDescription, toolbar ) =
+            if Kind.isTranslation model.kind then
+                ( Kind.translationsTitle appState
+                , Kind.translationsDescription appState
+                , Layout.stack [ viewTranslationTabs appState model.kind, filterField ]
+                )
+
+            else
+                ( Kind.title appState model.kind, Kind.description appState model.kind, filterField )
     in
     ListPage.list
-        { title = Kind.title appState model.kind
-        , toolbar = filterField
+        { title = pageTitle
+        , toolbar = toolbar
         , content = content
         }
-        |> ListPage.withDescription (Kind.description appState model.kind)
+        |> ListPage.withDescription pageDescription
         -- Said when the list arrives, not on every keystroke of the search.
         |> ListPage.withStatus (Kind.count appState model.kind (List.length items))
         |> ListPage.toHtml
+
+
+viewTranslationTabs : AppState -> Kind -> Html msg
+viewTranslationTabs appState current =
+    let
+        tab kind =
+            NavTabs.item
+                { label = Kind.tabTitle appState kind
+                , url = Routes.toUrl (Routes.Items kind)
+                , active = kind == current
+                }
+                |> NavTabs.withTestId ("translations-tab_" ++ Routes.kindSegment kind)
+    in
+    NavTabs.toHtml
+        { label = Kind.translationsTitle appState
+        , items = List.map tab (Kind.translations appState)
+        , full = False
+        }
 
 
 viewItem : AppState -> Kind -> Item -> ListItem.ListItem Msg

@@ -4,6 +4,7 @@ module Registry.Routes exposing
     , isPublicOnly
     , kindSegment
     , parse
+    , redirect
     , toUrl
     )
 
@@ -14,6 +15,9 @@ and `/mail-template-locales`; one version of a knowledge model or a template at
 `/<kind>/<id>:<version>`, which is also how a wizard asks for it. A
 translation has no page of its own. The links the registry e-mails are `/signup/<user>/<hash>`
 and `/forgotten-password/<user>/<hash>`.
+
+The addresses of the registry before accounts still lead somewhere
+(`redirect`).
 
 -}
 
@@ -87,6 +91,61 @@ parser appState =
             ++ signup
             ++ List.concatMap itemRoutes kinds
         )
+
+
+{-| Where an address the registry had before accounts went is now: templates
+were at `/templates`, an item's identifier had the organization in it
+(`org:item:version`, now `org.item:version`, as the server reads it), locales
+had a page each, an organization recovered its token at `/forgotten-token` and
+edited itself at `/organization`.
+-}
+redirect : Url -> Maybe String
+redirect url =
+    case List.filter (not << String.isEmpty) (String.split "/" url.path) of
+        [ "templates" ] ->
+            Just "/document-templates"
+
+        [ "templates", ref ] ->
+            Just ("/document-templates/" ++ withoutOrganization ref)
+
+        [ "forgotten-token" ] ->
+            Just "/forgotten-password"
+
+        [ "organization" ] ->
+            Just "/account"
+
+        [ "locales", _ ] ->
+            Just "/locales"
+
+        [ segment, ref ] ->
+            if (segment == "knowledge-models" || segment == "document-templates") && isLegacyReference ref then
+                Just ("/" ++ segment ++ "/" ++ withoutOrganization ref)
+
+            else
+                Nothing
+
+        _ ->
+            Nothing
+
+
+isLegacyReference : String -> Bool
+isLegacyReference ref =
+    List.length (String.split ":" (decoded ref)) == 3
+
+
+withoutOrganization : String -> String
+withoutOrganization ref =
+    case String.split ":" (decoded ref) of
+        [ organizationId, itemId, version ] ->
+            organizationId ++ "." ++ itemId ++ ":" ++ version
+
+        _ ->
+            ref
+
+
+decoded : String -> String
+decoded segment =
+    Maybe.withDefault segment (Url.percentDecode segment)
 
 
 {-| An `id:version`, percent-decoded: a version is digits and dots, an id
