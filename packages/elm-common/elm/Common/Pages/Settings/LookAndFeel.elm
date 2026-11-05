@@ -108,7 +108,7 @@ formView appState form =
         Layout.stack
             [ Field.input appState form "appTitle" (gettext "Application Title" appState.locale)
                 |> Field.withPlaceholder appState.config.lookAndFeel.defaultAppTitle
-                |> Field.withHint (gettext "Name of the DSW instance (displayed, for example, in the browser tab title, before login or on top of the navigation bar)." appState.locale)
+                |> Field.withHint (gettext "Name of the instance (displayed, for example, in the browser tab title, before login or on top of the navigation bar)." appState.locale)
                 |> Field.toHtml
             , Field.color appState form "stylePrimaryColor" (gettext "Primary Color" appState.locale)
                 |> Field.withSwatches ColorPalette.accents

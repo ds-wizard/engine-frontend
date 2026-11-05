@@ -150,8 +150,11 @@ connectRegistry appState =
         (AppState.userHasPerm RolePermission.settingsManage appState
             && not (RegistryConfig.isEnabled appState.config.registry)
         )
-        { title = gettext "Connect to DSW Registry" appState.locale
-        , text = gettext "[DSW Registry](https://registry.ds-wizard.org) is a place for published knowledge models and document templates. When you connect your instance, data stewards can easily import them." appState.locale
+        { title = String.format (gettext "Connect to %s" appState.locale) [ appState.clientDefaults.registryName ]
+        , text =
+            String.format
+                (gettext "[%s](%s) is a place for published knowledge models and document templates. When you connect your instance, data stewards can easily import them." appState.locale)
+                [ appState.clientDefaults.registryName, appState.clientDefaults.registryUrl ]
         , label = gettext "Connect" appState.locale
         , route = Routes.settingsRegistry
         }

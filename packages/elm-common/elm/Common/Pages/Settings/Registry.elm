@@ -20,6 +20,7 @@ import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html)
+import String.Format as String
 import Ui.Form as UiForm
 import Ui.Layout as Layout
 
@@ -62,7 +63,7 @@ subscriptions =
 view : AppState -> Model -> { body : List (Html Msg), footer : Maybe (Html Msg) }
 view appState =
     SettingsPage.view appState
-        { title = gettext "DSW Registry" appState.locale
+        { title = gettext "Registry" appState.locale
         , description = Nothing
         , guideLink = Just (Section.guideLink appState GuideLinks.settingsRegistry)
         , formView = formView appState
@@ -80,7 +81,7 @@ formView appState form =
             if enabled then
                 [ UiForm.nested
                     [ Field.secret appState form "apiKey" (gettext "API Key" appState.locale)
-                        |> Field.withHintMarkdown (gettext "Fill in an API key of your DSW Registry account. You can create one after signing in to [DSW Registry](https://registry.ds-wizard.org)." appState.locale)
+                        |> Field.withHintMarkdown (String.format (gettext "Fill in an API key of your %s account. You can create one after signing in to [%s](%s)." appState.locale) [ appState.clientDefaults.registryName, appState.clientDefaults.registryName, appState.clientDefaults.registryUrl ])
                         |> Field.toHtml
                     ]
                 ]
@@ -91,7 +92,7 @@ formView appState form =
     Html.map SettingsPage.formMsg <|
         Layout.stack
             ((Field.toggle appState form "enabled" (gettext "Enabled" appState.locale)
-                |> Field.withHintMarkdown (gettext "If enabled, you can import knowledge models and document templates directly from [DSW Registry](https://registry.ds-wizard.org)." appState.locale)
+                |> Field.withHintMarkdown (String.format (gettext "If enabled, you can import knowledge models and document templates directly from [%s](%s)." appState.locale) [ appState.clientDefaults.registryName, appState.clientDefaults.registryUrl ])
                 |> Field.toHtml
              )
                 :: apiKeyInput

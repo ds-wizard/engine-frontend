@@ -22,6 +22,7 @@ list something fetch it on `init`. It starts the dashboard tour.
 -}
 
 import Common.Api.Models.Announcement exposing (Announcement)
+import Common.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Common.Components.Announcements as Announcements
 import Common.Components.Tour as Tour
 import Common.Data.AppState exposing (AppState)
@@ -91,7 +92,7 @@ tour appState =
     let
         firstStep =
             { element = Tour.centered
-            , title = gettext "Welcome to Data Stewardship Wizard" appState.locale
+            , title = String.format (gettext "Welcome to %s" appState.locale) [ LookAndFeelConfig.getAppTitle appState.config.lookAndFeel ]
             , description = gettext "We'll guide you through creating your data management plan." appState.locale
             }
 

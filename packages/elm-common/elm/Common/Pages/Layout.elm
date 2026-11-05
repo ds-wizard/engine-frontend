@@ -327,7 +327,7 @@ pageName appState route =
                         gettext "Look & Feel" l
 
                     SettingsRoutes.RegistryRoute ->
-                        gettext "DSW Registry" l
+                        gettext "Registry" l
 
                     SettingsRoutes.ProjectsRoute ->
                         gettext "Projects" l

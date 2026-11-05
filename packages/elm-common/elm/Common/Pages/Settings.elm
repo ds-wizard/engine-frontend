@@ -636,7 +636,7 @@ navigationAt mount appState active =
                         []
                    )
                 ++ (if Feature.registry appState then
-                        [ ( RegistryRoute, gettext "DSW Registry" appState.locale, is RegistryRoute ) ]
+                        [ ( RegistryRoute, gettext "Registry" appState.locale, is RegistryRoute ) ]
 
                     else
                         []
