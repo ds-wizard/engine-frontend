@@ -23,7 +23,6 @@ import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Form.Field
-import Gettext exposing (gettext)
 import Html exposing (Html)
 import Maybe.Extra as Maybe
 import String.Normalize as Normalize
@@ -70,7 +69,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model
-                        | savingTenant = ApiError.toActionResult appState (gettext "Tenant could not be created." appState.locale) error
+                        | savingTenant = ApiError.toActionResult appState "Tenant could not be created." error
                         , form = FormUtils.setFormErrors appState error model.form
                       }
                     , Cmd.batch
@@ -127,17 +126,17 @@ view appState model =
                 |> Html.map FormMsg
     in
     FormLayout.createPage appState
-        { title = gettext "Create Tenant" appState.locale
+        { title = "Create Tenant"
         , description = Nothing
         , actions = []
         , content =
-            [ field Field.input "tenantName" (gettext "Name" appState.locale)
-            , field Field.input "tenantId" (gettext "Tenant ID" appState.locale)
-            , field Field.email "email" (gettext "Email" appState.locale)
-            , field Field.input "firstName" (gettext "First name" appState.locale)
-            , field Field.input "lastName" (gettext "Last name" appState.locale)
+            [ field Field.input "tenantName" "Name"
+            , field Field.input "tenantId" "Tenant ID"
+            , field Field.email "email" "Email"
+            , field Field.input "firstName" "First name"
+            , field Field.input "lastName" "Last name"
             ]
-        , submitLabel = gettext "Create" appState.locale
+        , submitLabel = "Create"
         , result = model.savingTenant
         , onSubmit = FormMsg Form.Submit
         , onCancel = Just Cancel

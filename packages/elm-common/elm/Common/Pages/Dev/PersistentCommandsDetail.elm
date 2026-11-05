@@ -26,7 +26,6 @@ import Common.Routes as Routes
 import Common.Utils.JsonUtils as JsonUtils
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.TimeUtils as TimeUtils
-import Gettext exposing (gettext)
 import Html exposing (Html)
 import List.Extra as List
 import String.Format as String
@@ -99,7 +98,7 @@ update cfg appState msg model =
                         )
 
                     else
-                        ( { model | persistentCommand = ApiError.toActionResult appState (gettext "Unable to get persistent command." appState.locale) error }
+                        ( { model | persistentCommand = ApiError.toActionResult appState "Unable to get persistent command." error }
                         , RequestHelpers.getResultCmd cfg.logoutMsg result
                         )
 
@@ -123,12 +122,12 @@ update cfg appState msg model =
         RerunCommandComplete result ->
             case result of
                 Ok _ ->
-                    ( { model | updating = Success (gettext "Persistent command has been scheduled for the rerun." appState.locale) }
+                    ( { model | updating = Success "Persistent command has been scheduled for the rerun." }
                     , Cmd.none
                     )
 
                 Err error ->
-                    ( { model | updating = ApiError.toActionResult appState (gettext "Unable to rerun persistent command." appState.locale) error }
+                    ( { model | updating = ApiError.toActionResult appState "Unable to rerun persistent command." error }
                     , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
@@ -144,13 +143,13 @@ update cfg appState msg model =
                         Ok _ ->
                             ( { model
                                 | persistentCommand = Success { persistentCommand | state = PersistentCommandState.Ignore }
-                                , updating = Success (gettext "Persistent command is now being ignored." appState.locale)
+                                , updating = Success "Persistent command is now being ignored."
                               }
                             , Cmd.none
                             )
 
                         Err error ->
-                            ( { model | updating = ApiError.toActionResult appState (gettext "Unable to set persistent command ignored." appState.locale) error }
+                            ( { model | updating = ApiError.toActionResult appState "Unable to set persistent command ignored." error }
                             , RequestHelpers.getResultCmd cfg.logoutMsg result
                             )
 
@@ -210,9 +209,9 @@ detailPage appState model persistentCommand =
         lastError =
             case persistentCommand.lastErrorMessage of
                 Just lastErrorMessage ->
-                    [ Text.title (gettext "Last Error Message" appState.locale)
+                    [ Text.title "Last Error Message"
                     , CodeBlock.toHtml
-                        { label = gettext "Last Error Message" appState.locale
+                        { label = "Last Error Message"
                         , language = ""
                         , value = lastErrorMessage
                         }
@@ -227,9 +226,9 @@ detailPage appState model persistentCommand =
             [ Layout.stack
                 (updatingResult
                     :: lastError
-                    ++ [ Text.title (gettext "Body" appState.locale)
+                    ++ [ Text.title "Body"
                        , CodeBlock.fill
-                            { label = gettext "Body" appState.locale
+                            { label = "Body"
                             , language = ""
                             , value = body
                             }
@@ -241,7 +240,7 @@ detailPage appState model persistentCommand =
         |> DetailPage.withBadges [ PersistentCommandBadge.badge appState persistentCommand.state ]
         |> DetailPage.withMoreActions
             { id = actionsMenuId
-            , label = String.format (gettext "Actions for %s" appState.locale) [ name ]
+            , label = String.format "Actions for %s" [ name ]
             , actions = detailActions appState persistentCommand
             , model = model.actionsMenu
             , toMsg = ActionsMenuMsg
@@ -281,14 +280,14 @@ sidePanelSections appState persistentCommand =
         lastTraceUuidSection =
             case persistentCommand.lastTraceUuid of
                 Just lastTraceUuid ->
-                    DetailPage.sectionHtml (gettext "Last Trace UUID" appState.locale)
+                    DetailPage.sectionHtml "Last Trace UUID"
                         [ Text.code (Uuid.toString lastTraceUuid) ]
 
                 Nothing ->
-                    DetailPage.sectionHtml (gettext "Last Trace UUID" appState.locale) []
+                    DetailPage.sectionHtml "Last Trace UUID" []
 
         createdBySection =
-            DetailPage.sectionHtml (gettext "Created by" appState.locale)
+            DetailPage.sectionHtml "Created by"
                 (case persistentCommand.createdBy of
                     Just createdBy ->
                         [ ListItem.list
@@ -310,21 +309,21 @@ sidePanelSections appState persistentCommand =
                         []
                 )
     in
-    [ DetailPage.section (gettext "Persistent Command" appState.locale)
+    [ DetailPage.section "Persistent Command"
         [ DescriptionList.entry
-            { term = gettext "Attempts" appState.locale
+            { term = "Attempts"
             , description = String.fromInt persistentCommand.attempts ++ "/" ++ String.fromInt persistentCommand.maxAttempts
             }
         , DescriptionList.entry
-            { term = gettext "Created at" appState.locale
+            { term = "Created at"
             , description = TimeUtils.toReadableDateTime appState.timeZone persistentCommand.createdAt
             }
         , DescriptionList.entry
-            { term = gettext "Updated at" appState.locale
+            { term = "Updated at"
             , description = TimeUtils.toReadableDateTime appState.timeZone persistentCommand.updatedAt
             }
         ]
-    , DetailPage.sectionHtml (gettext "Tenant" appState.locale) [ ListItem.list [ tenantItem ] ]
+    , DetailPage.sectionHtml "Tenant" [ ListItem.list [ tenantItem ] ]
     , lastTraceUuidSection
     , createdBySection
     ]

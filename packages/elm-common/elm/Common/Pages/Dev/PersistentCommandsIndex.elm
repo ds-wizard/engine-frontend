@@ -27,7 +27,6 @@ import Common.Pages.Dev.Routes exposing (persistentCommandIndexRouteStateFilterI
 import Common.Ports.Window as Window
 import Common.Routes as Routes
 import Common.Utils.RequestHelpers as RequestHelpers
-import Gettext exposing (gettext)
 import Html exposing (Html)
 import String.Format as String
 import Task.Extra as Task
@@ -100,7 +99,7 @@ update cfg appState msg model =
                     ( model, Window.refresh () )
 
                 Err error ->
-                    ( { model | updating = ApiError.toActionResult appState (gettext "Unable to retry all failed persistent commands." appState.locale) error }
+                    ( { model | updating = ApiError.toActionResult appState "Unable to retry all failed persistent commands." error }
                     , Cmd.batch
                         [ RequestHelpers.getResultCmd cfg.logoutMsg result
                         , ApiErrorAlert.focus (cfg.wrapMsg NoOp)
@@ -123,7 +122,7 @@ update cfg appState msg model =
                     ( model, Task.dispatch (cfg.wrapMsg (ListingMsg Listing.onAfterDelete)) )
 
                 Err error ->
-                    ( { model | updating = ApiError.toActionResult appState (gettext "Persistent command update failed." appState.locale) error }
+                    ( { model | updating = ApiError.toActionResult appState "Persistent command update failed." error }
                     , Cmd.batch
                         [ RequestHelpers.getResultCmd cfg.logoutMsg result
                         , ApiErrorAlert.focus (cfg.wrapMsg NoOp)
@@ -146,7 +145,7 @@ closeMenus cfg appState persistentCommands =
 listingUpdateConfig : UpdateConfig Msg msg -> AppState -> Listing.UpdateConfig PersistentCommand msg
 listingUpdateConfig cfg appState =
     { getRequest = PersistentCommandsApi.getPersistentCommands appState
-    , getError = gettext "Unable to get persistent commands." appState.locale
+    , getError = "Unable to get persistent commands."
     , wrapMsg = cfg.wrapMsg << ListingMsg
     , logoutMsg = cfg.logoutMsg
     , toUrl = \filters pqs -> Routes.toUrl appState (Routes.persistentCommandsIndexWithFilters filters pqs)
@@ -179,30 +178,30 @@ listingConfig : AppState -> Model -> Listing.ViewConfig PersistentCommand Msg
 listingConfig appState model =
     let
         retryFailedButton =
-            Button.secondary (gettext "Retry failed" appState.locale) RetryFailed
+            Button.secondary "Retry failed" RetryFailed
                 |> Button.withIcon (Icon.solid "fa-rotate")
                 |> Button.withLoading (ActionResult.isLoading model.updating)
     in
-    { title = gettext "Persistent Commands" appState.locale
+    { title = "Persistent Commands"
     , description = Nothing
     , breadcrumbs = Nothing
     , toolbarActions = [ retryFailedButton ]
-    , searchPlaceholder = gettext "Search commands..." appState.locale
-    , sortOptions = [ ( "createdAt", gettext "Created" appState.locale ) ]
+    , searchPlaceholder = "Search commands..."
+    , sortOptions = [ ( "createdAt", "Created" ) ]
     , filters =
         [ Listing.MultiFilter persistentCommandIndexRouteStateFilterId
-            { name = gettext "State" appState.locale
+            { name = "State"
             , options =
-                [ ( "NewPersistentCommandState", gettext "New" appState.locale )
-                , ( "DonePersistentCommandState", gettext "Done" appState.locale )
-                , ( "ErrorPersistentCommandState", gettext "Error" appState.locale )
-                , ( "IgnorePersistentCommandState", gettext "Ignore" appState.locale )
+                [ ( "NewPersistentCommandState", "New" )
+                , ( "DonePersistentCommandState", "Done" )
+                , ( "ErrorPersistentCommandState", "Error" )
+                , ( "IgnorePersistentCommandState", "Ignore" )
                 ]
             , maxVisibleValues = 2
             }
         ]
     , item = listingItem appState
-    , emptyTitle = gettext "There are no persistent commands" appState.locale
+    , emptyTitle = "There are no persistent commands"
     , emptyDescription = ""
     , wrapMsg = ListingMsg
     }
@@ -220,7 +219,7 @@ listingItem appState persistentCommand =
                 , title =
                     Link.link { label = name, url = Routes.toUrl appState (Routes.persistentCommandsDetail persistentCommand.uuid) }
                         |> Link.toHtml
-                , actionsLabel = String.format (gettext "Actions for %s" appState.locale) [ name ]
+                , actionsLabel = String.format "Actions for %s" [ name ]
                 }
 
         tenantFragment =
@@ -251,7 +250,7 @@ listingItem appState persistentCommand =
 
         attempts =
             Text.muted
-                (String.format (gettext "Attempts: %s/%s" appState.locale)
+                (String.format "Attempts: %s/%s"
                     [ String.fromInt persistentCommand.attempts, String.fromInt persistentCommand.maxAttempts ]
                 )
     in

@@ -20,7 +20,6 @@ import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Tenants.Routes exposing (indexRouteEnabledFilterId, indexRouteStatesFilterId)
 import Common.Routes as Routes
-import Gettext exposing (gettext)
 import Html exposing (Html)
 import String.Format as String
 import Ui.Badge as Badge
@@ -76,7 +75,7 @@ update cfg appState msg model =
 listingUpdateConfig : UpdateConfig Msg msg -> AppState -> Listing.UpdateConfig Tenant msg
 listingUpdateConfig cfg appState =
     { getRequest = TenantsApi.getTenants appState
-    , getError = gettext "Unable to get tenants." appState.locale
+    , getError = "Unable to get tenants."
     , wrapMsg = cfg.wrapMsg << ListingMsg
     , logoutMsg = cfg.logoutMsg
     , toUrl = \filters pqs -> Routes.toUrl appState (Routes.tenantsIndexWithFilters filters pqs)
@@ -95,39 +94,39 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         createButton =
-            Button.linkPrimary (gettext "Create" appState.locale) (Routes.toUrl appState Routes.tenantsCreate)
+            Button.linkPrimary "Create" (Routes.toUrl appState Routes.tenantsCreate)
                 |> Button.withIcon (Icon.solid "fa-plus")
     in
     Listing.viewWith appState
         { notices = [], overlays = [] }
-        { title = gettext "Tenants" appState.locale
+        { title = "Tenants"
         , description = Nothing
         , breadcrumbs = Nothing
         , toolbarActions = [ createButton ]
-        , searchPlaceholder = gettext "Search tenants..." appState.locale
+        , searchPlaceholder = "Search tenants..."
         , sortOptions =
-            [ ( "name", gettext "Name" appState.locale )
-            , ( "tenantId", gettext "Tenant ID" appState.locale )
-            , ( "createdAt", gettext "Created at" appState.locale )
-            , ( "updatedAt", gettext "Updated at" appState.locale )
+            [ ( "name", "Name" )
+            , ( "tenantId", "Tenant ID" )
+            , ( "createdAt", "Created at" )
+            , ( "updatedAt", "Updated at" )
             ]
         , filters =
             [ Listing.SingleFilter indexRouteEnabledFilterId
-                { name = gettext "Enabled" appState.locale
+                { name = "Enabled"
                 , options =
-                    [ ( "true", gettext "Enabled only" appState.locale )
-                    , ( "false", gettext "Disabled only" appState.locale )
+                    [ ( "true", "Enabled only" )
+                    , ( "false", "Disabled only" )
                     ]
                 }
             , Listing.MultiFilter indexRouteStatesFilterId
-                { name = gettext "State" appState.locale
-                , options = stateFilterOptions appState
+                { name = "State"
+                , options = stateFilterOptions
                 , maxVisibleValues = 1
                 }
             ]
         , item = listingItem appState
-        , emptyTitle = gettext "No tenants" appState.locale
-        , emptyDescription = gettext "Click \"Create\" button to add a new tenant." appState.locale
+        , emptyTitle = "No tenants"
+        , emptyDescription = "Click \"Create\" button to add a new tenant."
         , wrapMsg = ListingMsg
         }
         model.tenants
@@ -136,29 +135,29 @@ view appState model =
 {-| The values are the API's state names, as `TenantState.filterOptions` has
 them; the labels are translated here, because that module's are not.
 -}
-stateFilterOptions : AppState -> List ( String, String )
-stateFilterOptions appState =
-    [ ( "NotSeededTenantState", stateLabel appState TenantState.NotSeeded )
-    , ( "PendingHousekeepingTenantState", stateLabel appState TenantState.PendingHousekeeping )
-    , ( "HousekeepingInProgressTenantState", stateLabel appState TenantState.HousekeepingInProgress )
-    , ( "ReadyForUseTenantState", stateLabel appState TenantState.ReadyForUse )
+stateFilterOptions : List ( String, String )
+stateFilterOptions =
+    [ ( "NotSeededTenantState", stateLabel TenantState.NotSeeded )
+    , ( "PendingHousekeepingTenantState", stateLabel TenantState.PendingHousekeeping )
+    , ( "HousekeepingInProgressTenantState", stateLabel TenantState.HousekeepingInProgress )
+    , ( "ReadyForUseTenantState", stateLabel TenantState.ReadyForUse )
     ]
 
 
-stateLabel : AppState -> TenantState -> String
-stateLabel appState state =
+stateLabel : TenantState -> String
+stateLabel state =
     case state of
         TenantState.NotSeeded ->
-            gettext "Not seeded" appState.locale
+            "Not seeded"
 
         TenantState.PendingHousekeeping ->
-            gettext "Pending housekeeping" appState.locale
+            "Pending housekeeping"
 
         TenantState.HousekeepingInProgress ->
-            gettext "Housekeeping in progress" appState.locale
+            "Housekeeping in progress"
 
         TenantState.ReadyForUse ->
-            gettext "Ready for use" appState.locale
+            "Ready for use"
 
 
 listingItem : AppState -> Tenant -> Listing.Item Msg
@@ -170,7 +169,7 @@ listingItem appState tenant =
                 , title =
                     Link.link { label = tenant.name, url = Routes.toUrl appState (Routes.tenantsDetail tenant.uuid) }
                         |> Link.toHtml
-                , actionsLabel = String.format (gettext "Actions for %s" appState.locale) [ tenant.name ]
+                , actionsLabel = String.format "Actions for %s" [ tenant.name ]
                 }
 
         badges =
@@ -178,17 +177,17 @@ listingItem appState tenant =
                 []
 
             else
-                [ Badge.danger (gettext "Disabled" appState.locale) ]
+                [ Badge.danger "Disabled" ]
 
         urlFragment =
             Link.link { label = String.replace "https://" "" tenant.clientUrl, url = tenant.clientUrl }
                 |> Link.external
-                |> Link.withExternalNotice (gettext "(opens in a new tab)" appState.locale)
+                |> Link.withExternalNotice "(opens in a new tab)"
                 |> Link.toHtml
 
         stateFragment =
             if tenant.state /= TenantState.ReadyForUse then
-                [ Badge.toHtml (Badge.neutral (stateLabel appState tenant.state)) ]
+                [ Badge.toHtml (Badge.neutral (stateLabel tenant.state)) ]
 
             else
                 []

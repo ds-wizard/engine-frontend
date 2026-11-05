@@ -33,7 +33,6 @@ import Common.Pages.Dev.Routes as DevRoutes
 import Common.Routes as Routes
 import Common.Utils.RequestHelpers as RequestHelpers
 import Dict exposing (Dict)
-import Gettext exposing (gettext)
 import Html exposing (Html)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -135,7 +134,7 @@ update cfg appState msg model =
                     ( { model | adminOperationSections = Success sections }, Cmd.none )
 
                 Err error ->
-                    ( { model | adminOperationSections = ApiError.toActionResult appState (gettext "Unable to get dev operations." appState.locale) error }
+                    ( { model | adminOperationSections = ApiError.toActionResult appState "Unable to get dev operations." error }
                     , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
@@ -158,7 +157,7 @@ update cfg appState msg model =
                 updateConfig =
                     { wrapMsg = cfg.wrapMsg << TypeHintMsg path
                     , getTypeHints = TenantsApi.getTenantSuggestions appState
-                    , getError = gettext "Unable to get tenants." appState.locale
+                    , getError = "Unable to get tenants."
                     , setReply = cfg.wrapMsg << FieldInput path << Uuid.toString << .uuid
                     , clearReply = Just (cfg.wrapMsg (FieldInput path ""))
                     , filterResults = Nothing
@@ -204,7 +203,7 @@ update cfg appState msg model =
                             Success executionResult
 
                         Err error ->
-                            ApiError.toActionResult appState (gettext "Execution failed." appState.locale) error
+                            ApiError.toActionResult appState "Execution failed." error
             in
             ( { model | operationResults = Dict.insert (operationPath sectionName operationName) operationResultValue model.operationResults }
             , RequestHelpers.getResultCmd cfg.logoutMsg result
@@ -240,7 +239,7 @@ viewContent appState model sections =
             }
     in
     SettingsPage.layout
-        { title = gettext "Dev Operations" appState.locale
+        { title = "Dev Operations"
         , groups = [ ( Nothing, List.map entry sections ) ]
         , body =
             case opened of
@@ -248,7 +247,7 @@ viewContent appState model sections =
                     viewSection appState model section
 
                 Nothing ->
-                    [ Text.pageTitle (gettext "Dev Operations" appState.locale) ]
+                    [ Text.pageTitle "Dev Operations" ]
         , footer = Nothing
         }
 
@@ -283,7 +282,7 @@ viewOperation appState model sectionName operation =
             case result of
                 Success executionResult ->
                     CodeBlock.toHtml
-                        { label = gettext "Result" appState.locale
+                        { label = "Result"
                         , language = ""
                         , value = executionResult.output
                         }
@@ -302,7 +301,7 @@ viewOperation appState model sectionName operation =
                     , content =
                         List.map (viewParameter appState model sectionName operation.name) operation.parameters
                             ++ [ Ui.Form.actions
-                                    [ Button.submit (gettext "Execute" appState.locale)
+                                    [ Button.submit "Execute"
                                         |> Button.withLoading (ActionResult.isLoading result)
                                     ]
                                ]
@@ -358,7 +357,7 @@ viewParameter appState model sectionName operationName parameter =
             TypeHint.view appState
                 { id = domId path
                 , label = parameter.name
-                , placeholder = gettext "Select tenant" appState.locale
+                , placeholder = "Select tenant"
                 , required = False
                 , error = Nothing
                 , hint = Nothing

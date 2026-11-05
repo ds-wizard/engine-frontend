@@ -10,7 +10,6 @@ module Common.Pages.Dev.Components.PersistentCommandActions exposing
 import Common.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Common.Components.ItemActions as ItemActions
 import Common.Routes as Routes
-import Gettext exposing (gettext)
 import Ui.Icon as Icon
 import Uuid exposing (Uuid)
 
@@ -29,13 +28,13 @@ type alias ActionsConfig a msg =
     }
 
 
-actions : { b | locale : Gettext.Locale, toUrl : Routes.Route -> String } -> ActionsConfig a msg -> PersistentCommandLike a -> List (ItemActions.Action msg)
+actions : { b | toUrl : Routes.Route -> String } -> ActionsConfig a msg -> PersistentCommandLike a -> List (ItemActions.Action msg)
 actions appState cfg command =
     let
         viewAction =
             ItemActions.link
                 { icon = Icon.regular "fa-folder-open"
-                , label = gettext "Open" appState.locale
+                , label = "Open"
                 , url = Routes.toUrl appState (Routes.persistentCommandsDetail command.uuid)
                 }
                 |> ItemActions.withTestId "listing-item_action_view"
@@ -43,7 +42,7 @@ actions appState cfg command =
         retryAction =
             ItemActions.action
                 { icon = Icon.solid "fa-rotate"
-                , label = gettext "Rerun" appState.locale
+                , label = "Rerun"
                 , onSelect = cfg.retryMsg command
                 }
                 |> ItemActions.withTestId "listing-item_action_retry"
@@ -51,7 +50,7 @@ actions appState cfg command =
         setIgnoredAction =
             ItemActions.dangerAction
                 { icon = Icon.solid "fa-ban"
-                , label = gettext "Ignore" appState.locale
+                , label = "Ignore"
                 , onSelect = cfg.setIgnoredMsg command
                 }
                 |> ItemActions.withTestId "listing-item_action_set-ignored"

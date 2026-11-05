@@ -57,7 +57,6 @@ import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.TimeUtils as TimeUtils
 import Form exposing (Form)
-import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Json.Encode as E
 import Maybe.Extra as Maybe
@@ -162,7 +161,7 @@ updateWith server cfg appState msg model =
                         )
 
                     else
-                        ( { model | tenant = ApiError.toActionResult appState (gettext "Unable to get tenant." appState.locale) error }
+                        ( { model | tenant = ApiError.toActionResult appState "Unable to get tenant." error }
                         , RequestHelpers.getResultCmd cfg.logoutMsg result
                         )
 
@@ -172,7 +171,7 @@ updateWith server cfg appState msg model =
                     ( { model | usage = Success usage }, Cmd.none )
 
                 Err error ->
-                    ( { model | usage = ApiError.toActionResult appState (gettext "Unable to get usage." appState.locale) error }
+                    ( { model | usage = ApiError.toActionResult appState "Unable to get usage." error }
                     , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
@@ -211,7 +210,7 @@ updateWith server cfg appState msg model =
 
                 Err error ->
                     ( { model
-                        | savingTenant = ApiError.toActionResult appState (gettext "Tenant could not be saved." appState.locale) error
+                        | savingTenant = ApiError.toActionResult appState "Tenant could not be saved." error
                         , editForm = Maybe.map (FormUtils.setFormErrors appState error) model.editForm
                       }
                     , Cmd.batch [ RequestHelpers.getResultCmd cfg.logoutMsg result, FormLayout.focusErrorSummary ]
@@ -255,7 +254,7 @@ updateWith server cfg appState msg model =
 
                 Err error ->
                     ( { model
-                        | savingTenant = ApiError.toActionResult appState (gettext "Tenant limits could not be saved." appState.locale) error
+                        | savingTenant = ApiError.toActionResult appState "Tenant limits could not be saved." error
                         , limitsForm = Maybe.map (FormUtils.setFormErrors appState error) model.limitsForm
                       }
                     , Cmd.batch [ RequestHelpers.getResultCmd cfg.logoutMsg result, FormLayout.focusErrorSummary ]
@@ -344,7 +343,7 @@ detailPage appState extension toMsg model tenant =
     let
         editLimits =
             if extension.editLimits then
-                [ Button.secondary (gettext "Edit limits" appState.locale) (toMsg EditLimitsModalOpen)
+                [ Button.secondary "Edit limits" (toMsg EditLimitsModalOpen)
                     |> Button.withIcon (Icon.solid "fa-sliders")
                     |> Button.withTestId "tenant-detail_edit-limits"
                     |> (if ActionResult.isSuccess model.usage then
@@ -354,7 +353,7 @@ detailPage appState extension toMsg model tenant =
                             -- The form starts from the limits the usage says.
                             Button.withDisabledReason
                                 { id = "tenant-detail_edit-limits-reason"
-                                , reason = gettext "The limits can be edited once the usage has loaded." appState.locale
+                                , reason = "The limits can be edited once the usage has loaded."
                                 }
                        )
                 ]
@@ -363,7 +362,7 @@ detailPage appState extension toMsg model tenant =
                 []
 
         actions =
-            (Button.secondary (gettext "Edit" appState.locale) (toMsg EditModalOpen)
+            (Button.secondary "Edit" (toMsg EditModalOpen)
                 |> Button.withIcon (Icon.solid "fa-pen-to-square")
                 |> Button.withTestId "tenant-detail_edit"
             )
@@ -384,12 +383,12 @@ detailPage appState extension toMsg model tenant =
         { title = tenant.name
         , content =
             [ Layout.stack
-                ([ Text.title (gettext "Usage" appState.locale)
+                ([ Text.title "Usage"
                  , case model.usage of
                     Success usage ->
                         UsageTable.view appState
                             { showSoftLimits = True
-                            , rows = usageRows appState usage ++ extension.usageRows
+                            , rows = usageRows usage ++ extension.usageRows
                             }
 
                     -- Said in its part of the page: the tenant is shown all the same.
@@ -405,101 +404,101 @@ detailPage appState extension toMsg model tenant =
             ]
         }
         |> DetailPage.withTitleIcon (ItemIcon.toHtml (UserAvatar.tenant { name = tenant.name, logoUrl = tenant.logoUrl }))
-        |> DetailPage.withBadges (enabledBadge appState tenant.enabled :: stateBadges appState tenant.state)
+        |> DetailPage.withBadges (enabledBadge tenant.enabled :: stateBadges tenant.state)
         |> DetailPage.withActions actions
         |> DetailPage.withSidePanel
             { resizer = model.resizer
             , toMsg = toMsg << ResizerMsg
             , sections =
                 [ sidePanelInfo appState tenant
-                , sidePanelUrls appState tenant
-                , sidePanelAdmins appState tenant
+                , sidePanelUrls tenant
+                , sidePanelAdmins tenant
                 ]
             }
 
 
-usageRows : AppState -> Usage -> List UsageTable.Row
-usageRows appState usage =
-    [ UsageTable.count "users" (gettext "Users" appState.locale) usage.users
-    , UsageTable.count "active-users" (gettext "Active Users" appState.locale) usage.activeUsers
-    , UsageTable.count "knowledge-model-editors" (gettext "Knowledge Model Editors" appState.locale) usage.knowledgeModelEditors
-    , UsageTable.count "knowledge-models" (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
-    , UsageTable.count "document-template-editors" (gettext "Document Template Editors" appState.locale) usage.documentTemplateDrafts
-    , UsageTable.count "document-templates" (gettext "Document Templates" appState.locale) usage.documentTemplates
-    , UsageTable.count "projects" (gettext "Projects" appState.locale) usage.projects
-    , UsageTable.count "documents" (gettext "Documents" appState.locale) usage.documents
-    , UsageTable.bytes "storage" (gettext "Storage" appState.locale) usage.storage
+usageRows : Usage -> List UsageTable.Row
+usageRows usage =
+    [ UsageTable.count "users" "Users" usage.users
+    , UsageTable.count "active-users" "Active Users" usage.activeUsers
+    , UsageTable.count "knowledge-model-editors" "Knowledge Model Editors" usage.knowledgeModelEditors
+    , UsageTable.count "knowledge-models" "Knowledge Models" usage.knowledgeModels
+    , UsageTable.count "document-template-editors" "Document Template Editors" usage.documentTemplateDrafts
+    , UsageTable.count "document-templates" "Document Templates" usage.documentTemplates
+    , UsageTable.count "projects" "Projects" usage.projects
+    , UsageTable.count "documents" "Documents" usage.documents
+    , UsageTable.bytes "storage" "Storage" usage.storage
     ]
 
 
-enabledBadge : AppState -> Bool -> Badge.Badge msg
-enabledBadge appState enabled =
+enabledBadge : Bool -> Badge.Badge msg
+enabledBadge enabled =
     if enabled then
-        Badge.success (gettext "Enabled" appState.locale)
+        Badge.success "Enabled"
 
     else
-        Badge.danger (gettext "Disabled" appState.locale)
+        Badge.danger "Disabled"
 
 
 {-| Only a state that is not the normal one is worth a badge beside the name;
 the side panel always says which state it is.
 -}
-stateBadges : AppState -> TenantState -> List (Badge.Badge msg)
-stateBadges appState state =
+stateBadges : TenantState -> List (Badge.Badge msg)
+stateBadges state =
     if state == TenantState.ReadyForUse then
         []
 
     else
-        [ Badge.warning (stateLabel appState state) ]
+        [ Badge.warning (stateLabel state) ]
 
 
-stateLabel : AppState -> TenantState -> String
-stateLabel appState state =
+stateLabel : TenantState -> String
+stateLabel state =
     case state of
         TenantState.NotSeeded ->
-            gettext "Not seeded" appState.locale
+            "Not seeded"
 
         TenantState.PendingHousekeeping ->
-            gettext "Pending housekeeping" appState.locale
+            "Pending housekeeping"
 
         TenantState.HousekeepingInProgress ->
-            gettext "Housekeeping in progress" appState.locale
+            "Housekeeping in progress"
 
         TenantState.ReadyForUse ->
-            gettext "Ready for use" appState.locale
+            "Ready for use"
 
 
 sidePanelInfo : AppState -> TenantDetail -> DetailPage.Section msg
 sidePanelInfo appState tenant =
-    DetailPage.section (gettext "Info" appState.locale)
-        [ DescriptionList.entry { term = gettext "Tenant ID" appState.locale, description = tenant.tenantId }
+    DetailPage.section "Info"
+        [ DescriptionList.entry { term = "Tenant ID", description = tenant.tenantId }
         , DescriptionList.withHtml
-            { term = gettext "Enabled" appState.locale
-            , description = [ Badge.toHtml (enabledBadge appState tenant.enabled) ]
+            { term = "Enabled"
+            , description = [ Badge.toHtml (enabledBadge tenant.enabled) ]
             }
-        , DescriptionList.entry { term = gettext "State" appState.locale, description = stateLabel appState tenant.state }
-        , DescriptionList.entry { term = gettext "Created at" appState.locale, description = TimeUtils.toReadableDateTime appState.timeZone tenant.createdAt }
-        , DescriptionList.entry { term = gettext "Updated at" appState.locale, description = TimeUtils.toReadableDateTime appState.timeZone tenant.updatedAt }
+        , DescriptionList.entry { term = "State", description = stateLabel tenant.state }
+        , DescriptionList.entry { term = "Created at", description = TimeUtils.toReadableDateTime appState.timeZone tenant.createdAt }
+        , DescriptionList.entry { term = "Updated at", description = TimeUtils.toReadableDateTime appState.timeZone tenant.updatedAt }
         ]
 
 
-sidePanelUrls : AppState -> TenantDetail -> DetailPage.Section msg
-sidePanelUrls appState tenant =
+sidePanelUrls : TenantDetail -> DetailPage.Section msg
+sidePanelUrls tenant =
     let
         externalLink url =
             Link.link { label = url, url = url }
                 |> Link.external
-                |> Link.withExternalNotice (gettext "(opens in a new tab)" appState.locale)
+                |> Link.withExternalNotice "(opens in a new tab)"
                 |> Link.toHtml
     in
-    DetailPage.section (gettext "URLs" appState.locale)
-        [ DescriptionList.withHtml { term = gettext "Client URL" appState.locale, description = [ externalLink tenant.clientUrl ] }
-        , DescriptionList.withHtml { term = gettext "Server URL" appState.locale, description = [ externalLink tenant.serverUrl ] }
+    DetailPage.section "URLs"
+        [ DescriptionList.withHtml { term = "Client URL", description = [ externalLink tenant.clientUrl ] }
+        , DescriptionList.withHtml { term = "Server URL", description = [ externalLink tenant.serverUrl ] }
         ]
 
 
-sidePanelAdmins : AppState -> TenantDetail -> DetailPage.Section msg
-sidePanelAdmins appState tenant =
+sidePanelAdmins : TenantDetail -> DetailPage.Section msg
+sidePanelAdmins tenant =
     let
         viewUser : User -> ListItem.ListItem msg
         viewUser user =
@@ -509,7 +508,7 @@ sidePanelAdmins appState tenant =
                         []
 
                     else
-                        [ Badge.toHtml (Badge.danger (gettext "inactive" appState.locale)) ]
+                        [ Badge.toHtml (Badge.danger "inactive") ]
             in
             ListItem.item (Layout.inline (Html.text (User.fullName user) :: inactiveBadge))
                 |> ListItem.withIcon
@@ -527,7 +526,7 @@ sidePanelAdmins appState tenant =
         users =
             List.sortWith User.compare tenant.users
     in
-    DetailPage.sectionHtml (gettext "Admins" appState.locale)
+    DetailPage.sectionHtml "Admins"
         (if List.isEmpty users then
             []
 
@@ -564,18 +563,18 @@ viewEditModal appState model =
                 |> Html.map EditModalFormMsg
     in
     Modal.plain
-        { title = gettext "Edit tenant" appState.locale
+        { title = "Edit tenant"
         , open = Maybe.isJust model.editForm
         , onClose = EditModalClose
         , body =
             [ div [] [ FormLayout.errorSummary (resultWhen (Maybe.isJust model.editForm) model.savingTenant) ]
-            , field Field.input "tenantId" (gettext "Tenant ID" appState.locale)
-            , field Field.input "name" (gettext "Name" appState.locale)
+            , field Field.input "tenantId" "Tenant ID"
+            , field Field.input "name" "Name"
             ]
         }
-        |> Modal.withForm { onSubmit = EditModalFormMsg Form.Submit, submitLabel = gettext "Save" appState.locale }
+        |> Modal.withForm { onSubmit = EditModalFormMsg Form.Submit, submitLabel = "Save" }
         |> Modal.withLoading (ActionResult.isLoading model.savingTenant)
-        |> Modal.withCancelLabel (gettext "Cancel" appState.locale)
+        |> Modal.withCancelLabel "Cancel"
         |> Modal.withTestId "tenant-edit"
         |> Modal.toHtml
 
@@ -593,25 +592,25 @@ viewEditLimitsModal appState model =
                 |> Html.map EditLimitsModalFormMsg
     in
     Modal.plain
-        { title = gettext "Edit limits" appState.locale
+        { title = "Edit limits"
         , open = Maybe.isJust model.limitsForm
         , onClose = EditLimitsModalClose
         , body =
             [ div [] [ FormLayout.errorSummary (resultWhen (Maybe.isJust model.limitsForm) model.savingTenant) ]
-            , field Field.number "users" (gettext "Users" appState.locale)
-            , field Field.number "activeUsers" (gettext "Active Users" appState.locale)
-            , field Field.number "knowledgeModelEditors" (gettext "Knowledge Model Editors" appState.locale)
-            , field Field.number "knowledgeModels" (gettext "Knowledge Models" appState.locale)
-            , field Field.number "documentTemplateDrafts" (gettext "Document Template Editors" appState.locale)
-            , field Field.number "documentTemplates" (gettext "Document Templates" appState.locale)
-            , field Field.number "questionnaires" (gettext "Projects" appState.locale)
-            , field Field.number "documents" (gettext "Documents" appState.locale)
-            , field Field.fileSize "storage" (gettext "Storage" appState.locale)
+            , field Field.number "users" "Users"
+            , field Field.number "activeUsers" "Active Users"
+            , field Field.number "knowledgeModelEditors" "Knowledge Model Editors"
+            , field Field.number "knowledgeModels" "Knowledge Models"
+            , field Field.number "documentTemplateDrafts" "Document Template Editors"
+            , field Field.number "documentTemplates" "Document Templates"
+            , field Field.number "questionnaires" "Projects"
+            , field Field.number "documents" "Documents"
+            , field Field.fileSize "storage" "Storage"
             ]
         }
-        |> Modal.withForm { onSubmit = EditLimitsModalFormMsg Form.Submit, submitLabel = gettext "Save" appState.locale }
+        |> Modal.withForm { onSubmit = EditLimitsModalFormMsg Form.Submit, submitLabel = "Save" }
         |> Modal.withLoading (ActionResult.isLoading model.savingTenant)
-        |> Modal.withCancelLabel (gettext "Cancel" appState.locale)
+        |> Modal.withCancelLabel "Cancel"
         |> Modal.withTestId "tenant-edit-limits"
         |> Modal.toHtml
 

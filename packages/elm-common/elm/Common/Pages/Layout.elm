@@ -139,13 +139,13 @@ pageName appState route =
         Routes.DevRoute devRoute ->
             case devRoute of
                 Common.Pages.Dev.Routes.OperationsRoute _ ->
-                    gettext "Dev Operations" l
+                    "Dev Operations"
 
                 Common.Pages.Dev.Routes.PersistentCommandsDetail _ ->
-                    gettext "Persistent Command" l
+                    "Persistent Command"
 
                 Common.Pages.Dev.Routes.PersistentCommandsIndex _ _ ->
-                    gettext "Persistent Commands" l
+                    "Persistent Commands"
 
         Routes.DocumentsRoute _ ->
             gettext "Project Documents" l
@@ -355,13 +355,13 @@ pageName appState route =
         Routes.TenantsRoute tenantsRoute ->
             case tenantsRoute of
                 TenantsRoutes.IndexRoute _ _ _ ->
-                    gettext "Tenants" l
+                    "Tenants"
 
                 TenantsRoutes.CreateRoute ->
-                    gettext "Create Tenant" l
+                    "Create Tenant"
 
                 TenantsRoutes.DetailRoute _ ->
-                    gettext "Tenant" l
+                    "Tenant"
 
         Routes.UsersRoute usersRoute ->
             case usersRoute of
