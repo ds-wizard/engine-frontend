@@ -31,6 +31,7 @@ import Common.Components.ConfirmModal as ConfirmModal
 import Common.Components.Timestamp as Timestamp
 import Common.Components.UiWords as UiWords
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.LocaleKind exposing (LocaleKind(..))
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Settings.Components.Section as Section
@@ -263,7 +264,7 @@ view appState { registry } model =
     in
     { body =
         [ Layout.stack
-            ([ Section.header (Common.title appState model.kind) actions
+            ([ Section.header (Common.title appState model.kind) (Section.guideLink appState GuideLinks.settingsTranslations :: actions)
              , ApiErrorAlert.view appState model.changing
              , ApiErrorAlert.view appState (ActionResult.map (always "") model.downloading)
              ]

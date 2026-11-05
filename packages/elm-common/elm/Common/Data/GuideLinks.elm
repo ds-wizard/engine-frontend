@@ -15,7 +15,13 @@ module Common.Data.GuideLinks exposing
     , markdownCheatsheet
     , profileActiveSessions
     , profileApiKeys
+    , profileConnectedAccounts
+    , profileInfo
     , profileLanguage
+    , profilePassword
+    , profilePluginSettings
+    , profileSubmissionSettings
+    , profileTours
     , projectsCreate
     , projectsDocumentSubmission
     , projectsDocuments
@@ -25,15 +31,22 @@ module Common.Data.GuideLinks exposing
     , projectsSettings
     , projectsSharing
     , settingsAuthentication
-    , settingsDashboardAndLoginScreen
+    , settingsDashboardAndMenu
     , settingsDocumentSubmission
     , settingsFeatures
+    , settingsLoginScreen
     , settingsLookAndFeel
     , settingsOpenId
     , settingsPlugins
     , settingsPrivacyAndSupport
     , settingsProjects
     , settingsRegistry
+    , settingsRoles
+    , settingsTranslations
+    , settingsTranslationsRegistry
+    , settingsTranslationsUpload
+    , settingsUsage
+    , settingsUsers
     , userGroupsCreate
     , userGroupsDetail
     , usersCreate
@@ -56,11 +69,6 @@ documentTemplatesCreate =
     GuideLinks.get "documentTemplatesCreate"
 
 
-documentTemplatesSettings : GuideLinks -> String
-documentTemplatesSettings =
-    GuideLinks.get "documentTemplatesSettings"
-
-
 documentTemplatesImport : GuideLinks -> String
 documentTemplatesImport =
     GuideLinks.get "documentTemplatesImport"
@@ -69,6 +77,11 @@ documentTemplatesImport =
 documentTemplatesPublish : GuideLinks -> String
 documentTemplatesPublish =
     GuideLinks.get "documentTemplatesPublish"
+
+
+documentTemplatesSettings : GuideLinks -> String
+documentTemplatesSettings =
+    GuideLinks.get "documentTemplatesSettings"
 
 
 documentTemplatesUnsupportedMetamodel : GuideLinks -> String
@@ -116,9 +129,9 @@ markdownCheatsheet =
     GuideLinks.get "markdownCheatsheet"
 
 
-profileLanguage : GuideLinks -> String
-profileLanguage =
-    GuideLinks.get "profileLanguage"
+profileActiveSessions : GuideLinks -> String
+profileActiveSessions =
+    GuideLinks.get "profileActiveSessions"
 
 
 profileApiKeys : GuideLinks -> String
@@ -126,9 +139,39 @@ profileApiKeys =
     GuideLinks.get "profileApiKeys"
 
 
-profileActiveSessions : GuideLinks -> String
-profileActiveSessions =
-    GuideLinks.get "profileActiveSessions"
+profileConnectedAccounts : GuideLinks -> String
+profileConnectedAccounts =
+    GuideLinks.get "profileConnectedAccounts"
+
+
+profileInfo : GuideLinks -> String
+profileInfo =
+    GuideLinks.get "profileInfo"
+
+
+profileLanguage : GuideLinks -> String
+profileLanguage =
+    GuideLinks.get "profileLanguage"
+
+
+profilePassword : GuideLinks -> String
+profilePassword =
+    GuideLinks.get "profilePassword"
+
+
+profilePluginSettings : GuideLinks -> String
+profilePluginSettings =
+    GuideLinks.get "profilePluginSettings"
+
+
+profileSubmissionSettings : GuideLinks -> String
+profileSubmissionSettings =
+    GuideLinks.get "profileSubmissionSettings"
+
+
+profileTours : GuideLinks -> String
+profileTours =
+    GuideLinks.get "profileTours"
 
 
 projectsCreate : GuideLinks -> String
@@ -176,9 +219,9 @@ settingsAuthentication =
     GuideLinks.get "settingsAuthentication"
 
 
-settingsDashboardAndLoginScreen : GuideLinks -> String
-settingsDashboardAndLoginScreen =
-    GuideLinks.get "settingsDashboardAndLoginScreen"
+settingsDashboardAndMenu : GuideLinks -> String
+settingsDashboardAndMenu =
+    GuideLinks.get "settingsDashboardAndMenu"
 
 
 settingsDocumentSubmission : GuideLinks -> String
@@ -189,6 +232,11 @@ settingsDocumentSubmission =
 settingsFeatures : GuideLinks -> String
 settingsFeatures =
     GuideLinks.get "settingsFeatures"
+
+
+settingsLoginScreen : GuideLinks -> String
+settingsLoginScreen =
+    GuideLinks.get "settingsLoginScreen"
 
 
 settingsLookAndFeel : GuideLinks -> String
@@ -221,9 +269,34 @@ settingsRegistry =
     GuideLinks.get "settingsRegistry"
 
 
-usersCreate : GuideLinks -> String
-usersCreate =
-    GuideLinks.get "usersCreate"
+settingsRoles : GuideLinks -> String
+settingsRoles =
+    GuideLinks.get "settingsRoles"
+
+
+settingsTranslations : GuideLinks -> String
+settingsTranslations =
+    GuideLinks.get "settingsTranslations"
+
+
+settingsTranslationsRegistry : GuideLinks -> String
+settingsTranslationsRegistry =
+    GuideLinks.get "settingsTranslationsRegistry"
+
+
+settingsTranslationsUpload : GuideLinks -> String
+settingsTranslationsUpload =
+    GuideLinks.get "settingsTranslationsUpload"
+
+
+settingsUsage : GuideLinks -> String
+settingsUsage =
+    GuideLinks.get "settingsUsage"
+
+
+settingsUsers : GuideLinks -> String
+settingsUsers =
+    GuideLinks.get "settingsUsers"
 
 
 userGroupsCreate : GuideLinks -> String
@@ -234,3 +307,8 @@ userGroupsCreate =
 userGroupsDetail : GuideLinks -> String
 userGroupsDetail =
     GuideLinks.get "userGroupsDetail"
+
+
+usersCreate : GuideLinks -> String
+usersCreate =
+    GuideLinks.get "usersCreate"

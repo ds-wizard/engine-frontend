@@ -28,6 +28,7 @@ import Common.Api.Models.Locale.MailTemplatePotInfo exposing (MailTemplatePotInf
 import Common.Components.Form as CommonForm
 import Common.Components.UiWords as UiWords
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.LocaleKind exposing (LocaleKind(..))
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Settings.Components.Section as Section
@@ -170,7 +171,7 @@ view : AppState -> Model -> { body : List (Html Msg), footer : Maybe (Html Msg) 
 view appState model =
     { body =
         [ Layout.stack
-            (Section.header (gettext "Upload translation" appState.locale) []
+            (Section.header (gettext "Upload translation" appState.locale) [ Section.guideLink appState GuideLinks.settingsTranslationsUpload ]
                 :: (case ( model.stored, model.confirmation ) of
                         ( Just locale, _ ) ->
                             viewStored appState model locale

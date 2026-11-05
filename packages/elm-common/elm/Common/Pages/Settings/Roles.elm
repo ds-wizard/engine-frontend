@@ -19,6 +19,7 @@ import Common.Api.Settings as SettingsApi
 import Common.Components.ApiErrorAlert as ApiErrorAlert
 import Common.Components.ConfirmModal as ConfirmModal
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Settings.Components.Section as Section
 import Common.Routes as Routes
@@ -173,7 +174,9 @@ view appState model =
     { body =
         [ Layout.stack
             [ Section.header (gettext "Roles" appState.locale)
-                [ Button.linkPrimary (gettext "Create" appState.locale) (Routes.toUrl appState Routes.settingsRoleCreate) ]
+                [ Section.guideLink appState GuideLinks.settingsRoles
+                , Button.linkPrimary (gettext "Create" appState.locale) (Routes.toUrl appState Routes.settingsRoleCreate)
+                ]
             , ApiErrorAlert.view appState model.savingDefault
             , Section.actionResult appState (viewRoles appState) (ActionResult.combine model.roles model.settings)
             , viewDeleteModal appState model

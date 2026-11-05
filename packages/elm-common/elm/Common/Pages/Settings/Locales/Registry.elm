@@ -23,6 +23,7 @@ import Common.Api.Models.Locale.RegistryLocale exposing (RegistryLocale)
 import Common.Components.ApiErrorAlert as ApiErrorAlert
 import Common.Components.UiWords as UiWords
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.LocaleKind exposing (LocaleKind(..))
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Settings.Components.Section as Section
@@ -153,7 +154,9 @@ view appState model =
     { body =
         [ Layout.stack
             [ Section.header (gettext "Import from Registry" appState.locale)
-                [ Button.linkGhost (gettext "Back to the translations" appState.locale) (Routes.toUrl appState (Routes.settingsLocales model.kind)) ]
+                [ Section.guideLink appState GuideLinks.settingsTranslationsRegistry
+                , Button.linkGhost (gettext "Back to the translations" appState.locale) (Routes.toUrl appState (Routes.settingsLocales model.kind))
+                ]
             , Text.body (gettext "The translations the registry has for this version. Importing one of a language that is here already replaces it." appState.locale)
             , case model.imported of
                 Just locale ->

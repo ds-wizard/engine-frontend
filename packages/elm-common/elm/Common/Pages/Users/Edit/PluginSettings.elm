@@ -15,6 +15,7 @@ import Common.Api.Users as UsersApi
 import Common.Components.Form as CommonForm
 import Common.Components.PluginView as PluginView
 import Common.Data.AppState as AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Pages.Users.Components.Section as Section
@@ -140,7 +141,7 @@ view appState model =
                 Just userSettingsConnector ->
                     Section.view appState
                         { title = String.format (gettext "%s Settings" appState.locale) [ plugin.name ]
-                        , guideLink = Nothing
+                        , guideLink = Just GuideLinks.profilePluginSettings
                         , content =
                             Section.actionResult appState
                                 (pluginSettingsView appState model plugin userSettingsConnector.element)

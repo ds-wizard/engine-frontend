@@ -25,6 +25,7 @@ import Common.Components.Markdown as Markdown
 import Common.Components.UserAvatar as UserAvatar
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.UserEditForm as UserEditForm exposing (UserEditForm)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Pages.Users.Components.Section as Section
@@ -200,7 +201,7 @@ view appState model =
     in
     Section.view appState
         { title = gettext "Profile" appState.locale
-        , guideLink = Nothing
+        , guideLink = Just GuideLinks.profileInfo
         , content = Section.actionResult appState (userView appState model) (ActionResult.combine model.user rolesActionResult)
         }
 

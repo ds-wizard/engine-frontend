@@ -18,6 +18,7 @@ import Common.Api.Users as UsersApi
 import Common.Components.ConfirmModal as ConfirmModal
 import Common.Components.ExternalLoginButton as ExternalLoginButton
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Users.Components.Section as Section
 import Common.Ports.LocalStorage as LocalStorage
@@ -162,7 +163,7 @@ view : AppState -> Model -> List (Html Msg)
 view appState model =
     Section.view appState
         { title = gettext "Connected Accounts" appState.locale
-        , guideLink = Nothing
+        , guideLink = Just GuideLinks.profileConnectedAccounts
         , content =
             Section.actionResult appState (connectedAccountsView appState model) model.userIdentities
                 ++ [ viewDisconnectModal appState model ]

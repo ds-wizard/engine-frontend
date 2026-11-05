@@ -17,6 +17,7 @@ import Common.Components.Form as CommonForm
 import Common.Components.Form.Field as Field
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.RoleForm as RoleForm exposing (RoleForm)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Settings.Components.Permissions as Permissions
 import Common.Pages.Settings.Components.Section as Section
@@ -104,7 +105,7 @@ view : { groups : List PermissionGroup, note : Maybe String, reach : Maybe Strin
 view permissions appState model =
     { body =
         [ Layout.stack
-            [ Section.header (gettext "Create Role" appState.locale) []
+            [ Section.header (gettext "Create Role" appState.locale) [ Section.guideLink appState GuideLinks.settingsRoles ]
             , CommonForm.createView
                 { onSubmit = FormMsg Form.Submit
                 , content =

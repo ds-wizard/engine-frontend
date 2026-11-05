@@ -12,6 +12,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Tours as ToursApi
 import Common.Components.Tour as Tour
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.Session as Session
 import Common.Data.TourId as TourId
 import Common.Data.UpdateConfig exposing (UpdateConfig)
@@ -118,7 +119,7 @@ view appState model =
     in
     Section.view appState
         { title = gettext "Tours" appState.locale
-        , guideLink = Nothing
+        , guideLink = Just GuideLinks.profileTours
         , content =
             [ resultAlert
             , Text.body (gettext "This resets all page-specific onboarding tours, allowing the guided highlights and instructions to replay on next visit." appState.locale)

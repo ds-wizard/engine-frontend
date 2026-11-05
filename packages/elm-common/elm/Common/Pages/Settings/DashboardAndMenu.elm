@@ -71,7 +71,7 @@ view appState =
     SettingsPage.view appState
         { title = gettext "Dashboard & Menu" appState.locale
         , description = Nothing
-        , guideLink = Just (Section.guideLink appState GuideLinks.settingsDashboardAndLoginScreen)
+        , guideLink = Just (Section.guideLink appState GuideLinks.settingsDashboardAndMenu)
         , formView = formView appState
         , wrapMsg = identity
         }

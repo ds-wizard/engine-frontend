@@ -13,6 +13,7 @@ import Common.Api.Models.Settings.UsersSettings as UsersSettings exposing (Users
 import Common.Components.Form.Field as Field
 import Common.Components.SettingsPage as SettingsPage
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Settings.Components.Section as Section
 import Common.Utils.Form.FormError exposing (FormError)
@@ -62,7 +63,7 @@ view appState =
     SettingsPage.view appState
         { title = gettext "Users" appState.locale
         , description = Nothing
-        , guideLink = Nothing
+        , guideLink = Just (Section.guideLink appState GuideLinks.settingsUsers)
         , formView = formView appState
         , wrapMsg = identity
         }

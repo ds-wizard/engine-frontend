@@ -15,6 +15,7 @@ import Common.Api.Models.Usage exposing (Usage)
 import Common.Api.Tenants as TenantsApi
 import Common.Components.UsageTable as UsageTable
 import Common.Data.AppState exposing (AppState)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Common.Pages.Settings.Components.Section as Section
@@ -78,7 +79,7 @@ viewWith : AppState -> List UsageTable.Row -> Model -> { body : List (Html msg),
 viewWith appState extraRows model =
     { body =
         [ Layout.stack
-            [ Section.header (gettext "Usage" appState.locale) []
+            [ Section.header (gettext "Usage" appState.locale) [ Section.guideLink appState GuideLinks.settingsUsage ]
             , Section.actionResult appState (viewUsage appState extraRows) model.usage
             ]
         ]

@@ -64,7 +64,7 @@ view appState =
     SettingsPage.view appState
         { title = gettext "Login Screen" appState.locale
         , description = Nothing
-        , guideLink = Just (Section.guideLink appState GuideLinks.settingsDashboardAndLoginScreen)
+        , guideLink = Just (Section.guideLink appState GuideLinks.settingsLoginScreen)
         , formView = formView appState
         , wrapMsg = identity
         }

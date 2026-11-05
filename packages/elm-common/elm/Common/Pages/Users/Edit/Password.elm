@@ -15,6 +15,7 @@ import Common.Components.Form as CommonForm
 import Common.Components.Form.Field as Field
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Pages.Users.Components.Section as Section
@@ -137,7 +138,7 @@ view appState model =
     in
     Section.view appState
         { title = gettext "Password" appState.locale
-        , guideLink = Nothing
+        , guideLink = Just GuideLinks.profilePassword
         , content =
             [ CommonForm.view
                 { onSubmit = PasswordFormMsg Form.Submit

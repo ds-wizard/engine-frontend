@@ -17,6 +17,7 @@ import Common.Components.Form as CommonForm
 import Common.Components.Form.Field as Field
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.SubmissionPropsEditForm as SubmissionPropsEditForm exposing (SubmissionPropsEditForm)
+import Common.Data.GuideLinks as GuideLinks
 import Common.Data.UpdateConfig exposing (UpdateConfig)
 import Common.Pages.Users.Components.Section as Section
 import Common.Utils.Form as FormUtils
@@ -161,7 +162,7 @@ view : AppState -> Model -> List (Html Msg)
 view appState model =
     Section.view appState
         { title = gettext "Submission Settings" appState.locale
-        , guideLink = Nothing
+        , guideLink = Just GuideLinks.profileSubmissionSettings
         , content = Section.actionResult appState (submissionPropsView appState model) model.submissionProps
         }
 
