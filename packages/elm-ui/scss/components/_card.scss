@@ -259,9 +259,8 @@
   padding: var(--ui-space-6);
 }
 
-// A dialog with no actions at all (`Modal.withActions []`) keeps the element —
-// `ui-dialog` moves its children into the dialog when it connects, so the
-// number of them must not change while it is mounted — and gives up the room.
+// A dialog with no actions at all (`Modal.withActions []`) keeps the element and
+// gives up the room.
 // `Modal.withStartAction`: pushed to the start, the rest stay at the end.
 .ui-dialog__footer-start {
   margin-inline-end: auto;

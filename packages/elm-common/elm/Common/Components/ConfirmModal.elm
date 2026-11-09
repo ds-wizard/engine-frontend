@@ -21,12 +21,9 @@ modal backdrop is a message nobody can read. The error is a `Ui.Alert.danger`,
 so it is announced when it appears, and the dialog stays open so the user can
 try again or cancel.
 
-**The error has a place in the body whether or not there is an error.**
-`ui-dialog` moves its children into the dialog when it connects, so the body is
-built once for the life of the modal; the slot for the error is always there
-and only its contents change. That keeps the rule `Ui.Modal` sets — a modal
-never gains or loses child elements while it is mounted — without the caller
-having to know about it.
+**The error has a place in the body whether or not there is an error.** The
+slot for the error is always there and only its contents change, so the body
+does not shift when one appears.
 
 -}
 
