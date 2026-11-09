@@ -24,6 +24,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Users as UsersApi
 import Common.Components.Form as FormView
 import Common.Components.Form.Field as FormField
+import Common.Components.PasswordStrength as PasswordStrength
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.SignupForm as SignupForm exposing (SignupForm)
 import Common.Data.UpdateConfig exposing (UpdateConfig)
@@ -47,6 +48,7 @@ import Ui.Link as Link
 type alias Model =
     { form : Form FormError SignupForm
     , signingUp : ActionResult String
+    , passwordStrength : PasswordStrength.Model
     }
 
 
@@ -54,20 +56,22 @@ initialModel : AppState -> Model
 initialModel appState =
     { form = SignupForm.initEmpty appState
     , signingUp = Unset
+    , passwordStrength = PasswordStrength.init appState
     }
 
 
 type Msg
     = FormMsg Form.Msg
     | PostSignupCompleted (Result ApiError ())
+    | PasswordStrengthMsg PasswordStrength.Msg
 
 
 update : UpdateConfig Msg msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.form ) of
-                ( Form.Submit, Just signupForm ) ->
+            case ( formMsg, Form.getOutput model.form, PasswordStrength.isChecking model.passwordStrength ) of
+                ( Form.Submit, Just signupForm, False ) ->
                     if signupForm.acceptFake then
                         ( { model | signingUp = Success "" }, focusTitle )
 
@@ -78,9 +82,22 @@ update cfg appState msg model =
                         )
 
                 _ ->
-                    ( { model | form = Form.update (SignupForm.validation appState) formMsg model.form }
-                    , Cmd.none
+                    let
+                        updated =
+                            PasswordStrength.updateForm appState (passwordField appState) formMsg model.form model.passwordStrength
+                    in
+                    ( { model | form = updated.form, passwordStrength = updated.passwordStrength }
+                    , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (FormMsg Form.Submit)) updated
                     )
+
+        PasswordStrengthMsg passwordStrengthMsg ->
+            let
+                updated =
+                    PasswordStrength.update appState (passwordField appState) passwordStrengthMsg model.form model.passwordStrength
+            in
+            ( { model | form = updated.form, passwordStrength = updated.passwordStrength }
+            , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (FormMsg Form.Submit)) updated
+            )
 
         PostSignupCompleted result ->
             case result of
@@ -94,6 +111,11 @@ update cfg appState msg model =
                       }
                     , FormView.focusErrorSummary
                     )
+
+
+passwordField : AppState -> PasswordStrength.PasswordField SignupForm
+passwordField appState =
+    { path = "password", validation = SignupForm.validation appState }
 
 
 {-| The form is replaced by the message, so the button that sent it is gone.
@@ -126,7 +148,7 @@ view appState model =
                         { onSubmit = FormMsg Form.Submit
                         , content =
                             FormView.errorSummary model.signingUp
-                                :: List.map (Html.map FormMsg) (formView appState model.form)
+                                :: List.map (Html.map FormMsg) (formView appState model.passwordStrength model.form)
                                 ++ [ FormView.actions appState
                                         { submitLabel = gettext "Sign Up" appState.locale
                                         , result = model.signingUp
@@ -141,8 +163,8 @@ view appState model =
     PublicLayout.panel appState { title = gettext "Sign Up" appState.locale, content = content, intro = Nothing, aside = Nothing }
 
 
-formView : AppState -> Form FormError SignupForm -> List (Html Form.Msg)
-formView appState form =
+formView : AppState -> PasswordStrength.Model -> Form FormError SignupForm -> List (Html Form.Msg)
+formView appState passwordStrength form =
     [ FormField.email appState form "email" (gettext "Email" appState.locale)
         |> FormField.withRequired True
         |> FormField.withAutocomplete "email"
@@ -159,7 +181,7 @@ formView appState form =
         |> FormField.withAutocomplete "organization"
         |> FormField.withSuggestions appState.config.users.affiliations
         |> FormField.toHtml
-    , FormField.passwordWithStrength appState form "password" (gettext "Password" appState.locale)
+    , FormField.passwordWithStrength appState passwordStrength form "password" (gettext "Password" appState.locale)
         |> FormField.withRequired True
         |> FormField.withAutocomplete "new-password"
         |> FormField.toHtml

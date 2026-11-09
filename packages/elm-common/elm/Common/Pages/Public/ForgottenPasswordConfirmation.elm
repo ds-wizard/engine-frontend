@@ -15,6 +15,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Users as UsersApi
 import Common.Components.Form as FormView
 import Common.Components.Form.Field as FormField
+import Common.Components.PasswordStrength as PasswordStrength
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.PasswordForm as PasswordForm exposing (PasswordForm)
 import Common.Data.UpdateConfig exposing (UpdateConfig)
@@ -38,6 +39,7 @@ type alias Model =
     , submitting : ActionResult String
     , userId : String
     , hash : String
+    , passwordStrength : PasswordStrength.Model
     }
 
 
@@ -47,29 +49,44 @@ initialModel appState userId hash =
     , submitting = Unset
     , userId = userId
     , hash = hash
+    , passwordStrength = PasswordStrength.init appState
     }
 
 
 type Msg
     = FormMsg Form.Msg
     | PutPasswordCompleted (Result ApiError ())
+    | PasswordStrengthMsg PasswordStrength.Msg
 
 
 update : UpdateConfig Msg msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.form ) of
-                ( Form.Submit, Just passwordForm ) ->
+            case ( formMsg, Form.getOutput model.form, PasswordStrength.isChecking model.passwordStrength ) of
+                ( Form.Submit, Just passwordForm, False ) ->
                     ( { model | submitting = Loading }
                     , Cmd.map cfg.wrapMsg <|
                         UsersApi.putUserPasswordPublic appState model.userId model.hash (PasswordForm.encode passwordForm) PutPasswordCompleted
                     )
 
                 _ ->
-                    ( { model | form = Form.update (PasswordForm.validation appState) formMsg model.form }
-                    , Cmd.none
+                    let
+                        updated =
+                            PasswordStrength.updateForm appState (passwordField appState) formMsg model.form model.passwordStrength
+                    in
+                    ( { model | form = updated.form, passwordStrength = updated.passwordStrength }
+                    , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (FormMsg Form.Submit)) updated
                     )
+
+        PasswordStrengthMsg passwordStrengthMsg ->
+            let
+                updated =
+                    PasswordStrength.update appState (passwordField appState) passwordStrengthMsg model.form model.passwordStrength
+            in
+            ( { model | form = updated.form, passwordStrength = updated.passwordStrength }
+            , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (FormMsg Form.Submit)) updated
+            )
 
         PutPasswordCompleted result ->
             case result of
@@ -84,6 +101,11 @@ update cfg appState msg model =
                       }
                     , FormView.focusErrorSummary
                     )
+
+
+passwordField : AppState -> PasswordStrength.PasswordField PasswordForm
+passwordField appState =
+    { path = "password", validation = PasswordForm.validation appState }
 
 
 subscriptions : AppState -> Model -> Sub Msg
@@ -120,7 +142,7 @@ view appState model =
                             [ FormView.errorSummary model.submitting
                             , Text.body (gettext "Enter a new password you want to use to log in." appState.locale)
                             , Html.map FormMsg <|
-                                (FormField.passwordWithStrength appState model.form "password" (gettext "New password" appState.locale)
+                                (FormField.passwordWithStrength appState model.passwordStrength model.form "password" (gettext "New password" appState.locale)
                                     |> FormField.withRequired True
                                     |> FormField.withAutocomplete "new-password"
                                     |> FormField.toHtml

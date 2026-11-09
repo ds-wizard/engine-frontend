@@ -963,24 +963,28 @@
   display: inline-flex;
 }
 
-// While the answer is somewhere else. Opacity only, and the global
-// reduced-motion rule stops it.
-.ui-strength.is-busy .ui-strength__icon {
-  animation: ui-spin var(--ui-duration-slow) linear infinite;
+// While the answer is somewhere else: the bars take the color of a meaningful
+// graphic (3:1, 1.4.11) and a wave runs across them, one bar after another.
+// Opacity only, and the global reduced-motion rule stops it. The icon is
+// Ui.Icon's spinner, which turns on its own center.
+.ui-strength.is-busy .ui-strength__bar {
+  background: var(--ui-icon-subtle);
+  animation: ui-strength-waiting 1.2s ease-in-out infinite;
 }
 
-.ui-strength.is-busy .ui-strength__bars {
-  animation: ui-strength-waiting 1.2s var(--ui-ease-out) infinite;
-}
+.ui-strength.is-busy .ui-strength__bar:nth-child(2) { animation-delay: 0.15s; }
+.ui-strength.is-busy .ui-strength__bar:nth-child(3) { animation-delay: 0.3s; }
+.ui-strength.is-busy .ui-strength__bar:nth-child(4) { animation-delay: 0.45s; }
+.ui-strength.is-busy .ui-strength__bar:nth-child(5) { animation-delay: 0.6s; }
 
 @keyframes ui-strength-waiting {
   0%,
   100% {
-    opacity: 1;
+    opacity: 0.3;
   }
 
   50% {
-    opacity: 0.5;
+    opacity: 1;
   }
 }
 
