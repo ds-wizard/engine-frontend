@@ -1,7 +1,13 @@
-// A custom element wrapping the native <dialog>.
+// A custom element around the native <dialog>, which opens it as a modal while
+// it has the `open` attribute.
 //
 // A custom element rather than a port: there is no message ordering to get
-// wrong, and it composes with the virtual DOM. The browser gives us focus
+// wrong, and it composes with the virtual DOM. The dialog is its child, drawn by
+// the view like everything in it, and the element only opens and closes it:
+// what the virtual DOM has drawn stays where the virtual DOM put it. (It does
+// not make the dialog and move what it was given into it: an element kept from
+// one page to the next for another dialog would then get what is new beside
+// the dialog, on the page.) The browser gives us focus
 // trapping, Escape, the top layer and an inert background for free, and all
 // four are easy to get subtly wrong by hand.
 //
@@ -56,7 +62,8 @@ const openDialogs = []
 
 document.addEventListener('keydown', (event) => {
     const top = openDialogs[openDialogs.length - 1]
-    if (!top || top._dialog.contains(event.target)) return
+    const dialog = top && top._dialog
+    if (!dialog || dialog.contains(event.target)) return
     if (event.target !== document.body && event.target !== document.documentElement) return
     top._onKeydown(event)
 })
@@ -68,69 +75,71 @@ function primaryAction(dialog) {
 
 class UiDialog extends HTMLElement {
     static get observedAttributes() {
-        return ['open', 'data-labelledby', 'data-label']
+        return ['open']
+    }
+
+    // Looked up each time, not kept: the view owns the dialog.
+    get _dialog() {
+        for (const child of this.children) {
+            if (child.localName === 'dialog') return child
+        }
+        return null
     }
 
     connectedCallback() {
-        if (this._dialog) return
+        if (!this._connected) {
+            this._connected = true
 
-        this._dialog = document.createElement('dialog')
-        this._dialog.className = 'ui-dialog'
+            // Escape is handled by the browser; we only forward the outcome so Elm
+            // can update its own model rather than the DOM drifting out of sync.
+            // `close` does not bubble, so it is caught on its way down.
+            this._onClose = (event) => {
+                if (event.target !== this._dialog) return
+                this._forget()
+                this.dispatchEvent(new CustomEvent('dialogClose', {bubbles: true}))
+            }
+            this.addEventListener('close', this._onClose, true)
 
-        while (this.firstChild) {
-            this._dialog.appendChild(this.firstChild)
-        }
-        this.appendChild(this._dialog)
+            // Clicking the backdrop closes, matching every other dialog on the web.
+            this._onClick = (event) => {
+                const dialog = this._dialog
+                if (dialog && event.target === dialog) dialog.close()
+            }
+            this.addEventListener('click', this._onClick)
 
-        // Escape is handled by the browser; we only forward the outcome so Elm
-        // can update its own model rather than the DOM drifting out of sync.
-        this._onClose = () => {
-            this._forget()
-            this.dispatchEvent(new CustomEvent('dialogClose', { bubbles: true }))
-        }
-        this._dialog.addEventListener('close', this._onClose)
+            this._onKeydown = (event) => {
+                const dialog = this._dialog
+                if (!dialog || event.key !== 'Enter' || event.defaultPrevented || event.isComposing) return
 
-        // Clicking the backdrop closes, matching every other dialog on the web.
-        this._onClick = (event) => {
-            if (event.target === this._dialog) this._dialog.close()
-        }
-        this._dialog.addEventListener('click', this._onClick)
+                const target = event.target
+                const primary = primaryAction(dialog)
 
-        this._onKeydown = (event) => {
-            if (event.key !== 'Enter' || event.defaultPrevented || event.isComposing) return
+                if (isSubmitShortcut(event)) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    if (primary && !primary.disabled) primary.click()
+                    return
+                }
+                if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return
 
-            const target = event.target
-            const primary = primaryAction(this._dialog)
+                if (dialog.querySelector(FIELD)) {
+                    if (target.tagName === 'INPUT') event.preventDefault()
+                    return
+                }
+                if (target !== dialog && target.closest(OWN_ENTER)) return
+                if (!primary || primary.disabled) return
 
-            if (isSubmitShortcut(event)) {
                 event.preventDefault()
-                event.stopPropagation()
-                if (primary && !primary.disabled) primary.click()
-                return
+                primary.click()
             }
-            if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return
-
-            if (this._dialog.querySelector(FIELD)) {
-                if (target.tagName === 'INPUT') event.preventDefault()
-                return
-            }
-            if (target !== this._dialog && target.closest(OWN_ENTER)) return
-            if (!primary || primary.disabled) return
-
-            event.preventDefault()
-            primary.click()
+            this.addEventListener('keydown', this._onKeydown)
         }
-        this._dialog.addEventListener('keydown', this._onKeydown)
 
         this._sync()
     }
 
     disconnectedCallback() {
-        if (!this._dialog) return
         this._forget()
-        this._dialog.removeEventListener('close', this._onClose)
-        this._dialog.removeEventListener('click', this._onClick)
-        this._dialog.removeEventListener('keydown', this._onKeydown)
     }
 
     attributeChangedCallback() {
@@ -154,38 +163,20 @@ class UiDialog extends HTMLElement {
     }
 
     _sync() {
-        if (!this._dialog) return
-
-        // The dialog is named by its title. Elm can only reach this element,
-        // not the dialog it creates, so the reference is forwarded.
-        const labelledBy = this.getAttribute('data-labelledby')
-        if (labelledBy) {
-            this._dialog.setAttribute('aria-labelledby', labelledBy)
-        } else {
-            this._dialog.removeAttribute('aria-labelledby')
-        }
-
-        // A dialog whose content is all the caller's draws no title to point at,
-        // so it carries its name instead. A dialog with no name at all is
-        // announced as "dialog" and nothing more.
-        const label = this.getAttribute('data-label')
-        if (label) {
-            this._dialog.setAttribute('aria-label', label)
-        } else {
-            this._dialog.removeAttribute('aria-label')
-        }
+        const dialog = this._dialog
+        if (!this.isConnected || !dialog) return
 
         const shouldBeOpen = this.hasAttribute('open')
 
-        if (shouldBeOpen && !this._dialog.open) {
+        if (shouldBeOpen && !dialog.open) {
             // showModal, not show: only the modal form makes the background
             // inert and puts the dialog in the top layer.
-            this._dialog.showModal()
+            dialog.showModal()
             openDialogs.push(this)
             this._focusPrimary()
-        } else if (!shouldBeOpen && this._dialog.open) {
-            this._dialog.close()
+        } else if (!shouldBeOpen && dialog.open) {
             this._forget()
+            dialog.close()
         }
     }
 }

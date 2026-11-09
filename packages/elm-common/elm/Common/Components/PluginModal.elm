@@ -20,9 +20,7 @@ own (`Ui.Modal.withContentOnly`). The way out is the plugin's too, through
 `onActionClose`; Escape and the backdrop still work.
 
 The dialog is named after the plugin all the same, because a dialog without a
-name is announced as "dialog" and nothing else. The body is always one wrapper,
-open or closed, because `Ui.Modal` moves its children into the native dialog when
-it connects and a child added afterwards would land outside it.
+name is announced as "dialog" and nothing else.
 
 -}
 

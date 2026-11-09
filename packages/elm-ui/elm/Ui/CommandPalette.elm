@@ -350,56 +350,58 @@ view config (Model model) =
     in
     Html.node "ui-dialog"
         (attribute "data-variant" "palette"
-            :: attribute "data-labelledby" titleId
             :: Html.Events.on "dialogClose" (Decode.succeed config.onClose)
             :: openAttributes
         )
-        [ div [ class "ui-command-palette" ]
-            [ h2 [ class "ui-visually-hidden", id titleId ] [ text config.words.title ]
-            , div [ class "ui-command-palette__search" ]
-                [ span [ class "ui-command-palette__search-icon", attribute "aria-hidden" "true" ]
-                    [ Icon.toHtml (Icon.solid "fa-magnifying-glass") ]
-                , input
-                    [ type_ "text"
-                    , id inputId
-                    , class "ui-input ui-command-palette__input"
-                    , value model.query
-                    , placeholder config.words.placeholder
-                    , autocomplete False
-                    , attribute "role" "combobox"
-                    , attribute "aria-expanded" "true"
-                    , attribute "aria-controls" listboxId
-                    , attribute "aria-autocomplete" "list"
-                    , attribute "aria-label" config.words.title
-                    , activeDescendant config.items highlighted
-                    , onInput (config.wrapMsg << QueryChanged)
-                    , onKeyboard config highlighted
+        [ Html.node "dialog"
+            [ class "ui-dialog", attribute "aria-labelledby" titleId ]
+            [ div [ class "ui-command-palette" ]
+                [ h2 [ class "ui-visually-hidden", id titleId ] [ text config.words.title ]
+                , div [ class "ui-command-palette__search" ]
+                    [ span [ class "ui-command-palette__search-icon", attribute "aria-hidden" "true" ]
+                        [ Icon.toHtml (Icon.solid "fa-magnifying-glass") ]
+                    , input
+                        [ type_ "text"
+                        , id inputId
+                        , class "ui-input ui-command-palette__input"
+                        , value model.query
+                        , placeholder config.words.placeholder
+                        , autocomplete False
+                        , attribute "role" "combobox"
+                        , attribute "aria-expanded" "true"
+                        , attribute "aria-controls" listboxId
+                        , attribute "aria-autocomplete" "list"
+                        , attribute "aria-label" config.words.title
+                        , activeDescendant config.items highlighted
+                        , onInput (config.wrapMsg << QueryChanged)
+                        , onKeyboard config highlighted
+                        ]
+                        []
                     ]
-                    []
+                , if count == 0 && not config.loading then
+                    div [ class "ui-command-palette__empty" ] [ text config.words.empty ]
+
+                  else
+                    ul
+                        [ class "ui-command-palette__list"
+                        , id listboxId
+                        , attribute "role" "listbox"
+                        , attribute "aria-label" config.words.title
+                        , attribute "aria-busy"
+                            (if config.loading then
+                                "true"
+
+                             else
+                                "false"
+                            )
+                        ]
+                        (viewSections config highlighted)
+                , if config.loading then
+                    div [ class "ui-command-palette__loading", attribute "role" "status" ] [ text config.words.loading ]
+
+                  else
+                    text ""
                 ]
-            , if count == 0 && not config.loading then
-                div [ class "ui-command-palette__empty" ] [ text config.words.empty ]
-
-              else
-                ul
-                    [ class "ui-command-palette__list"
-                    , id listboxId
-                    , attribute "role" "listbox"
-                    , attribute "aria-label" config.words.title
-                    , attribute "aria-busy"
-                        (if config.loading then
-                            "true"
-
-                         else
-                            "false"
-                        )
-                    ]
-                    (viewSections config highlighted)
-            , if config.loading then
-                div [ class "ui-command-palette__loading", attribute "role" "status" ] [ text config.words.loading ]
-
-              else
-                text ""
             ]
         ]
 

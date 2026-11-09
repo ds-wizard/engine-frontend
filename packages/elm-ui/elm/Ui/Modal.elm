@@ -245,10 +245,8 @@ backdrop are not discoverable to everyone.
 
 An empty list is a dialog with no footer at all, for one whose content is a
 page in its own right and whose way out is an action in its header
-(`withHeaderAction`). The element is kept either way — `ui-dialog` moves its
-children into the dialog when it connects, so their number must not change
-while it is mounted — and only the room it takes is given up, so the list has
-to stay empty for the life of the modal.
+(`withHeaderAction`). The element is kept either way, and only the room it
+takes is given up.
 
 -}
 withActions : List (Button msg) -> Modal msg -> Modal msg
@@ -365,8 +363,8 @@ toHtml (Modal config) =
             else
                 []
 
-        -- The attributes land on the custom element, not on the dialog it
-        -- creates; the stylesheet reaches the dialog through its host.
+        -- `open` is the element's, which opens the dialog as a modal: on the
+        -- dialog itself it would show it without the backdrop or the inert page.
         hostAttrs =
             Maybe.values
                 [ if config.cover then
@@ -378,28 +376,32 @@ toHtml (Modal config) =
                   else
                     Nothing
                 , Maybe.map TestId.attribute config.testId
-
-                -- The dialog is created by the element, so the element copies
-                -- this onto it as aria-labelledby — or, where there is no title
-                -- drawn to point at, as the name itself.
-                , if config.contentOnly then
-                    Just (attribute "data-label" config.title)
-
-                  else
-                    Just (attribute "data-labelledby" (titleId config))
                 ]
+
+        -- The dialog is named by its title, or, where no title is drawn to point
+        -- at, by the title itself.
+        name =
+            if config.contentOnly then
+                attribute "aria-label" config.title
+
+            else
+                attribute "aria-labelledby" (titleId config)
     in
+    -- The dialog is drawn here, not made by the element: the virtual DOM then
+    -- knows where everything in it is. An element it keeps from one page to the
+    -- next — the same tag in the same place — may become another dialog, and
+    -- what that one has more of goes into the dialog, not beside it on the page.
     node "ui-dialog"
         (on "dialogClose" (Decode.succeed config.onClose) :: openAttrs ++ hostAttrs)
-        (if config.contentOnly then
-            -- One child, as the chrome is: `ui-dialog` moves what it has into
-            -- the dialog when it connects, and a child that arrives later lands
-            -- outside it.
-            [ div [ class "ui-dialog__content-only" ] config.body ]
+        [ node "dialog"
+            [ class "ui-dialog", name ]
+            (if config.contentOnly then
+                [ div [ class "ui-dialog__content-only" ] config.body ]
 
-         else
-            chrome config
-        )
+             else
+                chrome config
+            )
+        ]
 
 
 {-| The dialog's own parts: a header, the body and a footer.
@@ -479,10 +481,6 @@ chrome config =
                     ++ List.map Button.toHtml footerButtons
                 )
 
-        -- The number of children the element has must not change while it is
-        -- on the page: ui-dialog moves them into its dialog when it connects,
-        -- so a child added later would land outside it. A form is one child
-        -- for the life of the modal, and so is a body and a footer.
         content =
             case config.form of
                 Just formConfig ->
