@@ -72,6 +72,7 @@ import Common.Ports.Session as SessionPorts
 import Common.Ports.SideNav as SideNavPorts
 import Common.Ports.Window as Window
 import Common.Routes as Routes
+import Common.Routes.FormerAddress as FormerAddress
 import Common.Utils.GuideLinks as GuideLinks
 import Common.Utils.TimeUtils as TimeUtils
 import Dsw.Data.ClientDefaults as ClientDefaults
@@ -215,8 +216,10 @@ init flags url key =
 
             else
                 let
+                    -- A former address is decided on as the page it is now;
+                    -- the address itself is replaced on arrival (`OnUrlChange`).
                     originalRoute =
-                        Routes.parse appState url
+                        Routes.parse appState (Maybe.withDefault url (FormerAddress.toCurrent url))
                 in
                 Cmd.batch
                     [ decideInitialRoute model url (Routes.routeIfAllowed appState originalRoute) originalRoute
@@ -454,63 +457,14 @@ update msg model =
                 ( model, Cmd.none )
 
             OnUrlChange url ->
-                if isInPageJump model url then
-                    -- The same page, somewhere else on it: focus what the
-                    -- fragment names, or on the way back from it nothing at
-                    -- all. Loading the page again would throw away what is on
-                    -- it, and with it the element the jump was to.
-                    ( { model | navigationId = model.navigationId + 1, urlFragment = url.fragment }
-                    , if Maybe.isJust url.fragment then
-                        Cmd.batch [ CommonForm.cancelFocusFirstField, AppShell.focusFragment NoOp url.fragment ]
+                case FormerAddress.toCurrent url of
+                    Just currentUrl ->
+                        -- A bookmark or an email from before the addresses
+                        -- changed: the page it means, at its address now.
+                        ( model, Navigation.replaceUrl model.appState.key (Url.toString currentUrl) )
 
-                      else
-                        Cmd.none
-                    )
-
-                else
-                    let
-                        nextRoute =
-                            Routes.routeIfAllowed model.appState (Routes.parse model.appState url)
-
-                        originalRoute =
-                            model.route
-
-                        navigationId =
-                            model.navigationId + 1
-
-                        modelWithRoute =
-                            setRoute nextRoute { model | notFound = Nothing, notAllowed = False, navigated = True, navigationId = navigationId, urlFragment = url.fragment }
-
-                        sameListing =
-                            Routes.isSameListingRoute originalRoute nextRoute
-
-                        focusCmd =
-                            if Maybe.isJust url.fragment then
-                                Cmd.batch [ CommonForm.cancelFocusFirstField, AppShell.focusFragment NoOp url.fragment ]
-
-                            else if Routes.isCreateRoute nextRoute && originalRoute /= nextRoute then
-                                -- A create page opens on its first field, the very
-                                -- first route included.
-                                CommonForm.focusFirstField
-
-                            else if model.navigated && not sameListing && originalRoute /= nextRoute then
-                                Cmd.batch
-                                    [ CommonForm.cancelFocusFirstField
-                                    , AppShell.focusOnRouteChangeWhenReady (focusRetryConfig navigationId)
-                                    ]
-
-                            else
-                                Cmd.none
-                    in
-                    if sameListing then
-                        ( modelWithRoute, focusCmd )
-
-                    else
-                        let
-                            ( newModel, pageCmd ) =
-                                initPage modelWithRoute
-                        in
-                        ( newModel, Cmd.batch [ pageCmd, focusCmd ] )
+                    Nothing ->
+                        onUrlChange url model
 
             SetNotFound message ->
                 ( { model | notFound = Just message }, Cmd.none )
@@ -726,6 +680,69 @@ update msg model =
                         model.pages
                 in
                 ( setSeed seed { model | pages = { pages | shared = pageModel } }, pageCmd )
+
+
+{-| The page of a new address.
+-}
+onUrlChange : Url -> Model -> ( Model, Cmd Msg )
+onUrlChange url model =
+    if isInPageJump model url then
+        -- The same page, somewhere else on it: focus what the
+        -- fragment names, or on the way back from it nothing at
+        -- all. Loading the page again would throw away what is on
+        -- it, and with it the element the jump was to.
+        ( { model | navigationId = model.navigationId + 1, urlFragment = url.fragment }
+        , if Maybe.isJust url.fragment then
+            Cmd.batch [ CommonForm.cancelFocusFirstField, AppShell.focusFragment NoOp url.fragment ]
+
+          else
+            Cmd.none
+        )
+
+    else
+        let
+            nextRoute =
+                Routes.routeIfAllowed model.appState (Routes.parse model.appState url)
+
+            originalRoute =
+                model.route
+
+            navigationId =
+                model.navigationId + 1
+
+            modelWithRoute =
+                setRoute nextRoute { model | notFound = Nothing, notAllowed = False, navigated = True, navigationId = navigationId, urlFragment = url.fragment }
+
+            sameListing =
+                Routes.isSameListingRoute originalRoute nextRoute
+
+            focusCmd =
+                if Maybe.isJust url.fragment then
+                    Cmd.batch [ CommonForm.cancelFocusFirstField, AppShell.focusFragment NoOp url.fragment ]
+
+                else if Routes.isCreateRoute nextRoute && originalRoute /= nextRoute then
+                    -- A create page opens on its first field, the very
+                    -- first route included.
+                    CommonForm.focusFirstField
+
+                else if model.navigated && not sameListing && originalRoute /= nextRoute then
+                    Cmd.batch
+                        [ CommonForm.cancelFocusFirstField
+                        , AppShell.focusOnRouteChangeWhenReady (focusRetryConfig navigationId)
+                        ]
+
+                else
+                    Cmd.none
+        in
+        if sameListing then
+            ( modelWithRoute, focusCmd )
+
+        else
+            let
+                ( newModel, pageCmd ) =
+                    initPage modelWithRoute
+            in
+            ( newModel, Cmd.batch [ pageCmd, focusCmd ] )
 
 
 {-| Revoke the token and forget the session. Navigating within the client does
