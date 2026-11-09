@@ -13,6 +13,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Users as UsersApi
 import Common.Components.Form as CommonForm
 import Common.Components.Form.Field as Field
+import Common.Components.PasswordStrength as PasswordStrength
 import Common.Data.AppState exposing (AppState)
 import Common.Data.Forms.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)
 import Common.Data.GuideLinks as GuideLinks
@@ -36,6 +37,7 @@ type alias Model =
     { uuidOrCurrent : UuidOrCurrent
     , passwordForm : Form FormError UserPasswordForm
     , savingPassword : ActionResult String
+    , passwordStrength : PasswordStrength.Model
     }
 
 
@@ -44,6 +46,7 @@ initialModel appState uuidOrCurrent =
     { uuidOrCurrent = uuidOrCurrent
     , passwordForm = UserPasswordForm.init appState
     , savingPassword = Unset
+    , passwordStrength = PasswordStrength.init appState
     }
 
 
@@ -54,6 +57,7 @@ initialModel appState uuidOrCurrent =
 type Msg
     = PasswordFormMsg Form.Msg
     | PutUserPasswordCompleted (Result ApiError ())
+    | PasswordStrengthMsg PasswordStrength.Msg
     | Discard
     | NoOp
 
@@ -62,22 +66,39 @@ update : UpdateConfig Msg msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         PasswordFormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.passwordForm ) of
-                ( Form.Submit, Just passwordForm ) ->
+            case ( formMsg, Form.getOutput model.passwordForm, PasswordStrength.isChecking model.passwordStrength ) of
+                ( Form.Submit, Just passwordForm, False ) ->
                     ( { model | savingPassword = Loading }
                     , Cmd.map cfg.wrapMsg <|
                         UsersApi.putUserPassword appState model.uuidOrCurrent (UserPasswordForm.encode passwordForm) PutUserPasswordCompleted
                     )
 
                 _ ->
-                    ( { model | passwordForm = Form.update (UserPasswordForm.validation appState) formMsg model.passwordForm }
-                    , Cmd.none
+                    let
+                        updated =
+                            PasswordStrength.updateForm appState (passwordField appState) formMsg model.passwordForm model.passwordStrength
+                    in
+                    ( { model | passwordForm = updated.form, passwordStrength = updated.passwordStrength }
+                    , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (PasswordFormMsg Form.Submit)) updated
                     )
+
+        PasswordStrengthMsg passwordStrengthMsg ->
+            let
+                updated =
+                    PasswordStrength.update appState (passwordField appState) passwordStrengthMsg model.passwordForm model.passwordStrength
+            in
+            ( { model | passwordForm = updated.form, passwordStrength = updated.passwordStrength }
+            , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (PasswordFormMsg Form.Submit)) updated
+            )
 
         Discard ->
             -- The bar's buttons go with the bar, so focus would be left on
             -- nothing: it goes to the page's heading, as it does in settings.
-            ( { model | passwordForm = UserPasswordForm.init appState, savingPassword = Unset }
+            ( { model
+                | passwordForm = UserPasswordForm.init appState
+                , savingPassword = Unset
+                , passwordStrength = PasswordStrength.init appState
+              }
             , Cmd.map cfg.wrapMsg (Section.focusHeading NoOp)
             )
 
@@ -92,6 +113,7 @@ update cfg appState msg model =
                     ( { model
                         | savingPassword = Success (gettext "Password was successfully changed." appState.locale)
                         , passwordForm = UserPasswordForm.init appState
+                        , passwordStrength = PasswordStrength.init appState
                       }
                     , Cmd.none
                     )
@@ -103,6 +125,11 @@ update cfg appState msg model =
                         , CommonForm.focusErrorSummary
                         ]
                     )
+
+
+passwordField : AppState -> PasswordStrength.PasswordField UserPasswordForm
+passwordField appState =
+    { path = "password", validation = UserPasswordForm.validation appState }
 
 
 
@@ -130,7 +157,7 @@ view appState model =
                     Html.text ""
 
         fields =
-            [ Field.passwordWithStrength appState model.passwordForm "password" (gettext "New password" appState.locale)
+            [ Field.passwordWithStrength appState model.passwordStrength model.passwordForm "password" (gettext "New password" appState.locale)
                 |> Field.withAutocomplete "new-password"
             , Field.password appState model.passwordForm "passwordConfirmation" (gettext "New password again" appState.locale)
                 |> Field.withAutocomplete "new-password"

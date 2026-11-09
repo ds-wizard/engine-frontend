@@ -5,6 +5,7 @@ module Ui.Field exposing
     , FieldGroup
     , MarkdownWords
     , Strength
+    , StrengthTone(..)
     , Words
     , checkbox
     , checkboxGroup
@@ -29,6 +30,7 @@ module Ui.Field exposing
     , strengthLabel
     , strengthLabelWithWords
     , strengthScored
+    , strengthScoredAs
     , strengthUnavailable
     , textarea
     , time
@@ -280,9 +282,18 @@ a component's opinion.
 
 -}
 type Strength
-    = Checking
-    | Scored { level : Int, max : Int, label : String }
-    | Unavailable String
+    = Checking { max : Int }
+    | Scored { level : Int, max : Int, label : String, tone : Maybe StrengthTone }
+    | Unavailable { max : Int, label : String }
+
+
+{-| The color of a verdict, where the caller's policy decides it rather than
+the fraction of the bar (`strengthScoredAs`).
+-}
+type StrengthTone
+    = WeakTone
+    | FairTone
+    | StrongTone
 
 
 type Control msg
@@ -1024,7 +1035,9 @@ withStrength (Field config) =
 
 {-| A strength from somewhere else — an API, usually. `strengthChecking` while
 the answer is in flight and `strengthUnavailable` when it does not arrive: a
-meter that shows nothing in either case reads as "your password is fine".
+meter that shows nothing in either case reads as "your password is fine". All
+three take the number of bars, so the meter does not change length when the
+answer arrives.
 -}
 withStrengthOf : Strength -> Field msg -> Field msg
 withStrengthOf strength (Field config) =
@@ -1035,16 +1048,25 @@ withStrengthOf strength (Field config) =
 level of 4 out of 4 fills the bar exactly as 5 out of 5 would.
 -}
 strengthScored : { level : Int, max : Int, label : String } -> Strength
-strengthScored =
-    Scored
+strengthScored score =
+    Scored { level = score.level, max = score.max, label = score.label, tone = Nothing }
 
 
-strengthChecking : Strength
+{-| `strengthScored`, in the tone given rather than the one its fraction would
+land in: for a policy that accepts only the top of the scale, where four bars
+of five are still not enough.
+-}
+strengthScoredAs : StrengthTone -> { level : Int, max : Int, label : String } -> Strength
+strengthScoredAs tone score =
+    Scored { level = score.level, max = score.max, label = score.label, tone = Just tone }
+
+
+strengthChecking : { max : Int } -> Strength
 strengthChecking =
     Checking
 
 
-strengthUnavailable : String -> Strength
+strengthUnavailable : { max : Int, label : String } -> Strength
 strengthUnavailable =
     Unavailable
 
@@ -2081,10 +2103,10 @@ meterFor config current =
                     ( level, name ) =
                         strengthOf config.words current
                 in
-                Just { level = level, max = 5, label = name, busy = False, failed = False }
+                Just { level = level, max = 5, label = name, busy = False, failed = False, tone = Nothing }
 
-        Supplied Checking ->
-            Just { level = 0, max = 5, label = config.words.checking, busy = True, failed = False }
+        Supplied (Checking checking) ->
+            Just { level = 0, max = max 1 checking.max, label = config.words.checking, busy = True, failed = False, tone = Nothing }
 
         Supplied (Scored score) ->
             Just
@@ -2093,10 +2115,11 @@ meterFor config current =
                 , label = score.label
                 , busy = False
                 , failed = False
+                , tone = score.tone
                 }
 
-        Supplied (Unavailable message) ->
-            Just { level = 0, max = 5, label = message, busy = False, failed = True }
+        Supplied (Unavailable unavailable) ->
+            Just { level = 0, max = max 1 unavailable.max, label = unavailable.label, busy = False, failed = True, tone = Nothing }
 
 
 type alias Meter =
@@ -2105,6 +2128,7 @@ type alias Meter =
     , label : String
     , busy : Bool
     , failed : Bool
+    , tone : Maybe StrengthTone
     }
 
 
@@ -2148,15 +2172,22 @@ viewStrength config meter =
             , attribute "aria-live" "polite"
             ]
             [ span [ class "ui-strength__icon", attribute "aria-hidden" "true" ]
-                [ Icon.toHtml (Icon.solid (iconOf meter)) ]
+                [ Icon.toHtml
+                    (if meter.busy then
+                        Icon.spinner
+
+                     else
+                        Icon.solid (iconOf meter)
+                    )
+                ]
             , text meter.label
             ]
         ]
 
 
-{-| Three buckets, taken from the fraction rather than from a level, so a score
-out of four and a score out of five land in the same places. The admin center's
-thresholds — 4 of 4 strong, 2 of 4 almost — fall out of these exactly.
+{-| Three buckets, the caller's where it gave one (`strengthScoredAs`), and
+otherwise taken from the fraction rather than from a level, so a score out of
+four and a score out of five land in the same places.
 -}
 toneOf : Meter -> String
 toneOf meter =
@@ -2167,27 +2198,40 @@ toneOf meter =
         "busy"
 
     else
-        let
-            fraction =
-                toFloat meter.level / toFloat meter.max
-        in
-        if fraction >= 0.8 then
-            "strong"
+        case meter.tone of
+            Just WeakTone ->
+                "weak"
 
-        else if fraction >= 0.4 then
-            "fair"
+            Just FairTone ->
+                "fair"
 
-        else
-            "weak"
+            Just StrongTone ->
+                "strong"
+
+            Nothing ->
+                toneOfFraction meter
+
+
+toneOfFraction : Meter -> String
+toneOfFraction meter =
+    let
+        fraction =
+            toFloat meter.level / toFloat meter.max
+    in
+    if fraction >= 0.8 then
+        "strong"
+
+    else if fraction >= 0.4 then
+        "fair"
+
+    else
+        "weak"
 
 
 iconOf : Meter -> String
 iconOf meter =
     if meter.failed then
         "fa-triangle-exclamation"
-
-    else if meter.busy then
-        "fa-circle-notch"
 
     else
         case toneOf meter of

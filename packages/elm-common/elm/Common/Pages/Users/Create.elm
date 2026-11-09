@@ -21,6 +21,7 @@ import Common.Components.Form as CommonForm
 import Common.Components.Form.Field as Field
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Page as Page
+import Common.Components.PasswordStrength as PasswordStrength
 import Common.Data.AppState as AppState exposing (AppState)
 import Common.Data.Forms.UserCreateForm as UserCreateForm exposing (UserCreateForm)
 import Common.Data.GuideLinks as GuideLinks
@@ -46,6 +47,7 @@ type alias Model =
     { roles : ActionResult (List Role)
     , savingUser : ActionResult String
     , form : Form FormError UserCreateForm
+    , passwordStrength : PasswordStrength.Model
     }
 
 
@@ -54,6 +56,7 @@ initialModel appState =
     { roles = Loading
     , savingUser = Unset
     , form = UserCreateForm.init appState
+    , passwordStrength = PasswordStrength.init appState
     }
 
 
@@ -77,6 +80,7 @@ type Msg
     | Cancel
     | FormMsg Form.Msg
     | PostUserCompleted (Result ApiError ())
+    | PasswordStrengthMsg PasswordStrength.Msg
 
 
 update : UpdateConfig Msg msg -> AppState -> Msg -> Model -> ( Seed, Model, Cmd msg )
@@ -101,7 +105,7 @@ update cfg appState msg model =
                     ( appState.seed
                     , { model
                         | form =
-                            Form.update (UserCreateForm.validation appState)
+                            Form.update (PasswordStrength.validation appState (passwordField appState) model.passwordStrength)
                                 (Form.Input "roleUuid" Form.Select (FormField.String (Uuid.toString settings.value.defaultRoleUuid)))
                                 model.form
                       }
@@ -115,8 +119,8 @@ update cfg appState msg model =
             ( appState.seed, model, Window.historyBack (Routes.toUrl appState Routes.usersIndex) )
 
         FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.form ) of
-                ( Form.Submit, Just userCreateForm ) ->
+            case ( formMsg, Form.getOutput model.form, PasswordStrength.isChecking model.passwordStrength ) of
+                ( Form.Submit, Just userCreateForm, False ) ->
                     let
                         ( newUuid, newSeed ) =
                             Random.step Uuid.uuidGenerator appState.seed
@@ -130,10 +134,24 @@ update cfg appState msg model =
                     )
 
                 _ ->
+                    let
+                        updated =
+                            PasswordStrength.updateForm appState (passwordField appState) formMsg model.form model.passwordStrength
+                    in
                     ( appState.seed
-                    , { model | form = Form.update (UserCreateForm.validation appState) formMsg model.form }
-                    , Cmd.none
+                    , { model | form = updated.form, passwordStrength = updated.passwordStrength }
+                    , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (FormMsg Form.Submit)) updated
                     )
+
+        PasswordStrengthMsg passwordStrengthMsg ->
+            let
+                updated =
+                    PasswordStrength.update appState (passwordField appState) passwordStrengthMsg model.form model.passwordStrength
+            in
+            ( appState.seed
+            , { model | form = updated.form, passwordStrength = updated.passwordStrength }
+            , PasswordStrength.toCmd (cfg.wrapMsg << PasswordStrengthMsg) (cfg.wrapMsg (FormMsg Form.Submit)) updated
+            )
 
         PostUserCompleted result ->
             case result of
@@ -151,6 +169,11 @@ update cfg appState msg model =
                         , CommonForm.focusErrorSummary
                         ]
                     )
+
+
+passwordField : AppState -> PasswordStrength.PasswordField UserCreateForm
+passwordField appState =
+    { path = "password", validation = UserCreateForm.validation appState }
 
 
 

@@ -95,6 +95,7 @@ Three decisions worth knowing:
 -}
 
 import Common.Components.Markdown as Markdown
+import Common.Components.PasswordStrength as PasswordStrength
 import Common.Components.UiWords as UiWords
 import Common.Data.Context exposing (WithLocale)
 import Common.Utils.ByteUnits as ByteUnits
@@ -201,14 +202,16 @@ password appState form path label =
 
 {-| A new password, with the meter.
 
-The meter is `Ui.Field`'s; the verdict is worked out here, with the same
-library, so that its words are translated — the local meter in `Ui` cannot know
+The meter is `Ui.Field`'s. Its verdict is the server's where the client has the
+server judge it (`Common.Components.PasswordStrength`, which the page keeps and
+feeds the password); otherwise it is worked out here, with the same library as
+`Ui`'s local meter, so that its words are translated — that meter cannot know
 `Gettext`. Nothing is said about an empty field. Pair it with
 `withAutocomplete "new-password"`.
 
 -}
-passwordWithStrength : WithLocale a -> Form FormError o -> String -> String -> Field
-passwordWithStrength appState form path label =
+passwordWithStrength : WithLocale a -> PasswordStrength.Model -> Form FormError o -> String -> String -> Field
+passwordWithStrength appState passwordStrength form path label =
     let
         value =
             stringValue form path
@@ -218,7 +221,12 @@ passwordWithStrength appState form path label =
                 field
 
             else
-                UiField.withStrengthOf (strength appState value) field
+                case PasswordStrength.toUiStrength appState passwordStrength of
+                    Just checked ->
+                        UiField.withStrengthOf checked field
+
+                    Nothing ->
+                        UiField.withStrengthOf (strength appState value) field
     in
     password appState form path label
         |> mapUi withMeter

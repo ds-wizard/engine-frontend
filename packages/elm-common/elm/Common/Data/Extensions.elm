@@ -30,6 +30,11 @@ everything empty (`none`).
   - **`openIdLink`** — something of the client's own an OpenID configuration
     may have one of, on its detail: a link to it when there is one, a button
     that creates it when there is not (`LinkedEntity`).
+  - **`passwordStrengthCheck`** — the meter of a new password shows the
+    server's verdict (`POST /password-strength`, `Common.Components.PasswordStrength`)
+    instead of one worked out in the browser, and the form leaves judging the
+    strength to the server. Only a client whose server answers that endpoint
+    may turn it on.
   - **`integrations`** — integrations the client has built in, offered in the
     knowledge model editor as types of their own and answered in the
     questionnaire from the API (`Common.Data.BuiltInIntegration`).
@@ -48,6 +53,7 @@ type alias Extensions =
     , aiAssistant : Bool
     , openIdLink : Maybe LinkedEntity
     , integrations : List BuiltInIntegration
+    , passwordStrengthCheck : Bool
     }
 
 
@@ -109,4 +115,5 @@ none =
     , aiAssistant = False
     , openIdLink = Nothing
     , integrations = []
+    , passwordStrengthCheck = False
     }

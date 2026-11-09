@@ -48,21 +48,35 @@ confirmation confirmationField =
     V.andThen validate
 
 
-password : { a | locale : Gettext.Locale } -> Validation FormError String
+{-| A new password. Where the server judges its strength
+(`Extensions.passwordStrengthCheck`), any is let through, and the server's
+answer is what stops a weak one: a verdict worked out here would disagree with
+it both ways.
+-}
+password : { a | locale : Gettext.Locale, extensions : { b | passwordStrengthCheck : Bool } } -> Validation FormError String
 password appState =
     V.string
         |> V.andThen
             (\value ->
-                case (Rumkin.getStats value).strength of
-                    Rumkin.VeryWeak ->
+                case localStrength appState.extensions.passwordStrengthCheck value of
+                    Just Rumkin.VeryWeak ->
                         V.fail (V.customError (FormError.Error (gettext "This is a very weak password." appState.locale)))
 
-                    Rumkin.Weak ->
+                    Just Rumkin.Weak ->
                         V.fail (V.customError (FormError.Error (gettext "This is a weak password." appState.locale)))
 
                     _ ->
                         V.succeed value
             )
+
+
+localStrength : Bool -> String -> Maybe Rumkin.Strength
+localStrength checkedByServer value =
+    if checkedByServer then
+        Nothing
+
+    else
+        Just (Rumkin.getStats value).strength
 
 
 ifElse :
