@@ -18,7 +18,7 @@
 //   dialog and cannot be clicked, which is a field that does not work at all.
 
 const assert = require('assert')
-const { MODES, calendarHost, calendarOffset, calendarPlacement, optionsFor, placeholderFor, wordsFrom } = require('../js/date-picker')
+const { MODES, calendarHost, calendarOffset, calendarPlacement, optionsFor, placeAgainOnceSettled, placeholderFor, wordsFrom } = require('../js/date-picker')
 
 assert.deepStrictEqual(Object.keys(MODES).sort(), ['date', 'datetime', 'time'])
 
@@ -103,4 +103,29 @@ assert.strictEqual(calendarOffset({
     viewportHeight: 200
 }).flip, false)
 
-console.log('ui date picker contract OK')
+// A calendar opened while its dialog is still opening is placed again once
+// the dialog has settled, finished or canceled; one opened in a dialog that
+// has, or on the page, is left where flatpickr put it.
+function dialogAnimating(playState, finished) {
+    finished.catch(() => {})
+    return { getAnimations: () => [{ playState, finished }] }
+}
+
+;(async () => {
+    const tick = () => new Promise((resolve) => setImmediate(resolve))
+    const placed = []
+    const place = (what) => () => placed.push(what)
+
+    placeAgainOnceSettled(dialogAnimating('running', Promise.resolve()), place('finished'))
+    placeAgainOnceSettled(dialogAnimating('running', Promise.reject(new Error('canceled'))), place('canceled'))
+    placeAgainOnceSettled(dialogAnimating('finished', Promise.resolve()), place('settled already'))
+    placeAgainOnceSettled({}, place('cannot tell'))
+    placeAgainOnceSettled(null, place('on the page'))
+    await tick()
+    assert.deepStrictEqual(placed.sort(), ['canceled', 'finished'])
+
+    console.log('ui date picker contract OK')
+})().catch((error) => {
+    console.error(error)
+    process.exit(1)
+})

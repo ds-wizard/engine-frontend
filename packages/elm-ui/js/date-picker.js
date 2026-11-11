@@ -32,6 +32,7 @@
 //                glyph, which is what it was doing usefully.
 
 const flatpickr = require('flatpickr').default
+const { isAnimating, settled } = require('./settle')
 
 // The value the field carries is the machine-readable one, and it does not
 // depend on where the reader is: a date is a calendar date, a time is a wall
@@ -122,6 +123,15 @@ function calendarOffset({ field, host, hostBorder, calendarHeight, viewportHeigh
         left: field.left - host.left - hostBorder.left,
         flip
     }
+}
+
+// A calendar opened while its dialog is still opening — a date field that is
+// the dialog's first field opens on the focus the dialog gives it — is placed
+// against a field that is still moving and scaling, and is left up to a few
+// pixels off it. It is placed again once the dialog has settled.
+function placeAgainOnceSettled(dialog, place) {
+    if (!dialog || !isAnimating(dialog)) return
+    settled(dialog).then(place)
 }
 
 function placeholderFor(mode) {
@@ -354,6 +364,7 @@ function define() {
             // first shows it. Only on the path where we do the measuring —
             // a popover is positioned against the page, as flatpickr assumes.
             if (this._placement === 'dialog') requestAnimationFrame(() => this._positionInHost())
+            placeAgainOnceSettled(this._hostDialog, () => this._reposition())
 
             this._watchScroll()
         }
@@ -420,15 +431,17 @@ function define() {
         _watchScroll() {
             if (this._scrollListener) return
 
-            this._scrollListener = () => {
-                if (!this._instance || !this._instance.isOpen) return
-
-                if (this._placement === 'dialog') this._positionInHost()
-                else this._instance._positionCalendar(this._visibleInput)
-            }
+            this._scrollListener = () => this._reposition()
 
             window.addEventListener('scroll', this._scrollListener, true)
             window.addEventListener('resize', this._scrollListener)
+        }
+
+        _reposition() {
+            if (!this._instance || !this._instance.isOpen) return
+
+            if (this._placement === 'dialog') this._positionInHost()
+            else this._instance._positionCalendar(this._visibleInput)
         }
 
         _unwatchScroll() {
@@ -543,4 +556,4 @@ if (typeof customElements !== 'undefined' && typeof HTMLElement !== 'undefined')
     define()
 }
 
-module.exports = { MODES, calendarHost, calendarOffset, calendarPlacement, optionsFor, placeholderFor, wordsFrom }
+module.exports = { MODES, calendarHost, calendarOffset, calendarPlacement, optionsFor, placeAgainOnceSettled, placeholderFor, wordsFrom }
