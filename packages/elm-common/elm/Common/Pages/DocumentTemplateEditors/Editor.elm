@@ -190,6 +190,10 @@ type alias Model =
     -- Which dialog is open, and what has been typed into it.
     , dialog : Dialog
     , dialogName : String
+
+    -- Whether the name has been submitted, so that a missing one is said to be
+    -- missing only once someone has tried to go on without it.
+    , dialogNameSubmitted : Bool
     , addMenu : Menu.Model
 
     -- Where a move is going, once a folder has been chosen, and which folders
@@ -239,6 +243,7 @@ initialModel appState uuid =
     , newFolders = []
     , dialog = NoDialog
     , dialogName = ""
+    , dialogNameSubmitted = False
     , addMenu = Menu.init
     , moveTarget = Nothing
     , moveExpanded = Set.empty
@@ -853,6 +858,7 @@ update cfg appState msg model =
                 { model
                     | dialog = dialog
                     , dialogResult = Unset
+                    , dialogNameSubmitted = False
                     , dialogName =
                         case dialog of
                             RenameDialog ->
@@ -898,47 +904,54 @@ update cfg appState msg model =
                 }
 
         ConfirmDialog ->
-            case ( model.dialog, model.selected ) of
-                ( AddFolderDialog, _ ) ->
-                    let
-                        path =
-                            into (Files.pathOf (filesConfigOf model) model.selected) model.dialogName
-                    in
-                    -- Selected, because a folder is made in order to put
-                    -- something in it: the next Add goes there without anybody
-                    -- having to point at it first.
-                    quiet
-                        { model
-                            | newFolders = model.newFolders ++ [ path ]
-                            , selected = Files.SelectedFolder path
-                            , dialog = NoDialog
-                            , dialogName = ""
-                        }
+            -- A name is the last part of a path, and without one there is a
+            -- file or a folder that cannot be told apart in the list. Nothing
+            -- is sent; the field says what is missing.
+            if namesSomething model.dialog && String.isEmpty (String.trim model.dialogName) then
+                plain ( { model | dialogNameSubmitted = True }, Dom.focus ("#" ++ dialogNameId) )
 
-                ( RenameDialog, Files.SelectedFolder path ) ->
-                    plain (moveFolderTo appState model path (into (Files.parentOf path) model.dialogName))
-
-                ( MoveDialog, Files.SelectedFolder path ) ->
-                    plain (moveFolderTo appState model path (into (Maybe.withDefault "" model.moveTarget) (Files.nameOf path)))
-
-                ( DeleteDialog, Files.SelectedFolder path ) ->
-                    if isClientFolder model path then
-                        -- Nothing to ask the server: this folder is a name the
-                        -- client is holding, and dropping the name is the whole
-                        -- of the delete.
+            else
+                case ( model.dialog, model.selected ) of
+                    ( AddFolderDialog, _ ) ->
+                        let
+                            path =
+                                into (Files.pathOf (filesConfigOf model) model.selected) model.dialogName
+                        in
+                        -- Selected, because a folder is made in order to put
+                        -- something in it: the next Add goes there without anybody
+                        -- having to point at it first.
                         quiet
                             { model
-                                | newFolders = List.filterNot (Files.isUnder path) model.newFolders
-                                , selected = Files.NoSelection
+                                | newFolders = model.newFolders ++ [ path ]
+                                , selected = Files.SelectedFolder path
                                 , dialog = NoDialog
-                                , dialogResult = Unset
+                                , dialogName = ""
                             }
 
-                    else
-                        plain ( { model | dialogResult = Loading }, confirmDialog appState model )
+                    ( RenameDialog, Files.SelectedFolder path ) ->
+                        plain (moveFolderTo appState model path (into (Files.parentOf path) model.dialogName))
 
-                _ ->
-                    plain ( { model | dialogResult = Loading }, confirmDialog appState model )
+                    ( MoveDialog, Files.SelectedFolder path ) ->
+                        plain (moveFolderTo appState model path (into (Maybe.withDefault "" model.moveTarget) (Files.nameOf path)))
+
+                    ( DeleteDialog, Files.SelectedFolder path ) ->
+                        if isClientFolder model path then
+                            -- Nothing to ask the server: this folder is a name the
+                            -- client is holding, and dropping the name is the whole
+                            -- of the delete.
+                            quiet
+                                { model
+                                    | newFolders = List.filterNot (Files.isUnder path) model.newFolders
+                                    , selected = Files.NoSelection
+                                    , dialog = NoDialog
+                                    , dialogResult = Unset
+                                }
+
+                        else
+                            plain ( { model | dialogResult = Loading }, confirmDialog appState model )
+
+                    _ ->
+                        plain ( { model | dialogResult = Loading }, confirmDialog appState model )
 
         DeletedFolder path result ->
             case result of
@@ -2310,15 +2323,48 @@ viewDialogs appState model =
                 model
                 (dialogTitle appState model.dialog)
                 (dialogConfirm appState model.dialog)
-                [ Field.toHtml
-                    (Field.input
-                        { id = "dt-editor-dialog-name"
-                        , label = gettext "Name" appState.locale
-                        , value = model.dialogName
-                        , onInput = SetDialogName
-                        }
-                    )
+                [ Field.input
+                    { id = dialogNameId
+                    , label = gettext "Name" appState.locale
+                    , value = model.dialogName
+                    , onInput = SetDialogName
+                    }
+                    |> Field.withRequired True
+                    |> Field.withError (dialogNameError appState model)
+                    |> Field.toHtml
                 ]
+
+
+dialogNameId : String
+dialogNameId =
+    "dt-editor-dialog-name"
+
+
+dialogNameError : AppState -> Model -> Maybe String
+dialogNameError appState model =
+    if model.dialogNameSubmitted && String.isEmpty (String.trim model.dialogName) then
+        Just (String.format (gettext "%s cannot be empty." appState.locale) [ gettext "Name" appState.locale ])
+
+    else
+        Nothing
+
+
+{-| The dialogs whose one field is the name of what they make or rename.
+-}
+namesSomething : Dialog -> Bool
+namesSomething dialog =
+    case dialog of
+        AddFileDialog ->
+            True
+
+        AddFolderDialog ->
+            True
+
+        RenameDialog ->
+            True
+
+        _ ->
+            False
 
 
 dialogShell : AppState -> Model -> String -> String -> List (Html Msg) -> Html Msg
