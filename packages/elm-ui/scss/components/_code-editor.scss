@@ -113,6 +113,27 @@ ui-code-editor {
   font: inherit;
 }
 
+// The panel's fields and buttons. CodeMirror's own are light whatever the page
+// is — a white field, a pale gradient — and take their text color from the
+// panel, so in dark mode they were light text on a light ground. These are the
+// system's control colors instead, which change with the theme.
+.ui-code-editor .cm-panel .cm-textfield,
+.ui-code-editor .cm-panel .cm-button {
+  border: 1px solid var(--ui-border-control);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-text);
+}
+
+.ui-code-editor .cm-panel .cm-button {
+  &:hover { background: var(--ui-state-hover); }
+  &:active { background: var(--ui-state-active); }
+}
+
+.ui-code-editor .cm-panel input[type='checkbox'] {
+  accent-color: var(--ui-brand-strong);
+}
+
 .cm-tooltip {
   border: 1px solid var(--ui-border-subtle);
   border-radius: var(--ui-radius-control);
