@@ -98,10 +98,13 @@
     }
   }
 
+  // A rule divides the text into parts, so it keeps further from both than
+  // the gap between two paragraphs, or it reads as an underline of the one
+  // above it. Like a heading's, a margin added to the container's gap.
   hr {
     block-size: 1px;
     border: 0;
-    margin: 0;
+    margin: var(--ui-space-4) 0;
     background: var(--ui-border-subtle);
   }
 
