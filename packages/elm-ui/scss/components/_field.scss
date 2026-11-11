@@ -680,6 +680,12 @@
 
 // The bars are the ends of the box, so they take its corners — one radius less
 // the border they sit inside, or the gray square would show through the curve.
+// A switch in the bar above (`Ui.ModeSwitch`) goes to its end, where the
+// markdown editor's toolbar has its own — the same switch in the same place.
+.ui-field__frame-bar--start .ui-mode-switch {
+  margin-inline-start: auto;
+}
+
 .ui-field__frame-bar--start {
   border-block-end: 1px solid var(--ui-border-subtle);
   border-start-start-radius: calc(var(--ui-radius-control) - 1px);
@@ -702,6 +708,42 @@
 // what the control fills — the same move the markdown editor makes.
 .ui-field__frame > .ui-input:focus-visible {
   outline: none;
+}
+
+// The code editor in a frame, the same: the frame is the box, and the ring
+// the editor would draw round itself goes round the frame instead.
+.ui-field__frame > .ui-code-editor {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+
+  // Where no bar comes after it (or before it), the editor is the end of the
+  // box, so it takes the box's corners as the bars do — one radius less the
+  // border. Its gutter has a background of its own and would otherwise square
+  // off the frame's curve; the editor clips it (`overflow: hidden`).
+  &:first-child {
+    border-start-start-radius: calc(var(--ui-radius-control) - 1px);
+    border-start-end-radius: calc(var(--ui-radius-control) - 1px);
+  }
+
+  &:last-child {
+    border-end-start-radius: calc(var(--ui-radius-control) - 1px);
+    border-end-end-radius: calc(var(--ui-radius-control) - 1px);
+  }
+
+  // WCAG 2.4.7 ring moved: to .ui-field__frame, below.
+  &:focus-within {
+    outline: none;
+  }
+}
+
+.ui-field__frame:has(> .ui-code-editor:focus-within) {
+  outline: var(--ui-focus-ring-width) solid var(--ui-focus-ring);
+  outline-offset: var(--ui-focus-ring-offset);
+}
+
+.ui-field__frame:has(> .ui-code-editor.is-invalid) {
+  border-color: var(--ui-danger-border);
 }
 
 .ui-field__frame-instead {
