@@ -736,13 +736,17 @@ onKeyboard highlighted count options =
                         "Escape" ->
                             Decode.succeed ( Dismissed, True )
 
+                        -- Enter is the combobox's even with nothing to choose —
+                        -- while the options are loading, or when nothing
+                        -- matches. The search field is a text field, and Enter
+                        -- let through from one submits the form around it.
                         "Enter" ->
                             case List.getAt highlighted options of
                                 Just option ->
                                     Decode.succeed ( Chose option, True )
 
                                 Nothing ->
-                                    Decode.fail "nothing highlighted"
+                                    Decode.succeed ( Noop, True )
 
                         _ ->
                             Decode.fail "not a combobox key"
