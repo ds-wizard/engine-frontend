@@ -29,7 +29,12 @@ uuidStringGenerator =
 
 {-| Verification function to check if the given string is a valid Uuid in the canonical
 representation xxxxxxxx-xxxx-Axxx-Yxxx-xxxxxxxxxxxx where A is the version number between
-[1-5] and Y is in the range [8-B]
+[1-8] and Y is in the range [8-B]
+
+Versions 6 to 8 are RFC 9562's, the time-ordered ones among them: the server
+makes version 7 Uuids, and one that is refused here fails the decoding of
+whatever it is in.
+
 -}
 isValidUuid : String -> Bool
 isValidUuid uuidAsString =
@@ -69,7 +74,7 @@ limitDigitRange8ToB digit =
 
 uuidRegex : Regex.Regex
 uuidRegex =
-    Regex.fromString "^[0-9A-Fa-f]{8,8}-[0-9A-Fa-f]{4,4}-[1-5][0-9A-Fa-f]{3,3}-[8-9A-Ba-b][0-9A-Fa-f]{3,3}-[0-9A-Fa-f]{12,12}$"
+    Regex.fromString "^[0-9A-Fa-f]{8,8}-[0-9A-Fa-f]{4,4}-[1-8][0-9A-Fa-f]{3,3}-[8-9A-Ba-b][0-9A-Fa-f]{3,3}-[0-9A-Fa-f]{12,12}$"
         |> Maybe.withDefault Regex.never
 
 
