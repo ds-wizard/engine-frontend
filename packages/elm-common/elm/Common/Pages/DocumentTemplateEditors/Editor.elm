@@ -165,6 +165,10 @@ type alias Model =
     , collapsed : Set String
     , navResizer : Resizer.Model
 
+    -- The file list on a narrow page, where it is an overlay opened from the
+    -- toolbar rather than a column beside the files.
+    , navOverlayOpen : Bool
+
     -- The settings are the draft itself; this says whether it differs from the
     -- server's copy. The revision counts the changes to it, so a save that
     -- comes back can tell whether anything was changed while it was away.
@@ -225,6 +229,7 @@ initialModel appState uuid =
     , assetCache = Dict.empty
     , collapsed = Set.empty
     , navResizer = Resizer.init (navResizerConfig appState)
+    , navOverlayOpen = False
     , settingsDirty = False
     , settingsRevision = 0
     , previewMode = ProjectPreview
@@ -382,6 +387,7 @@ type Msg
     | FileChanged String String
     | ToggleFolder String Bool
     | NavResizerMsg Resizer.Msg
+    | SetNavOverlay Bool
     | SetDraft DocumentTemplateDraftDetail
     | SavedDraft Int (Result ApiError DocumentTemplateDraftDetail)
     | AddFormat
@@ -601,7 +607,21 @@ update cfg appState msg model =
                 )
 
         Open entry ->
-            plain (openEntry appState { model | groups = Groups.open entry model.groups } entry)
+            let
+                ( opened, openCmd ) =
+                    openEntry appState { model | groups = Groups.open entry model.groups, navOverlayOpen = False } entry
+            in
+            -- On a narrow page the file list is an overlay over the file it has
+            -- just opened, so it gets out of the way, and focus goes to what was
+            -- opened rather than with the list.
+            plain
+                ( opened
+                , if model.navOverlayOpen then
+                    Cmd.batch [ openCmd, Dom.focus ("#" ++ openedId entry) ]
+
+                  else
+                    openCmd
+                )
 
         Activate side entry ->
             quiet { model | groups = Groups.activate side entry model.groups, selected = Files.SelectedEntry entry }
@@ -669,6 +689,22 @@ update cfg appState msg model =
 
         NavResizerMsg resizerMsg ->
             quiet { model | navResizer = Resizer.update resizerMsg model.navResizer }
+
+        SetNavOverlay isOpen ->
+            -- Focus follows the overlay: into it when it opens, back to the
+            -- control that opened it when it closes.
+            plain
+                ( { model | navOverlayOpen = isOpen }
+                , Dom.focus
+                    ("#"
+                        ++ (if isOpen then
+                                Workspace.navId workspaceId
+
+                            else
+                                Workspace.navToggleId workspaceId
+                           )
+                    )
+                )
 
         LoadPreview ->
             plain ( { model | preview = Loading, previewUnsupported = Nothing }, DocumentTemplateDraftsApi.getPreview appState model.uuid GotPreview )
@@ -1870,7 +1906,7 @@ viewFilesTab appState model =
     in
     Workspace.toHtml
         (Workspace.workspace
-            { id = "dt-editor"
+            { id = workspaceId
             , main = [ Files.view config (viewOpen appState model), viewDialogs appState model ]
             }
             -- The editor is the content area, not something set into it: the
@@ -1884,8 +1920,8 @@ viewFilesTab appState model =
                 , resizer = model.navResizer
                 , toResizerMsg = NavResizerMsg
                 , resizerWords = UiWords.resizer appState (gettext "Resize the file list" appState.locale)
-                , overlayOpen = False
-                , onOverlay = always (ToggleFolder "" True)
+                , overlayOpen = model.navOverlayOpen
+                , onOverlay = SetNavOverlay
                 , toggleLabel = gettext "Files" appState.locale
                 , closeLabel = gettext "Close the file list" appState.locale
                 }
@@ -2056,6 +2092,25 @@ itself — so it is what focus is moved to.
 fileEditorId : String -> String
 fileEditorId fileUuid =
     "dt-editor-file-" ++ fileUuid
+
+
+workspaceId : String
+workspaceId =
+    "dt-editor"
+
+
+{-| Where focus goes when an entry is opened from the narrow file list: a file's
+editor, which the port waits for, or the work itself for an asset, which has
+nothing to type into.
+-}
+openedId : Files.Entry -> String
+openedId entry =
+    case entry of
+        Files.File fileUuid ->
+            fileEditorId fileUuid
+
+        Files.Asset _ ->
+            Workspace.mainId workspaceId
 
 
 {-| What the template is called, which is what the top of its tree is called.
