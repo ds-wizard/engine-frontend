@@ -21,6 +21,7 @@ module Common.Components.Form.Field exposing
     , listWithHint
     , listWithHintMarkdown
     , markdown
+    , markdownOrHtml
     , number
     , password
     , passwordWithStrength
@@ -101,6 +102,7 @@ import Common.Data.Context exposing (WithLocale)
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.Form as FormUtils
 import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.MarkdownOrHtml as MarkdownOrHtml
 import Form exposing (Form)
 import Form.Field
 import Form.Validate exposing (Validation)
@@ -115,6 +117,8 @@ import Ui.Field as UiField
 import Ui.FileUpload as FileUpload
 import Ui.Icon exposing (Icon)
 import Ui.ListField as ListField
+import Ui.ModeSwitch as ModeSwitch
+import Ui.Prose as Prose
 import Ui.Text as Text
 import Version exposing (Version)
 
@@ -441,6 +445,69 @@ code appState form path label language =
         form
         path
         label
+
+
+{-| Text that may be HTML as well as Markdown — what `Common.Utils.MarkdownOrHtml`
+renders — written as source in the code editor, with a switch over it between
+the source and what it renders to.
+
+It is not `markdown`: the Markdown editor parses what it is given into its own
+document and writes Markdown back, and HTML does not survive that. The code
+editor keeps the text exactly as it was typed.
+
+Whether the preview is showing is kept in the form, in a helper field next to
+the value (`markdownOrHtmlPreviewPath`), as `secret` keeps whether its value is
+showing: the whole field stays in `Form.Msg`, and the helper's name ends in
+`__`, so looking at the preview is not an unsaved change.
+
+-}
+markdownOrHtml : WithLocale a -> Form FormError o -> String -> String -> Field
+markdownOrHtml appState form path label =
+    let
+        previewPath =
+            markdownOrHtmlPreviewPath path
+
+        previewing =
+            Maybe.withDefault False (Form.getFieldAsBool previewPath form).value
+
+        setPreviewing =
+            Form.Input previewPath Form.Checkbox << Form.Field.Bool
+
+        switch =
+            ModeSwitch.toHtml
+                { label = label
+                , options =
+                    [ ModeSwitch.option
+                        { label = gettext "Editor" appState.locale
+                        , chosen = not previewing
+                        , onChoose = setPreviewing False
+                        }
+                        |> ModeSwitch.withTestId (fieldId path ++ "_mode_editor")
+                    , ModeSwitch.option
+                        { label = gettext "Preview" appState.locale
+                        , chosen = previewing
+                        , onChoose = setPreviewing True
+                        }
+                        |> ModeSwitch.withTestId (fieldId path ++ "_mode_preview")
+                    ]
+                }
+
+        preview =
+            if previewing then
+                Just (Prose.toHtml [ MarkdownOrHtml.toHtml [] (stringValue form path) ])
+
+            else
+                Nothing
+    in
+    code appState form path label "html"
+        |> mapUi (UiField.withFrame { header = [ switch ], footer = [], instead = preview })
+
+
+{-| Where `markdownOrHtml` keeps whether the preview is showing.
+-}
+markdownOrHtmlPreviewPath : String -> String
+markdownOrHtmlPreviewPath path =
+    path ++ "-preview__"
 
 
 {-| A color as a hex string. `withSwatches` for a palette.
