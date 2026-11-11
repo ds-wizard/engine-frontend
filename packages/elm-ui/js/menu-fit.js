@@ -24,6 +24,24 @@
 // scrolls where neither has room for all of it. A field scrolled out of the
 // body's view takes its popup with it rather than leaving it hanging over the
 // header or the footer.
+//
+// Not while the dialog is animating. Opening, it is moved and scaled, and a
+// transformed box is what a fixed box inside it is placed against and clipped
+// by, instead of the window: coordinates measured from the window land as far
+// off as the dialog is from the window's corner. Measuring where the popup
+// landed and correcting for it raced the animation — in Firefox, which runs it
+// off the main thread, the measurement could be a frame behind the screen, and
+// the popup jumped between two wrong places and stayed in one. So the popup is
+// hidden until every animation of its dialog has settled, finished or
+// canceled, and placed then, against the window, once. Hidden by its opacity,
+// not its visibility: a combobox moves focus into its search field as it opens,
+// and an element that is not visible cannot take it.
+//
+// It is placed again when the dialog changes size — it is centered, so it moves
+// when it grows — and when a font arrives, which moves the field without
+// anything else saying so.
+
+const { isAnimating, settled } = require('./settle')
 
 const LIST = 'ui-menu__list'
 const OVER = 'ui-filter-menu--header'
@@ -74,10 +92,45 @@ function popupParts(popup) {
     }
 }
 
+// The dialogs whose animations are being waited for, so a dialog is waited
+// for once however many times its popups are placed meanwhile.
+const settling = new WeakSet()
+
+// Hidden until the dialog's animations are over, then placed with everything
+// else.
+function afterAnimations(dialog, then) {
+    if (settling.has(dialog)) return
+    settling.add(dialog)
+    settled(dialog).then(() => {
+        settling.delete(dialog)
+        then()
+    })
+}
+
+let resizes = null
+
+function watchSize(dialog, field) {
+    if (typeof ResizeObserver === 'undefined') return
+    if (!resizes) resizes = new ResizeObserver(() => placeAll())
+    resizes.observe(dialog)
+    resizes.observe(field)
+}
+
 function placeInDialog(popup) {
     if (popup.hidden) return
     const {field, body, gap, list} = popupParts(popup)
     if (!field || !body) return
+
+    const dialog = popup.closest('dialog') || body
+    if (isAnimating(dialog)) {
+        popup.style.opacity = '0'
+        popup.style.pointerEvents = 'none'
+        afterAnimations(dialog, placeAll)
+        return
+    }
+    popup.style.opacity = ''
+    popup.style.pointerEvents = ''
+    watchSize(dialog, field)
 
     const rect = field.getBoundingClientRect()
     const view = body.getBoundingClientRect()
@@ -98,17 +151,6 @@ function placeInDialog(popup) {
         list.style.maxBlockSize = `${Math.max(list.offsetHeight - (height - room), MIN_LIST_HEIGHT)}px`
     }
     if (up) popup.style.top = `${rect.top - gap - popup.offsetHeight}px`
-
-    // While the dialog is still animating in, its transform makes it what the
-    // popup is fixed to rather than the window: the popup is moved by however
-    // far it landed from where it was put, and placed again once the dialog
-    // has settled.
-    const landed = popup.getBoundingClientRect()
-    const top = parseFloat(popup.style.top)
-    if (Math.abs(landed.left - rect.left) > 0.5 || Math.abs(landed.top - top) > 0.5) {
-        popup.style.left = `${2 * rect.left - landed.left}px`
-        popup.style.top = `${2 * top - landed.top}px`
-    }
 }
 
 function place(list) {
@@ -172,12 +214,7 @@ if (typeof document !== 'undefined') {
 
     window.addEventListener('resize', schedule)
     document.addEventListener('scroll', placeAll, {capture: true, passive: true})
-
-    // A dialog that has finished opening is no longer what its popups are
-    // fixed to.
-    document.addEventListener('transitionend', (event) => {
-        if (event.target.classList && event.target.classList.contains('ui-dialog')) placeAll()
-    })
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', schedule)
 }
 
-module.exports = {maxHeight, overLeft, opensAbove, MARGIN, MIN_HEIGHT}
+module.exports = {maxHeight, overLeft, opensAbove, placeAll, MARGIN, MIN_HEIGHT}
