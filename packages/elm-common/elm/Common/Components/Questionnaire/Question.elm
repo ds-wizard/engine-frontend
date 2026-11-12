@@ -1025,9 +1025,24 @@ viewIntegrationPlugin locale actions node flags answeredAt replyString project c
         content =
             case pluginOf node of
                 Just pluginData ->
-                    if answered && not pluginData.rendersReply then
-                        div [ class "c-questionnaire-read-only-text", TestId.attribute "questionnaire_read-only-text" ]
-                            [ Markdown.view { headingOffset = 3 } (Maybe.unwrap "" (ReplyValue.getStringReply << .value) mbReply) ]
+                    let
+                        readOnlyText =
+                            div [ class "c-questionnaire-read-only-text", TestId.attribute "questionnaire_read-only-text" ]
+                                [ Markdown.view { headingOffset = 3 } (Maybe.unwrap "" (ReplyValue.getStringReply << .value) mbReply) ]
+                    in
+                    -- The plugin protocol has no read-only state, so a plugin's
+                    -- element is always one to answer with. Where nothing may be
+                    -- answered it is not drawn: the reply is shown as text, and
+                    -- there is nothing to choose without one.
+                    if Flags.isReadOnly flags then
+                        if answered then
+                            readOnlyText
+
+                        else
+                            text ""
+
+                    else if answered && not pluginData.rendersReply then
+                        readOnlyText
 
                     else
                         PluginElement.element pluginData.pluginElement
