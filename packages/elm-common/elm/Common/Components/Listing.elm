@@ -29,6 +29,11 @@ Responses are tagged with the query string and filters they were asked for, and
 one that no longer matches is dropped, so a slow response to an old search never
 replaces a newer one.
 
+A typed search is applied once typing has paused, and then only from the page:
+the pause ends in a pending query, which `subscriptions` applies on the next
+frame. A page that has been left is no longer subscribed to, so a search still
+waiting when someone moved on never replaces the URL of where they went.
+
 @docs Model, Msg, initialModel, initialModelWithFilters, init
 
 
@@ -111,6 +116,7 @@ The view half is `SearchFilter` in `ViewConfig.filters`, with the same id.
 
 import ActionResult exposing (ActionResult)
 import Browser.Dom
+import Browser.Events
 import Browser.Navigation as Navigation
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
@@ -167,6 +173,7 @@ type alias State a =
     , filters : PaginationQueryFilters
     , queryInput : String
     , queryDebouncer : Debouncer (Msg a)
+    , pendingQuery : Maybe String
     , searchDebouncer : Debouncer (Msg a)
     , searches : Dict String SearchState
     , menus : Dict String Menu.Model
@@ -203,6 +210,7 @@ initialModelWithFilters pqs initialFilters =
         , filters = initialFilters
         , queryInput = Maybe.withDefault "" pqs.q
         , queryDebouncer = Debouncer.toDebouncer (Debouncer.debounce 500)
+        , pendingQuery = Nothing
         , searchDebouncer = Debouncer.toDebouncer (Debouncer.debounce 500)
         , searches = Dict.empty
         , menus = Dict.empty
@@ -289,6 +297,7 @@ type Msg a
     | Cleared
     | QueryInput String
     | QueryApply String
+    | PendingQueryApplied
     | QueryDebouncerMsg (Debouncer.Msg (Msg a))
     | SearchInput String String
     | SearchApply String String
@@ -486,7 +495,7 @@ update appState cfg msg ((Model state) as model) =
                 ( Model navigated, cmd ) =
                     navigate cfg validFilters pqs model
             in
-            ( Model { navigated | queryInput = "" }, cmd )
+            ( Model { navigated | queryInput = "", pendingQuery = Nothing }, cmd )
                 |> withFocusOnHeading cfg
 
         QueryInput value ->
@@ -496,7 +505,15 @@ update appState cfg msg ((Model state) as model) =
                 (Model { state | queryInput = value })
 
         QueryApply value ->
-            navigate cfg state.filters (Internal.applyQuery value state.paginationQueryString) model
+            ( Model { state | pendingQuery = Just value }, Cmd.none )
+
+        PendingQueryApplied ->
+            case state.pendingQuery of
+                Just value ->
+                    navigate cfg state.filters (Internal.applyQuery value state.paginationQueryString) (Model { state | pendingQuery = Nothing })
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         QueryDebouncerMsg debouncerMsg ->
             Debouncer.update (update appState cfg)
@@ -703,9 +720,19 @@ getMenu menuId menus =
 -}
 subscriptions : Model a -> Sub (Msg a)
 subscriptions (Model state) =
+    let
+        pendingQuery =
+            case state.pendingQuery of
+                Just _ ->
+                    Browser.Events.onAnimationFrame (always PendingQueryApplied)
+
+                Nothing ->
+                    Sub.none
+    in
     state.menus
         |> Dict.toList
         |> List.map (\( menuId, menu ) -> Sub.map (MenuMsg menuId 0) (Menu.subscriptions menuId menu))
+        |> (::) pendingQuery
         |> Sub.batch
 
 
