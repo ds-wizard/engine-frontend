@@ -23,13 +23,16 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.ProjectVersion exposing (ProjectVersion)
 import Common.Api.Projects as ProjectsApi
 import Common.Data.AppState exposing (AppState)
+import Common.Ports.Dom as Dom
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
+import String.Format as String
 import Task
+import Ui.Alert as Alert
 import Ui.Field as Field
 import Ui.Modal as Modal
 import Uuid exposing (Uuid)
@@ -41,6 +44,10 @@ type alias Model =
     , name_ : String
     , description : String
     , result : ActionResult ProjectVersion
+
+    -- Whether the dialog has been submitted, so that a missing name is said
+    -- to be missing only once someone has tried to save without it.
+    , submitted : Bool
     }
 
 
@@ -53,14 +60,14 @@ type Open
 
 init : Uuid -> Model
 init projectUuid =
-    { projectUuid = projectUuid, open = Nothing, name_ = "", description = "", result = Unset }
+    { projectUuid = projectUuid, open = Nothing, name_ = "", description = "", result = Unset, submitted = False }
 
 
 {-| Name the change `eventUuid`.
 -}
 name : Uuid -> Model -> Model
 name eventUuid model =
-    { model | open = Just (New eventUuid), name_ = "", description = "", result = Unset }
+    { model | open = Just (New eventUuid), name_ = "", description = "", result = Unset, submitted = False }
 
 
 rename : ProjectVersion -> Model -> Model
@@ -70,6 +77,7 @@ rename version model =
         , name_ = version.name
         , description = Maybe.withDefault "" version.description
         , result = Unset
+        , submitted = False
     }
 
 
@@ -100,7 +108,7 @@ update appState cfg msg model =
             case model.open of
                 Just open ->
                     if String.isEmpty (String.trim model.name_) then
-                        ( model, Cmd.none )
+                        ( { model | submitted = True }, Dom.focus ("#" ++ nameId) )
 
                     else
                         let
@@ -119,7 +127,7 @@ update appState cfg msg model =
                                     Existing version ->
                                         ProjectsApi.putVersion appState model.projectUuid version.uuid body (cfg.wrapMsg << Saved)
                         in
-                        ( { model | result = Loading }, request )
+                        ( { model | result = Loading, submitted = True }, request )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -173,15 +181,15 @@ view appState model =
         , open = Maybe.isJust model.open
         , onClose = Close
         , body =
-            [ Field.toHtml
-                (Field.input
-                    { id = "project-version-name"
-                    , label = gettext "Name" appState.locale
-                    , value = model.name_
-                    , onInput = NameTyped
-                    }
-                    |> Field.withRequired True
-                )
+            [ Field.input
+                { id = nameId
+                , label = gettext "Name" appState.locale
+                , value = model.name_
+                , onInput = NameTyped
+                }
+                |> Field.withRequired True
+                |> Field.withError (nameError appState model)
+                |> Field.toHtml
             , Field.toHtml
                 (Field.textarea
                     { id = "project-version-description"
@@ -190,9 +198,29 @@ view appState model =
                     , onInput = DescriptionTyped
                     }
                 )
+            , case model.result of
+                Error message ->
+                    Alert.toHtml (Alert.danger message)
+
+                _ ->
+                    Html.text ""
             ]
         }
         |> Modal.withForm { onSubmit = Submit, submitLabel = gettext "Save" appState.locale }
         |> Modal.withLoading (ActionResult.isLoading model.result)
         |> Modal.withTestId "project-version"
         |> Modal.toHtml
+
+
+nameId : String
+nameId =
+    "project-version-name"
+
+
+nameError : AppState -> Model -> Maybe String
+nameError appState model =
+    if model.submitted && String.isEmpty (String.trim model.name_) then
+        Just (String.format (gettext "%s cannot be empty." appState.locale) [ gettext "Name" appState.locale ])
+
+    else
+        Nothing
