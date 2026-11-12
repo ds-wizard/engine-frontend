@@ -249,8 +249,8 @@ withPasswordStrength appState passwordStrength form path =
                 && ((Form.getFieldAsString path form).liveError == Just (Form.Error.CustomError FormError.PasswordTooWeak))
 
         meter =
-            PasswordStrength.toUiStrength appState { rejected = rejected } passwordStrength
-                |> Maybe.withDefault (localStrength appState { rejected = rejected } value)
+            PasswordStrength.toUiStrength appState passwordStrength
+                |> Maybe.withDefault (localStrength appState value)
 
         withMeter field =
             if String.isEmpty value then
@@ -269,27 +269,20 @@ withPasswordStrength appState passwordStrength form path =
 
 
 {-| The local verdict, in the tones of what `Validate.password` accepts: very
-weak and weak are refused, so they are red, reasonable is yellow. When the
-verdict is the field's error, the words say it is refused, which "weak" alone
-does not.
+weak and weak are refused, so they are red, reasonable is yellow. The words of
+the refused ones say so ("Too weak") while typing as well as once the field is
+invalid, which "weak" alone does not; the bars tell very weak from weak.
 -}
-localStrength : WithLocale a -> { rejected : Bool } -> String -> UiField.Strength
-localStrength appState { rejected } value =
+localStrength : WithLocale a -> String -> UiField.Strength
+localStrength appState value =
     let
-        refused words =
-            if rejected then
-                gettext "Too weak" appState.locale
-
-            else
-                words
-
         ( level, tone, label ) =
             case (Rumkin.getStats value).strength of
                 Rumkin.VeryWeak ->
-                    ( 1, UiField.WeakTone, refused (gettext "Very weak" appState.locale) )
+                    ( 1, UiField.WeakTone, gettext "Too weak" appState.locale )
 
                 Rumkin.Weak ->
-                    ( 2, UiField.WeakTone, refused (gettext "Weak" appState.locale) )
+                    ( 2, UiField.WeakTone, gettext "Too weak" appState.locale )
 
                 Rumkin.Reasonable ->
                     ( 3, UiField.FairTone, gettext "Reasonable" appState.locale )

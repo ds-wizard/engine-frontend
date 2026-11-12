@@ -264,24 +264,17 @@ updateModel appState msg ((Model state) as model) =
 on: the field then works the strength out itself. A bar for each of the five
 verdicts, `Risky` lighting the first; the tone is set rather than left to the
 fraction, since only `Strong` is accepted: everything below it is the weak
-tone, four bars of `Safe` included — they are "almost there", but the form
-does not take them, and the field turns red for them when it is left.
+tone, four bars of `Safe` included: the form does not take them.
 
-`rejected` when the verdict is the field's error, shown in place of an error
-message (`Ui.Field.withStrengthAsError`): the words then say that the password
-is not accepted, which "almost there" does not.
+The words say so from the first answer: they are what describes the field
+when it turns invalid on being left (`Ui.Field.withStrengthAsError`), and have
+to say that the password is not accepted, which "almost there" did not — and
+words that changed only then would read as a second verdict on the same
+password.
 
 -}
-toUiStrength : WithLocale a -> { rejected : Bool } -> Model -> Maybe UiField.Strength
-toUiStrength appState { rejected } (Model state) =
-    let
-        notYet encouragement =
-            if rejected then
-                gettext "Not strong enough yet" appState.locale
-
-            else
-                encouragement
-    in
+toUiStrength : WithLocale a -> Model -> Maybe UiField.Strength
+toUiStrength appState (Model state) =
     if not state.enabled then
         Nothing
 
@@ -299,10 +292,10 @@ toUiStrength appState { rejected } (Model state) =
                                     ( 2, UiField.WeakTone, gettext "Password too weak" appState.locale )
 
                                 Moderate ->
-                                    ( 3, UiField.WeakTone, notYet (gettext "Almost there…" appState.locale) )
+                                    ( 3, UiField.WeakTone, gettext "Not strong enough yet" appState.locale )
 
                                 Safe ->
-                                    ( 4, UiField.WeakTone, notYet (gettext "Almost there…" appState.locale) )
+                                    ( 4, UiField.WeakTone, gettext "Not strong enough yet" appState.locale )
 
                                 Strong ->
                                     ( 5, UiField.StrongTone, gettext "Strong password" appState.locale )
