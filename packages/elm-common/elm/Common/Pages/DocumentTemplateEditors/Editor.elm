@@ -191,9 +191,9 @@ type alias Model =
     , dialog : Dialog
     , dialogName : String
 
-    -- Whether the name has been submitted, so that a missing one is said to be
-    -- missing only once someone has tried to go on without it.
-    , dialogNameSubmitted : Bool
+    -- Whether the dialog has been submitted, so that a missing name or file is
+    -- said to be missing only once someone has tried to go on without it.
+    , dialogSubmitted : Bool
     , addMenu : Menu.Model
 
     -- Where a move is going, once a folder has been chosen, and which folders
@@ -243,7 +243,7 @@ initialModel appState uuid =
     , newFolders = []
     , dialog = NoDialog
     , dialogName = ""
-    , dialogNameSubmitted = False
+    , dialogSubmitted = False
     , addMenu = Menu.init
     , moveTarget = Nothing
     , moveExpanded = Set.empty
@@ -419,6 +419,7 @@ type Msg
     | DeletedFolder String (Result ApiError ())
     | Deleted (Result ApiError ())
     | UploadMsg FileUpload.Msg
+    | ClearUpload
     | UploadedAsset (Result ApiError DocumentTemplateAsset)
     | GotUploadContent String String
     | GotFileContentForRename String String (Result ApiError String)
@@ -858,7 +859,7 @@ update cfg appState msg model =
                 { model
                     | dialog = dialog
                     , dialogResult = Unset
-                    , dialogNameSubmitted = False
+                    , dialogSubmitted = False
                     , dialogName =
                         case dialog of
                             RenameDialog ->
@@ -908,7 +909,13 @@ update cfg appState msg model =
             -- file or a folder that cannot be told apart in the list. Nothing
             -- is sent; the field says what is missing.
             if namesSomething model.dialog && String.isEmpty (String.trim model.dialogName) then
-                plain ( { model | dialogNameSubmitted = True }, Dom.focus ("#" ++ dialogNameId) )
+                plain ( { model | dialogSubmitted = True }, Dom.focus ("#" ++ dialogNameId) )
+
+            else if isUploadDialog model.dialog && uploadMissing model then
+                -- Nothing to upload, so nothing is sent and nothing is waited
+                -- for: the field says a file is needed, and the button stays
+                -- ready for when one is chosen.
+                plain ( { model | dialogSubmitted = True }, Dom.focus ("#" ++ uploadId ++ "-button") )
 
             else
                 case ( model.dialog, model.selected ) of
@@ -1036,6 +1043,9 @@ update cfg appState msg model =
                     FileUpload.update { mimes = [ "*/*" ], read = False } uploadMsg model.upload
             in
             plain ( { model | upload = upload }, Cmd.map UploadMsg uploadCmd )
+
+        ClearUpload ->
+            quiet { model | upload = FileUpload.clear }
 
         UploadedAsset result ->
             case result of
@@ -2269,13 +2279,19 @@ viewDialogs appState model =
                 model
                 (gettext "Upload a file" appState.locale)
                 (gettext "Upload" appState.locale)
-                [ FileUpload.toHtml
-                    { toMsg = UploadMsg
+                [ FileUpload.toHtmlWithError (UiWords.fileUpload appState)
+                    { id = uploadId
+                    , toMsg = UploadMsg
                     , label = gettext "File" appState.locale
                     , buttonLabel = gettext "Choose a file" appState.locale
                     , hint = gettext "A text file is added as a file you can edit here. Anything else is stored as an asset." appState.locale
-                    , invalid = False
-                    , onClear = Nothing
+                    , error =
+                        if model.dialogSubmitted && uploadMissing model then
+                            Just (gettext "File is required." appState.locale)
+
+                        else
+                            Nothing
+                    , onClear = Just ClearUpload
                     }
                     model.upload
                 ]
@@ -2340,9 +2356,34 @@ dialogNameId =
     "dt-editor-dialog-name"
 
 
+uploadId : String
+uploadId =
+    "dt-editor-upload"
+
+
+uploadMissing : Model -> Bool
+uploadMissing model =
+    case FileUpload.file model.upload of
+        Just _ ->
+            False
+
+        Nothing ->
+            True
+
+
+isUploadDialog : Dialog -> Bool
+isUploadDialog dialog =
+    case dialog of
+        UploadDialog ->
+            True
+
+        _ ->
+            False
+
+
 dialogNameError : AppState -> Model -> Maybe String
 dialogNameError appState model =
-    if model.dialogNameSubmitted && String.isEmpty (String.trim model.dialogName) then
+    if model.dialogSubmitted && String.isEmpty (String.trim model.dialogName) then
         Just (String.format (gettext "%s cannot be empty." appState.locale) [ gettext "Name" appState.locale ])
 
     else
