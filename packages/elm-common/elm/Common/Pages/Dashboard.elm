@@ -2,6 +2,7 @@ module Common.Pages.Dashboard exposing
     ( Model
     , Msg
     , init
+    , initWithPlansStep
     , initialModel
     , isGuarded
     , subscriptions
@@ -69,7 +70,15 @@ initialModel =
 
 
 init : AppState -> Model -> ( Model, Cmd Msg )
-init =
+init appState =
+    initWithPlansStep (projectsStep appState) appState
+
+
+{-| `init`, with the tour's step to where the reader's plans are given by the
+application, for where they are not the navigation's Projects. `init`'s is.
+-}
+initWithPlansStep : Tour.Step -> AppState -> Model -> ( Model, Cmd Msg )
+initWithPlansStep plansStep =
     \appState _ ->
         let
             model =
@@ -84,29 +93,31 @@ init =
                     |> List.insertIf (Cmd.map UsageMsg (Usage.fetchData appState)) (Usage.enabled appState)
                     |> Cmd.batch
         in
-        ( model, Cmd.batch [ fetchCmd, tour appState ] )
+        ( model, Cmd.batch [ fetchCmd, tour appState plansStep ] )
 
 
-tour : AppState -> Cmd msg
-tour appState =
+projectsStep : AppState -> Tour.Step
+projectsStep appState =
+    { element = Just "#menu_projects"
+    , title = gettext "Projects" appState.locale
+    , description = gettext "Create and manage your data management plans here." appState.locale
+    }
+
+
+tour : AppState -> Tour.Step -> Cmd msg
+tour appState plansStep =
     let
         firstStep =
             { element = Tour.centered
             , title = String.format (gettext "Welcome to %s" appState.locale) [ LookAndFeelConfig.getAppTitle appState.config.lookAndFeel ]
             , description = gettext "We'll guide you through creating your data management plan." appState.locale
             }
-
-        projectsStep =
-            { element = Just "#menu_projects"
-            , title = gettext "Projects" appState.locale
-            , description = gettext "Create and manage your data management plans here." appState.locale
-            }
     in
     Tour.tour appState
         { tourId = TourId.dashboard
         , completedTours = appState.config.tours
         , enabled = appState.config.features.toursEnabled && Session.exists appState.session
-        , steps = [ firstStep, projectsStep ]
+        , steps = [ firstStep, plansStep ]
         }
 
 

@@ -13,6 +13,10 @@
 //   away in the meantime.
 // - The overlay is the modal backdrop role, and there is no animation when the
 //   reader prefers reduced motion.
+// - A step whose element is not on the page is left out: what it points at is
+//   not there for this reader (a navigation item they do not have, a choice the
+//   page does not offer), and a popover pointing at nothing would describe it
+//   anyway.
 const {driver} = require('driver.js')
 const {waitForElement} = require('../utils.js')
 
@@ -23,6 +27,9 @@ module.exports = function (app) {
         if (!config.steps || config.steps.length === 0) return
 
         function startDriver() {
+            const steps = config.steps.filter((step) => !step.element || isOnPage(step.element))
+            if (steps.length === 0) return
+
             const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
             const returnFocusTo = document.activeElement
 
@@ -41,7 +48,7 @@ module.exports = function (app) {
                 // property: the backdrop role already carries its own alpha.
                 overlayColor: 'var(--ui-surface-backdrop)',
                 overlayOpacity: 1,
-                steps: config.steps,
+                steps,
                 onPopoverRender: (popover) => {
                     popover.closeButton.setAttribute('aria-label', config.closeBtnText)
 
@@ -78,6 +85,15 @@ module.exports = function (app) {
                 }
             })
             driverObj.drive()
+        }
+
+        function isOnPage(selector) {
+            try {
+                return document.querySelector(selector) !== null
+            } catch {
+                // A selector this browser cannot read: kept, as before.
+                return true
+            }
         }
 
         setTimeout(() => {

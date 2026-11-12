@@ -266,12 +266,14 @@ init appState selectedProjectTemplateUuid selectedKnowledgeModelUuid =
             else
                 Cmd.none
 
+        -- With counts to wait for, the tour starts when they arrive: they
+        -- decide what the form asks first (`withDefaultMode` in `update`).
         tourCmd =
-            if anythingPreselected then
+            if anythingPreselected || countsPending model then
                 Cmd.none
 
             else
-                tour appState createFromTemplate createCustom
+                tour appState model
     in
     ( model
     , Cmd.batch
@@ -302,27 +304,52 @@ projectTemplatesTypeHintsQueryString pqs =
         |> PaginationQueryString.withSize (Just 50)
 
 
-tour : AppState -> Bool -> Bool -> Cmd msg
-tour appState createFromTemplate createCustom =
+{-| Whether what the form starts from is still being decided: whether there are
+any project templates and knowledge models to start from at all.
+-}
+countsPending : Model -> Bool
+countsPending model =
+    ActionResult.isLoading model.anyProjectTemplates || ActionResult.isLoading model.anyKnowledgeModels
+
+
+{-| The tour of the form as it is drawn. The step after the name is what the
+form then asks: the choice of a starting point only where there is a choice,
+which is not where a workspace has no project templates.
+-}
+tour : AppState -> Model -> Cmd msg
+tour appState model =
     let
+        projectTemplateStep =
+            { element = Tour.byField projectTemplateId
+            , title = gettext "Project Template" appState.locale
+            , description = gettext "Project templates are pre-configured starting points for your project." appState.locale
+            }
+
+        knowledgeModelStep =
+            { element = Tour.byField knowledgeModelId
+            , title = gettext "Knowledge Model" appState.locale
+            , description = gettext "A knowledge model defines the structure of your questionnaire. You can configure the document template and other settings later." appState.locale
+            }
+
         createStep =
-            if createFromTemplate && createCustom then
-                { element = Tour.byId startingPointId
-                , title = gettext "Starting Point" appState.locale
-                , description = gettext "Create a project from a template with preset content, or start from a knowledge model and configure everything yourself." appState.locale
-                }
+            case model.mode of
+                DefaultMode TabsDefaultMode ->
+                    { element = Tour.byId startingPointId
+                    , title = gettext "Starting Point" appState.locale
+                    , description = gettext "Create a project from a template with preset content, or start from a knowledge model and configure everything yourself." appState.locale
+                    }
 
-            else if createFromTemplate then
-                { element = Tour.byField projectTemplateId
-                , title = gettext "Project Template" appState.locale
-                , description = gettext "Project templates are pre-configured starting points for your project." appState.locale
-                }
+                DefaultMode ProjectTemplateDefaultMode ->
+                    projectTemplateStep
 
-            else
-                { element = Tour.byField knowledgeModelId
-                , title = gettext "Knowledge Model" appState.locale
-                , description = gettext "A knowledge model defines the structure of your questionnaire. You can configure the document template and other settings later." appState.locale
-                }
+                FromProjectTemplateMode ->
+                    projectTemplateStep
+
+                DefaultMode KnowledgeModelDefaultMode ->
+                    knowledgeModelStep
+
+                FromKnowledgeModelMode ->
+                    knowledgeModelStep
     in
     Tour.tour appState
         { tourId = TourId.projectsCreate
@@ -382,7 +409,15 @@ update cfg appState msg model =
                 ProjectCreateForm.PackageValidationMode
 
         withDefaultMode ( m, c ) =
-            ( updateDefaultMode appState m, c )
+            let
+                updated =
+                    updateDefaultMode appState m
+            in
+            if countsPending model && not (countsPending updated) then
+                ( updated, Cmd.batch [ c, tour appState updated ] )
+
+            else
+                ( updated, c )
     in
     case msg of
         GetSelectedProjectTemplateCompleted result ->
