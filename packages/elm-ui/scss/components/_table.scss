@@ -111,3 +111,15 @@
   translate: 0 -50%;
   text-align: start;
 }
+
+// Beside the button is on the action before it, so a label that took the
+// pointer, as a shown tooltip does elsewhere to be hoverable, took the click
+// meant for that action: "Set as default" under Disable's label disabled the
+// locale, the label being part of the Disable button. Here the label lets the
+// pointer through to whatever it covers.
+.ui-table__actions .ui-tooltip:hover .ui-tooltip__bubble,
+.ui-table__actions .ui-tooltip:has(:focus-visible) .ui-tooltip__bubble,
+.ui-table__actions .ui-button[data-ui-tooltip]:hover::after,
+.ui-table__actions .ui-button[data-ui-tooltip]:focus-visible::after {
+  pointer-events: none;
+}
