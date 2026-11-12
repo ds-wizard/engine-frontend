@@ -71,6 +71,7 @@ module Ui.Field exposing
     , withRows
     , withSelectionOnBlur
     , withStrength
+    , withStrengthAsError
     , withStrengthOf
     , withSubmitOnEnter
     , withSubmitShortcut
@@ -134,6 +135,7 @@ type alias Config msg =
     , submitOnEnter : Bool
     , rows : Maybe Int
     , strength : StrengthSource
+    , strengthIsError : Bool
     , swatches : List String
     , clearable : Bool
     , suggestions : List String
@@ -381,6 +383,7 @@ base fieldId labelText control =
         , submitOnEnter = False
         , rows = Nothing
         , strength = NoStrength
+        , strengthIsError = False
         , swatches = []
         , clearable = False
         , suggestions = []
@@ -1026,7 +1029,9 @@ withSuggestions suggestions (Field config) =
 
 
 {-| Adds the strength meter to a password field, and says the strength in words
-as well as in bars.
+as well as in bars. A `secret` takes the meter too, under the input and its
+button: a new password somebody sets for somebody else, who may want to look at
+it before passing it on.
 -}
 withStrength : Field msg -> Field msg
 withStrength (Field config) =
@@ -1042,6 +1047,47 @@ answer arrives.
 withStrengthOf : Strength -> Field msg -> Field msg
 withStrengthOf strength (Field config) =
     Field { config | strength = Supplied strength }
+
+
+{-| The meter's verdict is the field's error: a password the meter calls too
+weak, where the form will not take it until it is strong enough.
+
+An error message under the meter would only say again what the meter says, so
+there is none. Everything else an error does is still done: the control is
+`aria-invalid` and drawn as invalid, an invalid submit focuses it, and the
+meter's words — already in its `aria-describedby`, and in a live region — are
+the description of what is wrong (3.3.1). The whole meter, bars and words, is
+then in the weak tone whatever tone its score has — the danger color and the
+error's icon — so it reads as the reason the field is red, and an amber bar
+does not sit under a red field. Its wording is the caller's:
+when the meter is the error, its words have to say that the password is not
+accepted, not only how far it is from being so.
+
+An error set with `withError` still shows: it is about something else, an empty
+field, say. Only a scored meter can be the error; while it is checking, has no
+answer or is not there, the field is not invalid on this account.
+
+-}
+withStrengthAsError : Bool -> Field msg -> Field msg
+withStrengthAsError isError (Field config) =
+    Field { config | strengthIsError = isError }
+
+
+{-| Whether the control is invalid: it has an error, or its meter is one.
+-}
+isInvalid : Config msg -> Bool
+isInvalid config =
+    Maybe.isJust config.error || strengthIsError config
+
+
+strengthIsError : Config msg -> Bool
+strengthIsError config =
+    case config.strength of
+        Supplied (Scored _) ->
+            config.strengthIsError
+
+        _ ->
+            False
 
 
 {-| A score somebody else produced. The admin center's API answers 0 to 4; a
@@ -1127,12 +1173,11 @@ toHtml (Field config) =
                     else
                         [ attribute "aria-describedby" (describedBy config) ]
                    )
-                ++ (case config.error of
-                        Just _ ->
-                            [ attribute "aria-invalid" "true" ]
+                ++ (if isInvalid config then
+                        [ attribute "aria-invalid" "true" ]
 
-                        Nothing ->
-                            []
+                    else
+                        []
                    )
                 ++ (case config.placeholder of
                         Just placeholder ->
@@ -1164,7 +1209,7 @@ toHtml (Field config) =
         shared =
             classList
                 [ ( "ui-input", True )
-                , ( "is-invalid", Maybe.isJust config.error )
+                , ( "is-invalid", isInvalid config )
                 ]
                 :: common
 
@@ -1736,7 +1781,7 @@ viewControl config shared =
                     :: onCheck onCheckMsg
                     :: classList
                         [ ( "ui-switch", True )
-                        , ( "is-invalid", Maybe.isJust config.error )
+                        , ( "is-invalid", isInvalid config )
                         ]
                     :: shared
                 )
@@ -1761,42 +1806,20 @@ viewControl config shared =
                 )
 
         Secret entry ->
-            div [ class "ui-field__affixed" ]
-                [ Html.input
-                    (type_
-                        (if entry.revealed then
-                            "text"
+            -- Always in the stack, as a password is, meter or not: the meter
+            -- comes with the first character and goes with the last, and were
+            -- the input wrapped only while it is there, it would be a new
+            -- input each time, and the one being typed in would lose focus.
+            div [ class "ui-field__stack" ]
+                (viewSecret config shared entry
+                    :: (case meterFor config entry.value of
+                            Just meter ->
+                                [ viewStrength config meter ]
 
-                         else
-                            "password"
-                        )
-                        :: value entry.value
-                        :: onInput entry.onInput
-                        :: shared
-                    )
-                    []
-                , Html.button
-                    [ type_ "button"
-                    , class "ui-field__reveal"
-                    , Attr.disabled config.disabled
-
-                    -- Pressed, not two buttons: it is one control whose state is
-                    -- whether the value is showing.
-                    , attribute "aria-pressed" (boolToString entry.revealed)
-                    , attribute "aria-label" (config.words.show config.label)
-                    , onClick (entry.onReveal (not entry.revealed))
-                    ]
-                    [ Icon.toHtml
-                        (Icon.solid
-                            (if entry.revealed then
-                                "fa-eye-slash"
-
-                             else
-                                "fa-eye"
-                            )
-                        )
-                    ]
-                ]
+                            Nothing ->
+                                []
+                       )
+                )
 
         Swatch current onInputMsg ->
             let
@@ -1915,8 +1938,8 @@ viewControl config shared =
                         else
                             [ attribute "describedby" (describedBy config) ]
                        )
-                    ++ presentIf (Maybe.isJust config.error) (attribute "invalid" "")
-                    ++ presentIf (Maybe.isJust config.error) (class "is-invalid")
+                    ++ presentIf (isInvalid config) (attribute "invalid" "")
+                    ++ presentIf (isInvalid config) (class "is-invalid")
                     ++ presentIf config.disabled (attribute "disabled" "")
                     ++ presentIf config.disabled (class "is-disabled")
                     ++ elementFocusHandlers config
@@ -1950,7 +1973,7 @@ viewControl config shared =
                         else
                             [ attribute "describedby" (describedBy config) ]
                        )
-                    ++ presentIf (Maybe.isJust config.error) (attribute "invalid" "")
+                    ++ presentIf (isInvalid config) (attribute "invalid" "")
                     ++ presentIf config.disabled (attribute "disabled" "")
                     ++ presentIf config.required (attribute "required" "")
                     ++ elementFocusHandlers config
@@ -1985,7 +2008,7 @@ viewMarkup config current onChangeMsg =
                 else
                     [ attribute "describedby" (describedBy config) ]
                )
-            ++ presentIf (Maybe.isJust config.error) (attribute "invalid" "")
+            ++ presentIf (isInvalid config) (attribute "invalid" "")
             ++ presentIf config.disabled (attribute "disabled" "")
             ++ presentIf config.required (attribute "required" "")
             ++ elementFocusHandlers config
@@ -2081,6 +2104,48 @@ presentIf condition attr =
         []
 
 
+{-| A secret's control: the input and the button that shows it.
+-}
+viewSecret : Config msg -> List (Html.Attribute msg) -> { value : String, onInput : String -> msg, revealed : Bool, onReveal : Bool -> msg } -> Html msg
+viewSecret config shared entry =
+    div [ class "ui-field__affixed" ]
+        [ Html.input
+            (type_
+                (if entry.revealed then
+                    "text"
+
+                 else
+                    "password"
+                )
+                :: value entry.value
+                :: onInput entry.onInput
+                :: shared
+            )
+            []
+        , Html.button
+            [ type_ "button"
+            , class "ui-field__reveal"
+            , Attr.disabled config.disabled
+
+            -- Pressed, not two buttons: it is one control whose state is
+            -- whether the value is showing.
+            , attribute "aria-pressed" (boolToString entry.revealed)
+            , attribute "aria-label" (config.words.show config.label)
+            , onClick (entry.onReveal (not entry.revealed))
+            ]
+            [ Icon.toHtml
+                (Icon.solid
+                    (if entry.revealed then
+                        "fa-eye-slash"
+
+                     else
+                        "fa-eye"
+                    )
+                )
+            ]
+        ]
+
+
 {-| What the meter shows, whoever worked it out.
 
 `Nothing` when there is nothing to say — no strength asked for, or an empty
@@ -2147,7 +2212,11 @@ viewStrength : Config msg -> Meter -> Html msg
 viewStrength config meter =
     let
         tone =
-            toneOf meter
+            if strengthIsError config then
+                "weak"
+
+            else
+                toneOf meter
     in
     div [ classList [ ( "ui-strength", True ), ( "is-busy", meter.busy ) ] ]
         [ div
@@ -2177,7 +2246,7 @@ viewStrength config meter =
                         Icon.spinner
 
                      else
-                        Icon.solid (iconOf meter)
+                        Icon.solid (iconOfTone meter.failed tone)
                     )
                 ]
             , text meter.label
@@ -2228,13 +2297,13 @@ toneOfFraction meter =
         "weak"
 
 
-iconOf : Meter -> String
-iconOf meter =
-    if meter.failed then
+iconOfTone : Bool -> String -> String
+iconOfTone failed tone =
+    if failed then
         "fa-triangle-exclamation"
 
     else
-        case toneOf meter of
+        case tone of
             "strong" ->
                 "fa-circle-check"
 

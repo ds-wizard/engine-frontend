@@ -41,6 +41,79 @@ suite =
                     Field.strengthLabel "correct horse battery staple"
                         |> Expect.equal (Field.strengthLabel "correct horse battery staple")
             ]
+        , describe "a meter that is the field's error"
+            [ test "makes the control invalid, described by the meter's words" <|
+                \_ ->
+                    rejectedPassword True
+                        |> Query.find [ tag "input" ]
+                        |> Query.has
+                            [ attribute (Attr.attribute "aria-invalid" "true")
+                            , attribute (Attr.attribute "aria-describedby" "pw-strength")
+                            , class "is-invalid"
+                            ]
+            , test "shows no error message of its own" <|
+                \_ ->
+                    rejectedPassword True
+                        |> Query.findAll [ class "ui-field__error" ]
+                        |> Query.count (Expect.equal 0)
+            , test "draws the whole meter in the weak tone, whatever its score's" <|
+                \_ ->
+                    rejectedPassword True
+                        |> Expect.all
+                            [ Query.find [ class "ui-strength__label" ] >> Query.has [ class "is-weak" ]
+                            , Query.find [ class "ui-strength__bars" ] >> Query.has [ class "is-weak" ]
+                            ]
+            , test "leaves the control valid otherwise" <|
+                \_ ->
+                    rejectedPassword False
+                        |> Query.find [ tag "input" ]
+                        |> Query.hasNot [ attribute (Attr.attribute "aria-invalid" "true") ]
+            , test "makes nothing invalid while the meter is checking" <|
+                \_ ->
+                    Field.password { id = "pw", label = "Password", value = "secret", onInput = always () }
+                        |> Field.withStrengthOf (Field.strengthChecking { max = 5 })
+                        |> Field.withStrengthAsError True
+                        |> Field.toHtml
+                        |> Query.fromHtml
+                        |> Query.find [ tag "input" ]
+                        |> Query.hasNot [ attribute (Attr.attribute "aria-invalid" "true") ]
+            ]
+        , test "a secret takes the meter under the input and its button" <|
+            \_ ->
+                Field.secret { id = "pw", label = "Password", value = "secret", onInput = always (), revealed = False, onReveal = always () }
+                    |> Field.withStrengthOf (Field.strengthScoredAs Field.WeakTone { level = 2, max = 5, label = "Too weak" })
+                    |> Field.withStrengthAsError True
+                    |> Field.toHtml
+                    |> Query.fromHtml
+                    |> Expect.all
+                        [ Query.find [ class "ui-field__stack" ] >> Query.findAll [ class "ui-field__affixed" ] >> Query.count (Expect.equal 1)
+                        , Query.find [ class "ui-field__stack" ] >> Query.findAll [ class "ui-strength" ] >> Query.count (Expect.equal 1)
+                        , Query.find [ tag "input" ] >> Query.has [ attribute (Attr.attribute "aria-describedby" "pw-strength"), attribute (Attr.attribute "aria-invalid" "true") ]
+                        ]
+        , describe "a secret's input stays where it is when the meter comes and goes" <|
+            -- Elm makes a new input when its place in the tree changes, and the
+            -- one being typed in loses focus: the meter comes with the first
+            -- character and goes with the last.
+            let
+                inputPlace field =
+                    field
+                        |> Field.toHtml
+                        |> Query.fromHtml
+                        |> Query.find [ class "ui-field__stack" ]
+                        |> Query.children [ class "ui-field__affixed" ]
+                        |> Query.count (Expect.equal 1)
+
+                secret value =
+                    Field.secret { id = "pw", label = "Password", value = value, onInput = always (), revealed = False, onReveal = always () }
+            in
+            [ test "without a meter" <|
+                \_ -> inputPlace (secret "")
+            , test "with a meter" <|
+                \_ ->
+                    secret "s"
+                        |> Field.withStrengthOf (Field.strengthScoredAs Field.WeakTone { level = 1, max = 5, label = "Too weak" })
+                        |> inputPlace
+            ]
         , describe "the color picker follows the typed value" <|
             List.map
                 (\( typed, shown ) ->
@@ -112,6 +185,15 @@ suite =
                         |> Event.expect "sent"
             ]
         ]
+
+
+rejectedPassword : Bool -> Query.Single ()
+rejectedPassword isError =
+    Field.password { id = "pw", label = "Password", value = "secret", onInput = always () }
+        |> Field.withStrengthOf (Field.strengthScoredAs Field.FairTone { level = 4, max = 5, label = "Not strong enough yet" })
+        |> Field.withStrengthAsError isError
+        |> Field.toHtml
+        |> Query.fromHtml
 
 
 messageBox : (String -> Field.Field String -> Field.Field String) -> Query.Single String

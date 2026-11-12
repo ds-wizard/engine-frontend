@@ -60,6 +60,9 @@ errorToString locale labelText error =
                 InvalidUuid ->
                     gettext "This is not a valid UUID." locale
 
+                PasswordTooWeak ->
+                    gettext "This password is not strong enough." locale
+
                 ServerValidationError msg ->
                     msg
 

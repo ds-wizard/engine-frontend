@@ -105,7 +105,7 @@ update cfg appState msg model =
                     ( appState.seed
                     , { model
                         | form =
-                            Form.update (PasswordStrength.validation appState (passwordField appState) model.passwordStrength)
+                            Form.update (PasswordStrength.validation (passwordField appState) model.passwordStrength)
                                 (Form.Input "roleUuid" Form.Select (FormField.String (Uuid.toString settings.value.defaultRoleUuid)))
                                 model.form
                       }
@@ -204,7 +204,7 @@ viewContent appState model roles =
         { title = gettext "Create User" appState.locale
         , description = Nothing
         , actions = [ GuideLink.button appState (AppState.toServerInfo appState) GuideLinks.usersCreate ]
-        , content = List.map (Html.map FormMsg) (formFields appState roles model.form)
+        , content = List.map (Html.map FormMsg) (formFields appState roles model.passwordStrength model.form)
         , submitLabel = gettext "Create" appState.locale
         , result = model.savingUser
         , onSubmit = FormMsg Form.Submit
@@ -212,15 +212,15 @@ viewContent appState model roles =
         }
 
 
-formFields : AppState -> List Role -> Form FormError UserCreateForm -> List (Html Form.Msg)
-formFields appState roles form =
+formFields : AppState -> List Role -> PasswordStrength.Model -> Form FormError UserCreateForm -> List (Html Form.Msg)
+formFields appState roles passwordStrength form =
     [ Field.email appState form "email" (gettext "Email" appState.locale)
     , Field.input appState form "firstName" (gettext "First name" appState.locale)
     , Field.input appState form "lastName" (gettext "Last name" appState.locale)
     , Field.input appState form "affiliation" (gettext "Affiliation" appState.locale)
         |> Field.withSuggestions appState.config.users.affiliations
     , Field.select appState form "roleUuid" (gettext "Role" appState.locale) (Role.toFormOptions appState.locale roles)
-    , Field.secret appState form "password" (gettext "Password" appState.locale)
+    , Field.secretWithStrength appState passwordStrength form "password" (gettext "Password" appState.locale)
         |> Field.withAutocomplete "new-password"
     ]
         |> List.map Field.toHtml

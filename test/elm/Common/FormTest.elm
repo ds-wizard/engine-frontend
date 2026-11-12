@@ -140,6 +140,10 @@ errorTextTests =
             \_ ->
                 message (Just "a") (CustomError InvalidUuid)
                     |> Expect.equal (Just "This is not a valid UUID.")
+        , test "PasswordTooWeak" <|
+            \_ ->
+                message (Just "a") (CustomError PasswordTooWeak)
+                    |> Expect.equal (Just "This password is not strong enough.")
         , test "ServerValidationError is the server's words" <|
             \_ ->
                 message (Just "a") (CustomError (ServerValidationError "Already taken."))
