@@ -357,9 +357,29 @@
 // nodes are siblings in the flat list, so each draws its part of the card — the
 // header the top, every node inside the sides, the footer the bottom — and
 // together they read as one box.
+//
+// In dark mode the elevated border is nothing, since a lifted thing is said by
+// its lighter ground — but the card's questions sit on the page's own ground,
+// so nothing would say where the item is. There its edge is the subtle rule.
+.c-questionnaire-item,
+.c-questionnaire-nest--item,
+.c-questionnaire-item-footer {
+  --c-questionnaire-item-edge: var(--ui-border-elevated);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) :is(.c-questionnaire-item, .c-questionnaire-nest--item, .c-questionnaire-item-footer) {
+    --c-questionnaire-item-edge: var(--ui-border-subtle);
+  }
+}
+
+:root[data-theme='dark'] :is(.c-questionnaire-item, .c-questionnaire-nest--item, .c-questionnaire-item-footer) {
+  --c-questionnaire-item-edge: var(--ui-border-subtle);
+}
+
 .c-questionnaire-nest--item {
   padding-inline: var(--ui-space-4);
-  border-inline: 1px solid var(--ui-border-elevated);
+  border-inline: 1px solid var(--c-questionnaire-item-edge);
   background: var(--ui-surface);
 }
 
@@ -804,7 +824,7 @@
   gap: var(--ui-space-3);
   margin-block-start: var(--ui-space-3);
   padding: var(--ui-space-2) var(--ui-space-2) var(--ui-space-2) var(--ui-space-4);
-  border: 1px solid var(--ui-border-elevated);
+  border: 1px solid var(--c-questionnaire-item-edge);
   border-block-end-color: var(--ui-border-subtle);
   border-radius: var(--ui-radius-control) var(--ui-radius-control) 0 0;
   // The lightest gray: enough to say where an item starts, not a band of it.
@@ -813,7 +833,7 @@
 
   // Folded, the header is the whole card.
   &.is-collapsed {
-    border-block-end-color: var(--ui-border-elevated);
+    border-block-end-color: var(--c-questionnaire-item-edge);
     border-radius: var(--ui-radius-control);
   }
 }
@@ -872,7 +892,7 @@
 }
 
 .c-questionnaire-item-footer {
-  border: 1px solid var(--ui-border-elevated);
+  border: 1px solid var(--c-questionnaire-item-edge);
   border-block-start: 0;
   border-radius: 0 0 var(--ui-radius-control) var(--ui-radius-control);
   background: var(--ui-surface);

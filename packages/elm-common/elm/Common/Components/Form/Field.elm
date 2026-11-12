@@ -29,6 +29,7 @@ module Common.Components.Form.Field exposing
     , readOnly
     , secret
     , secretRevealedPath
+    , secretWithStrength
     , select
     , setVersion
     , textarea
@@ -101,9 +102,10 @@ import Common.Components.UiWords as UiWords
 import Common.Data.Context exposing (WithLocale)
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.Form as FormUtils
-import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.FormError as FormError exposing (FormError)
 import Common.Utils.MarkdownOrHtml as MarkdownOrHtml
 import Form exposing (Form)
+import Form.Error
 import Form.Field
 import Form.Validate exposing (Validation)
 import Gettext exposing (gettext)
@@ -209,54 +211,96 @@ password appState form path label =
 The meter is `Ui.Field`'s. Its verdict is the server's where the client has the
 server judge it (`Common.Components.PasswordStrength`, which the page keeps and
 feeds the password); otherwise it is worked out here, with the same library as
-`Ui`'s local meter, so that its words are translated — that meter cannot know
-`Gettext`. Nothing is said about an empty field. Pair it with
-`withAutocomplete "new-password"`.
+`Ui`'s local meter and the same verdict as `Common.Utils.Form.Validate.password`,
+so that its words are translated — that meter cannot know `Gettext` — and its
+colors follow what is accepted: red for what the form refuses. Nothing is said
+about an empty field. Pair it with `withAutocomplete "new-password"`.
+
+When the verdict is the field's error (`FormError.PasswordTooWeak`, the
+server's or the local one), no message under the meter repeats it: the meter
+says that the password is not accepted, and the field is invalid
+(`Ui.Field.withStrengthAsError`). Any other error, an empty field's, shows as
+usual.
 
 -}
 passwordWithStrength : WithLocale a -> PasswordStrength.Model -> Form FormError o -> String -> String -> Field
 passwordWithStrength appState passwordStrength form path label =
+    password appState form path label
+        |> withPasswordStrength appState passwordStrength form path
+
+
+{-| A new password that can be looked at (`secret`), with the meter of
+`passwordWithStrength` — for a password somebody sets for somebody else.
+-}
+secretWithStrength : WithLocale a -> PasswordStrength.Model -> Form FormError o -> String -> String -> Field
+secretWithStrength appState passwordStrength form path label =
+    secret appState form path label
+        |> withPasswordStrength appState passwordStrength form path
+
+
+withPasswordStrength : WithLocale a -> PasswordStrength.Model -> Form FormError o -> String -> Field -> Field
+withPasswordStrength appState passwordStrength form path =
     let
         value =
             stringValue form path
+
+        rejected =
+            not (String.isEmpty value)
+                && ((Form.getFieldAsString path form).liveError == Just (Form.Error.CustomError FormError.PasswordTooWeak))
+
+        meter =
+            PasswordStrength.toUiStrength appState { rejected = rejected } passwordStrength
+                |> Maybe.withDefault (localStrength appState { rejected = rejected } value)
 
         withMeter field =
             if String.isEmpty value then
                 field
 
+            else if rejected then
+                field
+                    |> UiField.withStrengthOf meter
+                    |> UiField.withStrengthAsError True
+                    |> UiField.withError Nothing
+
             else
-                case PasswordStrength.toUiStrength appState passwordStrength of
-                    Just checked ->
-                        UiField.withStrengthOf checked field
-
-                    Nothing ->
-                        UiField.withStrengthOf (strength appState value) field
+                UiField.withStrengthOf meter field
     in
-    password appState form path label
-        |> mapUi withMeter
+    mapUi withMeter
 
 
-strength : WithLocale a -> String -> UiField.Strength
-strength appState value =
+{-| The local verdict, in the tones of what `Validate.password` accepts: very
+weak and weak are refused, so they are red, reasonable is yellow. When the
+verdict is the field's error, the words say it is refused, which "weak" alone
+does not.
+-}
+localStrength : WithLocale a -> { rejected : Bool } -> String -> UiField.Strength
+localStrength appState { rejected } value =
     let
-        ( level, words ) =
+        refused words =
+            if rejected then
+                gettext "Too weak" appState.locale
+
+            else
+                words
+
+        ( level, tone, label ) =
             case (Rumkin.getStats value).strength of
                 Rumkin.VeryWeak ->
-                    ( 1, gettext "Very weak" appState.locale )
+                    ( 1, UiField.WeakTone, refused (gettext "Very weak" appState.locale) )
 
                 Rumkin.Weak ->
-                    ( 2, gettext "Weak" appState.locale )
+                    ( 2, UiField.WeakTone, refused (gettext "Weak" appState.locale) )
 
                 Rumkin.Reasonable ->
-                    ( 3, gettext "Reasonable" appState.locale )
+                    ( 3, UiField.FairTone, gettext "Reasonable" appState.locale )
 
                 Rumkin.Strong ->
-                    ( 4, gettext "Strong" appState.locale )
+                    ( 4, UiField.StrongTone, gettext "Strong" appState.locale )
 
                 Rumkin.VeryStrong ->
-                    ( 5, gettext "Very strong" appState.locale )
+                    ( 5, UiField.StrongTone, gettext "Very strong" appState.locale )
     in
-    UiField.strengthScored { level = level, max = 5, label = words }
+    UiField.strengthScoredAs tone { level = level, max = 5, label = label }
 
 
 {-| A value that is hidden until asked for: a client secret, a token.

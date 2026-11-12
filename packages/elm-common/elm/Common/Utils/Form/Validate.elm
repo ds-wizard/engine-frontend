@@ -51,7 +51,9 @@ confirmation confirmationField =
 {-| A new password. Where the server judges its strength
 (`Extensions.passwordStrengthCheck`), any is let through, and the server's
 answer is what stops a weak one: a verdict worked out here would disagree with
-it both ways.
+it both ways. Otherwise a very weak or weak one fails here, with the same
+`FormError.PasswordTooWeak` as the server's verdict, so the field shows it the
+same way: through its meter, which says it already, not a message under it.
 -}
 password : { a | locale : Gettext.Locale, extensions : { b | passwordStrengthCheck : Bool } } -> Validation FormError String
 password appState =
@@ -60,10 +62,10 @@ password appState =
             (\value ->
                 case localStrength appState.extensions.passwordStrengthCheck value of
                     Just Rumkin.VeryWeak ->
-                        V.fail (V.customError (FormError.Error (gettext "This is a very weak password." appState.locale)))
+                        V.fail (V.customError FormError.PasswordTooWeak)
 
                     Just Rumkin.Weak ->
-                        V.fail (V.customError (FormError.Error (gettext "This is a weak password." appState.locale)))
+                        V.fail (V.customError FormError.PasswordTooWeak)
 
                     _ ->
                         V.succeed value

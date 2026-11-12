@@ -23,7 +23,10 @@ that is no longer there is dropped.
 
 The verdict is part of the form's validation, as the local one is where the
 check is off: a password the server has not called strong does not pass, so
-the form is not sent and the field says why. One the server could not be asked
+the form is not sent. Its error is `FormError.PasswordTooWeak`, for which the
+field shows no message of its own: the meter, which already says how strong
+the password is, says that it is not accepted (`toUiStrength`), and the field
+is invalid. One the server could not be asked
 about passes, and the server decides when the form arrives. While the answer is
 still to come, nothing is said under the field — the meter says it is checking
 — and a submit waits for the answer instead: it goes ahead once the answer is
@@ -120,7 +123,7 @@ updateForm : Context a -> PasswordField o -> Form.Msg -> Form FormError o -> Mod
 updateForm appState field formMsg form model =
     let
         updatedForm =
-            Form.update (validation appState field model) formMsg form
+            Form.update (validation field model) formMsg form
 
         ( (Model checkedState) as checkedModel, cmd ) =
             check appState (Maybe.withDefault "" (Form.getFieldAsString field.path updatedForm).value) model
@@ -137,7 +140,7 @@ updateForm appState field formMsg form model =
                 _ ->
                     checkedModel
     in
-    { form = revalidate appState field waitingModel updatedForm
+    { form = revalidate field waitingModel updatedForm
     , passwordStrength = waitingModel
     , cmd = cmd
     , submit = False
@@ -163,7 +166,7 @@ update appState field msg form model =
             else
                 updatedModel
     in
-    { form = revalidate appState field finalModel form
+    { form = revalidate field finalModel form
     , passwordStrength = finalModel
     , cmd = cmd
     , submit = submit
@@ -182,20 +185,17 @@ toCmd wrapMsg submitMsg updated =
         Cmd.map wrapMsg updated.cmd
 
 
-revalidate : WithLocale a -> PasswordField o -> Model -> Form FormError o -> Form FormError o
-revalidate appState field model =
-    Form.update (validation appState field model) Form.Validate
+revalidate : PasswordField o -> Model -> Form FormError o -> Form FormError o
+revalidate field model =
+    Form.update (validation field model) Form.Validate
 
 
 {-| The form's own validation, and the server's verdict on the password. The
 form's own error on the field, an empty one, say, comes first.
 -}
-validation : WithLocale a -> PasswordField o -> Model -> Validation FormError o
-validation appState field (Model state) =
+validation : PasswordField o -> Model -> Validation FormError o
+validation field (Model state) =
     let
-        fail message =
-            V.field field.path (V.fail (V.customError (FormError.Error message)))
-
         verdict =
             if not state.enabled || String.isEmpty state.password then
                 V.succeed ()
@@ -206,7 +206,7 @@ validation appState field (Model state) =
                         V.succeed ()
 
                     Success _ ->
-                        fail (gettext "This password is not strong enough." appState.locale)
+                        V.field field.path (V.fail (V.customError FormError.PasswordTooWeak))
 
                     _ ->
                         V.succeed ()
@@ -263,11 +263,25 @@ updateModel appState msg ((Model state) as model) =
 {-| What the meter shows. `Nothing` where the client has not turned the check
 on: the field then works the strength out itself. A bar for each of the five
 verdicts, `Risky` lighting the first; the tone is set rather than left to the
-fraction, since only `Strong` is accepted — four bars of `Safe` are still
-"almost there".
+fraction, since only `Strong` is accepted: everything below it is the weak
+tone, four bars of `Safe` included — they are "almost there", but the form
+does not take them, and the field turns red for them when it is left.
+
+`rejected` when the verdict is the field's error, shown in place of an error
+message (`Ui.Field.withStrengthAsError`): the words then say that the password
+is not accepted, which "almost there" does not.
+
 -}
-toUiStrength : WithLocale a -> Model -> Maybe UiField.Strength
-toUiStrength appState (Model state) =
+toUiStrength : WithLocale a -> { rejected : Bool } -> Model -> Maybe UiField.Strength
+toUiStrength appState { rejected } (Model state) =
+    let
+        notYet encouragement =
+            if rejected then
+                gettext "Not strong enough yet" appState.locale
+
+            else
+                encouragement
+    in
     if not state.enabled then
         Nothing
 
@@ -285,10 +299,10 @@ toUiStrength appState (Model state) =
                                     ( 2, UiField.WeakTone, gettext "Password too weak" appState.locale )
 
                                 Moderate ->
-                                    ( 3, UiField.FairTone, gettext "Almost there…" appState.locale )
+                                    ( 3, UiField.WeakTone, notYet (gettext "Almost there…" appState.locale) )
 
                                 Safe ->
-                                    ( 4, UiField.FairTone, gettext "Almost there…" appState.locale )
+                                    ( 4, UiField.WeakTone, notYet (gettext "Almost there…" appState.locale) )
 
                                 Strong ->
                                     ( 5, UiField.StrongTone, gettext "Strong password" appState.locale )
