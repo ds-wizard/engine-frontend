@@ -11,7 +11,7 @@ module Common.Pages.KnowledgeModels.Detail exposing
 
 {-| The detail of one knowledge model package.
 
-The readme and the locales policy are tabs, and the tabs are routes. Switching
+The readme and the locales are tabs, and the tabs are routes. Switching
 between them is a link to the other route, which the application recognizes as
 the same detail (`Common.Routes.isSameListingRoute`) and does not re-initialize,
 so the package is loaded once.
@@ -560,9 +560,9 @@ locales policy appState kmPackage =
         localesBody =
             if List.isEmpty kmPackage.locales then
                 EmptyState.emptyState
-                    { title = gettext "No locales policy" appState.locale
+                    { title = gettext "No locales" appState.locale
                     , description =
-                        gettext "There are no locales policy for this knowledge model yet." appState.locale
+                        gettext "There are no locales for this knowledge model yet." appState.locale
                             ++ " "
                             ++ gettext "Export the .pot file to create one." appState.locale
                     }

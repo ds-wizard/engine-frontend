@@ -9,7 +9,7 @@ module Common.Pages.DocumentTemplates.Detail exposing
     , view
     )
 
-{-| One document template, with its readme and its locales policy as tabs.
+{-| One document template, with its readme and its locales as tabs.
 
 The tabs are routes (`Routes.isSameListingRoute` keeps the page model when
 switching between them), so the active tab comes from the route and not from
@@ -591,8 +591,8 @@ locales policy appState template =
                             gettext "This document template is not prepared for translations." appState.locale
                 in
                 EmptyState.emptyState
-                    { title = gettext "No locales policy" appState.locale
-                    , description = gettext "There are no locales policy for this document template yet." appState.locale ++ " " ++ secondLine
+                    { title = gettext "No locales" appState.locale
+                    , description = gettext "There are no locales for this document template yet." appState.locale ++ " " ++ secondLine
                     }
                     |> EmptyState.withIllustration (Illustration.toHtml Illustration.empty)
                     |> EmptyState.withHeadingLevel 2
