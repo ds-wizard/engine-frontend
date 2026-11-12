@@ -268,8 +268,11 @@ typeField config integration =
                             ( _, Just builtIn ) ->
                                 pluginEvent (Uuid.toString builtIn.pluginUuid) builtIn.integrationId
 
+                            -- No plugin chosen yet, as "Choose a plugin" stores
+                            -- it: the nil uuid, which the server can read where
+                            -- an empty one is not a uuid at all.
                             ( "Plugin", Nothing ) ->
-                                pluginEvent "" ""
+                                pluginEvent (Uuid.toString Uuid.nil) ""
 
                             _ ->
                                 EditIntegrationApiEvent EditIntegrationApiEventData.init
@@ -907,7 +910,13 @@ pluginChoiceFields config plugins data =
     [ Widgets.select
         { id = config.fieldId "plugin"
         , label = gettext "Plugin" config.locale
-        , value = data.pluginUuid ++ "/" ++ data.pluginIntegrationId
+        , value =
+            case chosen of
+                Just _ ->
+                    data.pluginUuid ++ "/" ++ data.pluginIntegrationId
+
+                Nothing ->
+                    ""
         , options =
             ( "", gettext "Choose a plugin" config.locale )
                 :: List.map
