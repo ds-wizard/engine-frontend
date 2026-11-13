@@ -84,5 +84,5 @@ decoder =
     D.succeed LookAndFeelConfig
         |> D.required "appTitle" (D.nullable D.string)
         |> D.required "logoUrl" (D.nullable D.string)
-        |> D.required "primaryColor" (D.nullable D.hexColor)
+        |> D.required "primaryColor" D.lenientHexColor
         |> D.hardcoded ""

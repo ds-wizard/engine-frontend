@@ -7,6 +7,7 @@ module Common.Utils.Form.Validate exposing
     , kmId
     , kmSecret
     , localeId
+    , maybeColor
     , maybeString
     , optionalInt
     , optionalString
@@ -126,6 +127,17 @@ maybeRegex r error =
     V.oneOf
         [ V.map (\_ -> Nothing) <| V.emptyString
         , V.map Just <| validateRegexWithCustomError r (FormError.Error error)
+        ]
+
+
+{-| An optional hex color code: empty is `Nothing`, anything else has to be
+`#` with three or six hex digits.
+-}
+maybeColor : Validation FormError (Maybe String)
+maybeColor =
+    V.oneOf
+        [ V.map (\_ -> Nothing) <| V.emptyString
+        , V.map Just <| validateRegexWithCustomError RegexPatterns.color InvalidColor
         ]
 
 

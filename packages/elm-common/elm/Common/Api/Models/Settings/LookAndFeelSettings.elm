@@ -64,7 +64,7 @@ validation : Validation FormError LookAndFeelSettings
 validation =
     V.succeed LookAndFeelSettings
         |> V.andMap (V.field "appTitle" V.maybeString)
-        |> V.andMap (V.field "stylePrimaryColor" V.maybeString)
+        |> V.andMap (V.field "stylePrimaryColor" V.maybeColor)
         |> V.andMap (V.field "logoUrl" V.maybeString)
 
 

@@ -169,7 +169,7 @@ registryDecoder =
 workspaceDecoder : Decoder WorkspaceConfig
 workspaceDecoder =
     D.succeed WorkspaceConfig
-        |> D.required "primaryColor" (D.nullable D.hexColor)
+        |> D.required "primaryColor" D.lenientHexColor
         |> D.required "dashboardAndMenu" DashboardAndMenuSettings.decoder
         |> D.required "projects" ProjectConfig.decoder
         |> D.required "support" SupportSettings.decoder

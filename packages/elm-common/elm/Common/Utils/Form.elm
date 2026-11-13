@@ -60,6 +60,9 @@ errorToString locale labelText error =
                 InvalidUuid ->
                     gettext "This is not a valid UUID." locale
 
+                InvalidColor ->
+                    gettext "Fill in a hex color code, such as #1E88E5." locale
+
                 PasswordTooWeak ->
                     gettext "This password is not strong enough." locale
 

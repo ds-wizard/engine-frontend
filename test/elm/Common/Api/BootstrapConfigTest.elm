@@ -83,7 +83,13 @@ bootstrapConfigTests : Test
 bootstrapConfigTests =
     describe "Common.Api.Models.BootstrapConfig"
         [ describe "decoder"
-            [ test "reads the authentication section from `internal`" <|
+            [ test "an organization color that is not a hex color is no color" <|
+                \_ ->
+                    D.decodeValue BootstrapConfig.decoder
+                        (bootstrap [ ( "lookAndFeel", E.object [ ( "appTitle", E.null ), ( "logoUrl", E.null ), ( "primaryColor", E.string "not-a-color" ) ] ) ])
+                        |> Result.map (.lookAndFeel >> .primaryColor)
+                        |> Expect.equal (Ok Nothing)
+            , test "reads the authentication section from `internal`" <|
                 \_ ->
                     D.decodeValue BootstrapConfig.decoder (bootstrap [])
                         |> Result.map (\config -> ( config.authentication.registrationEnabled, config.authentication.nonAdminLoginEnabled ))
@@ -143,6 +149,12 @@ bootstrapConfigTests =
                 \_ ->
                     D.decodeValue BootstrapConfig.workspaceDecoder (workspace [])
                         |> Expect.err
+            , test "a stored color that is not a hex color is no color" <|
+                \_ ->
+                    D.decodeValue BootstrapConfig.workspaceDecoder
+                        (workspace [ ( "primaryColor", E.string "not-a-color" ), ( "disabledPlugins", E.list E.string [] ), ( "pluginSettings", E.object [] ) ])
+                        |> Result.map .primaryColor
+                        |> Expect.equal (Ok Nothing)
             ]
         , describe "the application's logo"
             [ test "stays the organization's in a workspace with a logo of its own" <|
