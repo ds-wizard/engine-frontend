@@ -25,6 +25,7 @@ module Common.Api.Projects exposing
     , postRevert
     , postVersion
     , putContent
+    , putName
     , putSettings
     , putShare
     , putVersion
@@ -136,6 +137,16 @@ getSettings appState uuid =
 putSettings : Context ctx -> Uuid -> Value -> ToMsg () msg -> Cmd msg
 putSettings appState uuid body =
     Request.putWhatever (Context.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/settings") body
+
+
+{-| Only the project's name, which its owner can change from the page's title
+without sending the rest of the settings.
+-}
+putName : Context ctx -> Uuid -> String -> ToMsg () msg -> Cmd msg
+putName appState uuid name =
+    Request.putWhatever (Context.toServerInfo appState)
+        ("/projects/" ++ Uuid.toString uuid ++ "/name")
+        (E.object [ ( "name", E.string name ) ])
 
 
 putShare : Context ctx -> Uuid -> Value -> ToMsg () msg -> Cmd msg

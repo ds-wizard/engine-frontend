@@ -94,6 +94,7 @@ import Ui.Alert as Alert
 import Ui.Button as Button
 import Ui.Card as Card
 import Ui.DescriptionList as DescriptionList
+import Ui.EditableTitle as EditableTitle
 import Ui.Field as Field
 import Ui.FileUpload as FileUpload
 import Ui.Icon as Icon
@@ -175,6 +176,11 @@ type alias Model =
     , settingsDirty : Bool
     , settingsRevision : Int
 
+    -- The title, renamed where it stands, and while a rename saved on its own
+    -- is on its way the name it had, to put back if the server refuses it.
+    , title : EditableTitle.Model
+    , renamingFrom : Maybe String
+
     -- What the preview is rendered against: a project or a knowledge model
     -- editor, and the search for one of each. Which of the two is being chosen
     -- is the client's; what was chosen is on the draft.
@@ -236,6 +242,8 @@ initialModel appState uuid =
     , navOverlayOpen = False
     , settingsDirty = False
     , settingsRevision = 0
+    , title = EditableTitle.init
+    , renamingFrom = Nothing
     , previewMode = ProjectPreview
     , projectTypeHint = TypeHint.init
     , kmEditorTypeHint = TypeHint.init
@@ -395,6 +403,8 @@ type Msg
     | SetNavOverlay Bool
     | SetDraft DocumentTemplateDraftDetail
     | SavedDraft Int (Result ApiError DocumentTemplateDraftDetail)
+    | TitleMsg EditableTitle.Msg
+    | SavedRename Int (Result ApiError DocumentTemplateDraftDetail)
     | AddFormat
     | LoadPreview
     | SavedPreviewSettings (Result ApiError DocumentTemplateDraftPreviewSettings)
@@ -1122,6 +1132,81 @@ update cfg appState msg model =
                         , RequestHelpers.getResultCmd cfg.logoutMsg result
                         )
 
+        TitleMsg titleMsg ->
+            case model.draft of
+                Success draft ->
+                    let
+                        ( title, titleCmd, outcome ) =
+                            EditableTitle.update draft.name titleMsg model.title
+
+                        withTitle =
+                            { model | title = title }
+
+                        titleCmdMapped =
+                            Cmd.map TitleMsg titleCmd
+
+                        withName name =
+                            { withTitle
+                                | draft = Success { draft | name = name }
+                                , settingsRevision = model.settingsRevision + 1
+                            }
+                    in
+                    case outcome of
+                        -- The name is one of the settings, and the settings are
+                        -- saved as a whole. With nothing else unsaved in them
+                        -- the rename is saved at once; otherwise it joins what
+                        -- is waiting for Save, which saves it with the rest.
+                        EditableTitle.Renamed name ->
+                            let
+                                renaming =
+                                    withName name
+                            in
+                            if model.settingsDirty || isSaving model then
+                                plain
+                                    ( { renaming | settingsDirty = True }
+                                    , Cmd.batch
+                                        [ titleCmdMapped
+                                        , Window.setUnloadMessage (gettext "There are unsaved changes." appState.locale)
+                                        ]
+                                    )
+
+                            else
+                                plain
+                                    ( { renaming | renamingFrom = Just draft.name, savingDraft = True, saveError = Nothing }
+                                    , Cmd.batch
+                                        [ titleCmdMapped
+                                        , DocumentTemplateDraftsApi.putDraft appState
+                                            model.uuid
+                                            (Settings.encode "DraftDocumentTemplatePhase" { draft | name = name })
+                                            (SavedRename renaming.settingsRevision)
+                                        ]
+                                    )
+
+                        EditableTitle.Unchanged ->
+                            plain ( withTitle, titleCmdMapped )
+
+                _ ->
+                    quiet model
+
+        SavedRename revision result ->
+            case ( result, model.renamingFrom ) of
+                ( Err error, Just previous ) ->
+                    -- The name it had comes back. Anything changed in the
+                    -- settings while the rename was away stays, unsaved.
+                    withSeed <|
+                        ( { model
+                            | draft = ActionResult.map (\draft -> { draft | name = previous }) model.draft
+                            , renamingFrom = Nothing
+                            , savingDraft = False
+                            , saveError =
+                                failureOf (ApiError.toActionResult appState (gettext "The document template could not be renamed." appState.locale) error)
+                          }
+                        , RequestHelpers.getResultCmd cfg.logoutMsg result
+                        )
+
+                _ ->
+                    update cfg appState (SavedDraft revision result) { model | renamingFrom = Nothing }
+
 
 {-| The guard on leaving goes once a save has left nothing behind it.
 -}
@@ -1438,6 +1523,18 @@ viewEditor appState route model draft =
             -- is nothing.
             , content = [ viewTab appState route model, viewSaveErrorModal appState model, viewDiscardModal appState model, viewPublishModal appState model ]
             }
+            |> (if Feature.documentTemplateEditorsEdit appState then
+                    DetailPage.withEditableTitle appState
+                        { model = model.title
+                        , toMsg = TitleMsg
+                        , label = gettext "Document template name" appState.locale
+                        , saving = Maybe.isJust model.renamingFrom
+                        , testId = "dt-editor_title"
+                        }
+
+                else
+                    identity
+               )
             |> DetailPage.withActions (actions appState model)
             |> DetailPage.withTabsWithTestIds
                 { label = gettext "Document template editor" appState.locale

@@ -37,8 +37,9 @@
 
 // The title's line: the title with its badges, the buttons, then the menu. A
 // grid with a named column per slot, so a page without buttons or without a
-// menu has no empty track. The title takes what is left and wraps inside its
-// own column rather than pushing the rest onto another line.
+// menu has no empty track. The title takes what is left and ends in an
+// ellipsis inside its own column rather than pushing the rest onto another
+// line.
 .ui-detail__heading {
   display: grid;
   grid-template-columns: [title] minmax(0, 1fr);
@@ -63,7 +64,26 @@
   grid-row: 1;
   grid-column: title;
   min-inline-size: 0;
-  overflow-wrap: anywhere;
+}
+
+// The title's line is one line. A long name would otherwise take a line of its
+// own and push what follows it — the badges, the saving indicator — onto the
+// next. The name gives up the room instead and ends in an ellipsis; everything
+// after it keeps its size.
+.ui-detail__title > .ui-inline {
+  flex-wrap: nowrap;
+
+  > :not(.ui-page-title) { flex-shrink: 0; }
+
+  // The name that cannot be renamed. One that can (`Ui.EditableTitle`) cuts
+  // its button rather than its heading, which would clip the button's border.
+  > .ui-page-title:not(.ui-editable-title) {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 
 .ui-detail__actions {

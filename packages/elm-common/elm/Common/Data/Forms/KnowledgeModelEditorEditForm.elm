@@ -1,6 +1,7 @@
 module Common.Data.Forms.KnowledgeModelEditorEditForm exposing
     ( KnowledgeModelEditorEditForm
     , encode
+    , encodeEditor
     , init
     , initEmpty
     , validation
@@ -69,16 +70,53 @@ validation appState =
 
 encode : KnowledgeModelEditorEditForm -> E.Value
 encode form =
-    let
-        version =
-            String.join "." <| List.map String.fromInt [ form.versionMajor, form.versionMinor, form.versionPatch ]
-    in
+    encodeSettings
+        { name = form.name
+        , description = form.description
+        , id = form.id
+        , version = String.join "." <| List.map String.fromInt [ form.versionMajor, form.versionMinor, form.versionPatch ]
+        , language = form.language
+        , license = form.license
+        , readme = form.readme
+        }
+
+
+{-| The editor's settings as they are, sent the way the form sends them — for a
+change made outside the form, such as a rename from the page's title. Nothing
+is validated: these are what the server already holds, and a new editor holds
+an empty description, license and readme, which the form does not accept until
+they are filled in.
+-}
+encodeEditor : KnowledgeModelEditorDetail -> E.Value
+encodeEditor kmEditor =
+    encodeSettings
+        { name = kmEditor.name
+        , description = kmEditor.description
+        , id = kmEditor.id
+        , version = Version.toString kmEditor.version
+        , language = kmEditor.language
+        , license = kmEditor.license
+        , readme = kmEditor.readme
+        }
+
+
+encodeSettings :
+    { name : String
+    , description : String
+    , id : String
+    , version : String
+    , language : String
+    , license : String
+    , readme : String
+    }
+    -> E.Value
+encodeSettings settings =
     E.object
-        [ ( "name", E.string form.name )
-        , ( "description", E.string form.description )
-        , ( "id", E.string form.id )
-        , ( "version", E.string version )
-        , ( "language", E.string form.language )
-        , ( "license", E.string form.license )
-        , ( "readme", E.string form.readme )
+        [ ( "name", E.string settings.name )
+        , ( "description", E.string settings.description )
+        , ( "id", E.string settings.id )
+        , ( "version", E.string settings.version )
+        , ( "language", E.string settings.language )
+        , ( "license", E.string settings.license )
+        , ( "readme", E.string settings.readme )
         ]

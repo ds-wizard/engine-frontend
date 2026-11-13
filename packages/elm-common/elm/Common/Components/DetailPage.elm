@@ -11,6 +11,7 @@ module Common.Components.DetailPage exposing
     , withActions
     , withActionsLeading
     , withBadges
+    , withEditableTitle
     , withFillContent
     , withFlushContent
     , withFooter
@@ -33,7 +34,8 @@ the same tabs and the same panel, and the decisions below are made once.
 **The title is the page's `h1`.** `Ui.Page.Detail` renders it with
 `Ui.Text.pageTitle`, so it is where focus lands after a route change. Badges sit
 beside it and are part of what the eye reads with the name; they are text, not
-color alone.
+color alone. For whoever may rename the thing, the name in it can be changed
+where it stands (`withEditableTitle`).
 
 **Anything else in the header sits at the end of the title's line** —
 `withHeaderAside`, a status such as the questionnaire's saving — **or before the
@@ -74,6 +76,7 @@ import Ui.Badge as Badge exposing (Badge)
 import Ui.Button exposing (Button)
 import Ui.Card as Card
 import Ui.DescriptionList as DescriptionList
+import Ui.EditableTitle as EditableTitle
 import Ui.Icon exposing (Icon)
 import Ui.Menu as Menu
 import Ui.NavTabs as NavTabs
@@ -84,6 +87,7 @@ import Ui.Resizer as Resizer
 type DetailPage msg
     = DetailPage
         { title : String
+        , editableTitle : Maybe (EditableTitle.Config msg)
         , content : List (Html msg)
         , badges : List (Badge msg)
         , actions : List (Button msg)
@@ -137,6 +141,7 @@ detailPage : { title : String, content : List (Html msg) } -> DetailPage msg
 detailPage config =
     DetailPage
         { title = config.title
+        , editableTitle = Nothing
         , content = config.content
         , badges = []
         , actions = []
@@ -181,6 +186,43 @@ goes here names itself.
 withHeaderAside : Html msg -> DetailPage msg -> DetailPage msg
 withHeaderAside aside (DetailPage config) =
     DetailPage { config | headerAside = Just aside }
+
+
+{-| The title can be renamed where it stands — the project's, an editor's — for
+whoever may rename the thing; see `Ui.EditableTitle`. Pass it only to them:
+everybody else gets the title as text.
+
+`label` names the field while it is edited: "Project name". `testId` is the
+name's `data-cy`, and the field's with `-input` after it. The title shows the
+page's `title`, so a page shows the new name while it is being saved by passing
+it there, and puts the old one back if saving fails.
+
+-}
+withEditableTitle :
+    WithLocale a
+    ->
+        { model : EditableTitle.Model
+        , toMsg : EditableTitle.Msg -> msg
+        , label : String
+        , saving : Bool
+        , testId : String
+        }
+    -> DetailPage msg
+    -> DetailPage msg
+withEditableTitle appState editable (DetailPage config) =
+    DetailPage
+        { config
+            | editableTitle =
+                Just
+                    { value = config.title
+                    , model = editable.model
+                    , toMsg = editable.toMsg
+                    , label = editable.label
+                    , hint = gettext "Rename" appState.locale
+                    , saving = editable.saving
+                    , testId = editable.testId
+                    }
+        }
 
 
 {-| Status next to the title: "Published", "default", the version.
@@ -409,6 +451,7 @@ toHtml : DetailPage msg -> Html msg
 toHtml (DetailPage config) =
     Detail.detail { title = config.title, content = config.content }
         |> applyMaybe identity Detail.withSidePanelWords config.resizerWords
+        |> applyMaybe identity Detail.withEditableTitle config.editableTitle
         |> applyMaybe identity Detail.withTitleIcon config.titleIcon
         |> applyMaybe identity Detail.withTitleAside config.headerAside
         |> applyMaybe identity Detail.withActionsLeading config.actionsLeading

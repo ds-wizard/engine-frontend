@@ -1,6 +1,7 @@
 module Common.Pages.KMEditor.Editor exposing
     ( Model
     , Msg
+    , SaveError
     , close
     , entityName
     , init
@@ -95,6 +96,7 @@ import Common.Components.SavingIndicator as SavingIndicator
 import Common.Components.UiWords as UiWords
 import Common.Data.AppState as AppState exposing (AppState)
 import Common.Data.BuiltInIntegration as BuiltInIntegration
+import Common.Data.Feature as Feature
 import Common.Data.Forms.KnowledgeModelEditorEditForm as KnowledgeModelEditorEditForm exposing (KnowledgeModelEditorEditForm)
 import Common.Data.GuideLinks as GuideLinks
 import Common.Data.NotFound as NotFound
@@ -117,6 +119,7 @@ import Common.Utils.RequestHelpers as RequestHelpers
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Form exposing (Form)
+import Form.Field
 import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
@@ -135,6 +138,7 @@ import Ui.Button as Button
 import Ui.Card as Card
 import Ui.Copy as Copy
 import Ui.DescriptionList as DescriptionList
+import Ui.EditableTitle as EditableTitle
 import Ui.Field as Field
 import Ui.Icon as Icon
 import Ui.Illustration as Illustration
@@ -161,10 +165,10 @@ type alias Model =
     , websocket : WebSocket
     , offline : Bool
 
-    -- Why the server refused a change sent over the socket. The change is
+    -- Why the server refused a change: one sent over the socket, which is
     -- already in the local copy, so the editor and the server no longer agree
-    -- until the page is refreshed.
-    , saveError : Maybe { message : String, details : List String }
+    -- until the page is refreshed (`stale`); or a rename, which is put back.
+    , saveError : Maybe SaveError
     , onlineUsers : List OnlineUserInfo
     , savingActionUuids : List Uuid
     , saving : SavingIndicator.Model
@@ -211,6 +215,11 @@ type alias Model =
     -- it, and the debounce that holds it back while typing continues.
     , settingsForm : Form FormError KnowledgeModelEditorEditForm
     , savingSettings : ActionResult String
+
+    -- The title, renamed where it stands, and while the new name is on its way
+    -- the name it had, to put back if the server refuses it.
+    , title : EditableTitle.Model
+    , renamingFrom : Maybe String
     , deletingEditor : ActionResult String
     , preview : Maybe Questionnaire.Model
     , previewTags : List String
@@ -228,6 +237,8 @@ initialModel appState uuid mbEntityUuid =
     , websocket = KnowledgeModelEditorsApi.websocket uuid
     , offline = False
     , saveError = Nothing
+    , title = EditableTitle.init
+    , renamingFrom = Nothing
     , onlineUsers = []
     , savingActionUuids = []
     , saving = SavingIndicator.init
@@ -557,6 +568,8 @@ type Msg
     | SettingsSetVersion FormField.VersionSuggestion
     | DiscardSettings
     | SavedSettings (Result ApiError ())
+    | TitleMsg EditableTitle.Msg
+    | Renamed (Result ApiError ())
     | SetDeleteEditorOpen Bool
     | DeleteEditor
     | DeletedEditor (Result ApiError ())
@@ -780,6 +793,71 @@ update cfg appState msg model =
                     , { model | savingSettings = ApiError.toActionResult appState (gettext "Unable to save the settings." appState.locale) error }
                     , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
+
+        TitleMsg titleMsg ->
+            case model.editorContext of
+                Success editorContext ->
+                    let
+                        ( title, titleCmd, outcome ) =
+                            EditableTitle.update editorContext.kmEditor.name titleMsg model.title
+
+                        withTitle =
+                            { model | title = title }
+
+                        titleCmdMapped =
+                            Cmd.map TitleMsg titleCmd
+                    in
+                    case outcome of
+                        -- The rename is the editor's settings as the server
+                        -- holds them, with another name. Not through the
+                        -- settings form: it does not accept an empty
+                        -- description, license or readme, which a new editor
+                        -- has. What the tab has typed and not saved is not part
+                        -- of it either.
+                        EditableTitle.Renamed name ->
+                            plain
+                                ( rename appState name { withTitle | renamingFrom = Just editorContext.kmEditor.name }
+                                , Cmd.batch
+                                    [ titleCmdMapped
+                                    , KnowledgeModelEditorsApi.putKnowledgeModelEditor appState
+                                        model.uuid
+                                        (KnowledgeModelEditorEditForm.encodeEditor (renamed name editorContext).kmEditor)
+                                        Renamed
+                                    ]
+                                )
+
+                        EditableTitle.Unchanged ->
+                            plain ( withTitle, titleCmdMapped )
+
+                _ ->
+                    quiet model
+
+        Renamed result ->
+            case ( result, model.renamingFrom ) of
+                ( Err error, Just previous ) ->
+                    ( appState.seed
+                    , rename appState
+                        previous
+                        { model
+                            | renamingFrom = Nothing
+                            , saveError =
+                                Just
+                                    { message =
+                                        case ApiError.toActionResult appState (gettext "The knowledge model editor could not be renamed." appState.locale) error of
+                                            Error message ->
+                                                message
+
+                                            _ ->
+                                                gettext "The knowledge model editor could not be renamed." appState.locale
+                                    , details = []
+                                    , stale = False
+                                    }
+                        }
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
+                    )
+
+                _ ->
+                    quiet { model | renamingFrom = Nothing }
 
         SetDeleteEditorOpen open ->
             quiet { model | deleteEditorOpen = open, deletingEditor = Unset }
@@ -1336,6 +1414,47 @@ applySettings form editorContext =
             editorContext
 
 
+{-| The editor called `name`.
+-}
+renamed : String -> EditorContext -> EditorContext
+renamed name editorContext =
+    let
+        kmEditor =
+            editorContext.kmEditor
+    in
+    { editorContext | kmEditor = { kmEditor | name = name } }
+
+
+{-| The editor is called `name` now: in the header, and in the settings form —
+built again when nothing in it is unsaved, and only its name changed when
+something else is. A name typed there and not saved is the user's, and stays.
+-}
+rename : AppState -> String -> Model -> Model
+rename appState name model =
+    case model.editorContext of
+        Success editorContext ->
+            let
+                withName =
+                    { model | editorContext = Success (renamed name editorContext) }
+            in
+            if not (Tabs.settingsChanged model.settingsForm) then
+                { withName | settingsForm = settingsFormOf appState withName }
+
+            else if (Form.getFieldAsString "name" model.settingsForm).value == Just editorContext.kmEditor.name then
+                { withName
+                    | settingsForm =
+                        Form.update (KnowledgeModelEditorEditForm.validation appState)
+                            (Form.Input "name" Form.Text (Form.Field.String name))
+                            model.settingsForm
+                }
+
+            else
+                withName
+
+        _ ->
+            model
+
+
 {-| The settings form as the editor stands, which is how it starts and what
 discarding goes back to.
 -}
@@ -1501,7 +1620,7 @@ handleWebSocketMsg appState websocketMsg model =
             -- still waiting stay waiting; the indicator just stops saying
             -- "Saving..." for one that is not coming.
             ( { model
-                | saveError = Just (saveErrorOf appState model serverError)
+                | saveError = Just (saveErrorOf appState model serverError True)
                 , saving = SavingIndicator.init
               }
             , Cmd.none
@@ -1527,11 +1646,18 @@ in the local copy, so even an entity the server has never heard of has a name
 in it.
 
 -}
-saveErrorOf : AppState -> Model -> ServerError -> { message : String, details : List String }
-saveErrorOf appState model serverError =
+type alias SaveError =
+    { message : String
+    , details : List String
+    , stale : Bool
+    }
+
+
+saveErrorOf : AppState -> Model -> ServerError -> Bool -> SaveError
+saveErrorOf appState model serverError stale =
     let
         simple message =
-            { message = message, details = [] }
+            { message = message, details = [], stale = stale }
     in
     case serverError of
         ServerError.UserSimpleError message ->
@@ -1544,6 +1670,7 @@ saveErrorOf appState model serverError =
                     |> Dict.values
                     |> List.concat
                     |> List.map (eventErrorToReadable appState model)
+            , stale = stale
             }
 
         ServerError.SystemLogError data ->
@@ -1773,6 +1900,18 @@ viewEditor appState route model editorContext =
                 ]
             }
             -- Nobody else here means no group and no rule beside the actions.
+            |> (if Feature.knowledgeModelEditorsEdit appState then
+                    DetailPage.withEditableTitle appState
+                        { model = model.title
+                        , toMsg = TitleMsg
+                        , label = gettext "Knowledge model editor name" appState.locale
+                        , saving = Maybe.isJust model.renamingFrom
+                        , testId = "km-editor_title"
+                        }
+
+                else
+                    identity
+               )
             |> applyWhenJust (OnlineUsers.avatars appState model.onlineUsers) DetailPage.withActionsLeading
             |> DetailPage.withHeaderAside (SavingIndicator.toHtml appState model.saving)
             |> DetailPage.withActions
@@ -2171,22 +2310,33 @@ viewSaveErrorModal appState model =
         , body =
             case model.saveError of
                 Just saveError ->
-                    [ Alert.danger ""
+                    (Alert.danger ""
                         |> Alert.toHtmlWithContent
                             (Html.p [] [ Html.strong [] [ text saveError.message ] ]
                                 :: List.map (\detail -> Html.p [] [ text detail ]) saveError.details
                             )
-                    , Html.p [] [ text (gettext "The editor no longer shows what is saved. Refresh the page to continue with the saved knowledge model." appState.locale) ]
-                    ]
+                    )
+                        :: (if saveError.stale then
+                                [ Html.p [] [ text (gettext "The editor no longer shows what is saved. Refresh the page to continue with the saved knowledge model." appState.locale) ] ]
+
+                            else
+                                []
+                           )
 
                 Nothing ->
                     []
         }
         |> Modal.withActions
-            [ Button.ghost (gettext "Close" appState.locale) CloseSaveError
-            , Button.primary (gettext "Refresh" appState.locale) Refresh
-                |> Button.withTestId "km-editor_save-error-refresh"
-            ]
+            (Button.ghost (gettext "Close" appState.locale) CloseSaveError
+                :: (if Maybe.unwrap False .stale model.saveError then
+                        [ Button.primary (gettext "Refresh" appState.locale) Refresh
+                            |> Button.withTestId "km-editor_save-error-refresh"
+                        ]
+
+                    else
+                        []
+                   )
+            )
         |> Modal.withTestId "km-editor_save-error-modal"
         |> Modal.toHtml
 

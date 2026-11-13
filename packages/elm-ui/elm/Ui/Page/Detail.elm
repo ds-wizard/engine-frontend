@@ -5,6 +5,7 @@ module Ui.Page.Detail exposing
     , withActions
     , withActionsLeading
     , withBadges
+    , withEditableTitle
     , withFillContent
     , withFlushContent
     , withFooter
@@ -32,6 +33,7 @@ import Html.Attributes exposing (attribute, class, classList, style)
 import Ui.Badge as Badge exposing (Badge)
 import Ui.Button as Button exposing (Button)
 import Ui.ButtonGroup as ButtonGroup
+import Ui.EditableTitle as EditableTitle
 import Ui.Layout as Layout
 import Ui.Resizer as Resizer
 import Ui.Separator as Separator
@@ -41,6 +43,7 @@ import Ui.Text as Text
 type Detail msg
     = Detail
         { title : String
+        , editableTitle : Maybe (EditableTitle.Config msg)
         , badges : List (Badge msg)
         , actions : List (Button msg)
         , actionsLeading : Maybe (Html msg)
@@ -69,6 +72,7 @@ detail : { title : String, content : List (Html msg) } -> Detail msg
 detail config =
     Detail
         { title = config.title
+        , editableTitle = Nothing
         , badges = []
         , actions = []
         , actionsLeading = Nothing
@@ -123,6 +127,15 @@ more in. Not a control: the actions are the controls.
 withActionsLeading : Html msg -> Detail msg -> Detail msg
 withActionsLeading leading (Detail config) =
     Detail { config | actionsLeading = Just leading }
+
+
+{-| The title can be renamed where it stands, by whoever may rename the thing;
+see `Ui.EditableTitle`. It is still the page's `h1`, and the name it shows is
+the config's `value` rather than the page's `title`.
+-}
+withEditableTitle : EditableTitle.Config msg -> Detail msg -> Detail msg
+withEditableTitle editable (Detail config) =
+    Detail { config | editableTitle = Just editable }
 
 
 withBadges : List (Badge msg) -> Detail msg -> Detail msg
@@ -283,7 +296,13 @@ toHtml (Detail config) =
                             Nothing ->
                                 []
                          )
-                            ++ Text.pageTitle config.title
+                            ++ (case config.editableTitle of
+                                    Just editable ->
+                                        EditableTitle.view editable
+
+                                    Nothing ->
+                                        Text.pageTitle config.title
+                               )
                             :: List.map Badge.toHtml config.badges
                             ++ (case config.titleAside of
                                     Just aside_ ->

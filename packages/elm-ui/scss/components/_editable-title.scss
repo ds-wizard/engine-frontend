@@ -1,0 +1,61 @@
+// A page title renamed where it stands (`Ui.EditableTitle`): the name is a
+// button that looks like the heading it is in, and gives way to a field of the
+// same size and in the same place while it is edited. Both are moved out by
+// their own padding, so the name does not shift when the border appears.
+
+.ui-editable-title__button,
+.ui-editable-title__input {
+  margin-inline: calc(-1 * var(--ui-space-2));
+  padding-block: 0;
+  padding-inline: var(--ui-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+// The heading is a flex item of the title's line: it may shrink below the
+// name's width, which is what lets the name inside it end in an ellipsis
+// rather than push the line wider or break onto a second one.
+.ui-editable-title {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+}
+
+// One line, cut with an ellipsis when it does not fit. The whole name is still
+// the button's text, so it is what a screen reader reads, and it is all there
+// in the field once the name is pressed.
+.ui-editable-title__button {
+  display: block;
+  // A button is as wide as its text, not as its container, so it is held to
+  // the heading's width — plus the padding its negative margins moved out —
+  // or the ellipsis would never start.
+  max-inline-size: calc(100% + 2 * var(--ui-space-2));
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: start;
+  cursor: text;
+  transition: var(--ui-transition-state);
+
+  // The border is what says the name can be changed, before it is pressed.
+  &:hover:not([aria-disabled='true']) { border-color: var(--ui-border-control); }
+
+  &[aria-disabled='true'] { cursor: progress; }
+}
+
+// While editing, the heading takes the room the badges leave it, so a long
+// name is not typed into a field the width of a short one.
+.ui-editable-title:has(.ui-editable-title__input) {
+  flex: 1 1 20rem;
+  min-inline-size: 0;
+}
+
+.ui-editable-title__input {
+  inline-size: 100%;
+  border-color: var(--ui-border-focus);
+  background: var(--ui-surface);
+}

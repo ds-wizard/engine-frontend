@@ -4,6 +4,7 @@ module Common.Pages.Projects.Detail.Settings exposing
     , footer
     , initialModel
     , isGuarded
+    , setName
     , setProject
     , subscriptions
     , update
@@ -149,6 +150,41 @@ setProject appState settings model =
         , form = ProjectSettingsForm.init appState settings
         , documentTemplateTypeHint = TypeHint.setSelected settings.documentTemplate model.documentTemplateTypeHint
     }
+
+
+{-| The project was renamed elsewhere — from the page's title, or by somebody
+else. The form follows, unless its own name has been typed over and not saved:
+that is the user's, and saving it is how they would say which name they want.
+Anything else typed and not saved stays as it was.
+-}
+setName : AppState -> String -> Model -> Model
+setName appState name model =
+    case model.settings of
+        Success settings ->
+            -- The socket says the project changed for any change to it, its
+            -- sharing as well, so the same name is nothing to follow.
+            if name == settings.name then
+                model
+
+            else if not (isDirty model) then
+                setProject appState { settings | name = name } model
+
+            else if (ElmForm.getFieldAsString "name" model.form).value == Just settings.name then
+                -- The name field still says what was loaded: nothing was typed
+                -- there, so it follows while the rest stays as it was typed.
+                { model
+                    | settings = Success { settings | name = name }
+                    , form =
+                        ElmForm.update (ProjectSettingsForm.validation appState)
+                            (ElmForm.Input "name" ElmForm.Text (Form.Field.String name))
+                            model.form
+                }
+
+            else
+                { model | settings = Success { settings | name = name } }
+
+        _ ->
+            model
 
 
 

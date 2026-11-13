@@ -118,6 +118,7 @@ import Task.Extra as Task
 import Ui.Alert as Alert
 import Ui.Badge as Badge
 import Ui.Button as Button
+import Ui.EditableTitle as EditableTitle
 import Ui.Icon as Icon
 import Ui.Illustration as Illustration
 import Ui.Layout as Layout
@@ -153,6 +154,11 @@ type alias Model =
     , versionViewModal : VersionViewModal.Model
     , revertModal : RevertModal.Model
     , addingToMyProjects : ActionResult ()
+
+    -- The title, renamed where it stands, and while the new name is on its way
+    -- the name it had, to put back if the server refuses it.
+    , title : EditableTitle.Model
+    , renamingFrom : Maybe String
     , copiedLink : Bool
     , previewModel : Preview.Model
     , documents : Documents.Model
@@ -184,6 +190,8 @@ initialModel appState uuid =
     , versionViewModal = VersionViewModal.initEmpty
     , revertModal = RevertModal.init
     , addingToMyProjects = Unset
+    , title = EditableTitle.init
+    , renamingFrom = Nothing
     , copiedLink = False
     , previewModel = Preview.initialModel
     , documents = Documents.initialModel
@@ -272,6 +280,8 @@ type Msg
     | ClearCopiedLink
     | AddToMyProjects
     | PutShareCompleted (Result ApiError ())
+    | TitleMsg EditableTitle.Msg
+    | PutNameCompleted (Result ApiError ())
     | NoOp
     | PreviewMsg Preview.Msg
     | InitDocuments PaginationQueryString
@@ -702,6 +712,52 @@ updatePage cfg appState msg model =
                     , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
+        TitleMsg titleMsg ->
+            case model.common of
+                Success common ->
+                    let
+                        ( title, titleCmd, outcome ) =
+                            EditableTitle.update common.name titleMsg model.title
+
+                        withTitle =
+                            { model | title = title }
+
+                        titleCmdMapped =
+                            Cmd.map (cfg.wrapMsg << TitleMsg) titleCmd
+                    in
+                    case outcome of
+                        -- The header says the new name at once; the page is not
+                        -- reloaded, as it is after the settings are saved,
+                        -- because nothing else on it depends on the name.
+                        EditableTitle.Renamed name ->
+                            ( rename appState name { withTitle | renamingFrom = Just common.name }
+                            , Cmd.batch
+                                [ titleCmdMapped
+                                , ProjectsApi.putName appState model.uuid name (cfg.wrapMsg << PutNameCompleted)
+                                ]
+                            )
+
+                        EditableTitle.Unchanged ->
+                            ( withTitle, titleCmdMapped )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        PutNameCompleted result ->
+            case ( result, model.renamingFrom ) of
+                ( Err error, Just previous ) ->
+                    ( rename appState
+                        previous
+                        { model
+                            | renamingFrom = Nothing
+                            , saveError = Just (apiSaveErrorOf appState (gettext "The project could not be renamed." appState.locale) error)
+                        }
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
+                    )
+
+                _ ->
+                    ( { model | renamingFrom = Nothing }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -787,6 +843,17 @@ updatePage cfg appState msg model =
             ( model, Window.refresh () )
 
 
+{-| The project is called `name` now: in the header, and in the settings tab
+unless its own name field has been typed over.
+-}
+rename : AppState -> String -> Model -> Model
+rename appState name model =
+    { model
+        | common = ActionResult.map (\common -> { common | name = name }) model.common
+        , settings = Settings.setName appState name model.settings
+    }
+
+
 actionsMenuId : String
 actionsMenuId =
     "project-actions"
@@ -826,6 +893,7 @@ handleWebSocketMsg appState websocketMsg model =
                             ( { model
                                 | common = ActionResult.map (ProjectCommon.updateWithQuestionnaireData data) model.common
                                 , questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData data) model.questionnaireModel
+                                , settings = Settings.setName appState data.name model.settings
                               }
                             , Cmd.none
                             )
@@ -1094,6 +1162,7 @@ viewProject appState route model common =
         |> DetailPage.withBadges badges
         |> withOnlineUsers appState model
         |> withActions appState model common
+        |> withEditableTitle appState model common
         |> DetailPage.withTabsWithTestIds
             { label = gettext "Project" appState.locale
             , items = tabs appState route model common
@@ -1225,6 +1294,24 @@ saveErrorModal appState model =
             )
         |> Modal.withTestId "project_detail_save-error-modal"
         |> Modal.toHtml
+
+
+{-| The name can be changed from the title by whoever can change it in the
+settings: the project's owner, signed in.
+-}
+withEditableTitle : AppState -> Model -> ProjectCommon -> DetailPage.DetailPage Msg -> DetailPage.DetailPage Msg
+withEditableTitle appState model common =
+    if Feature.projectSettings appState common && Session.exists appState.session then
+        DetailPage.withEditableTitle appState
+            { model = model.title
+            , toMsg = TitleMsg
+            , label = gettext "Project name" appState.locale
+            , saving = Maybe.isJust model.renamingFrom
+            , testId = "project_detail_title"
+            }
+
+    else
+        identity
 
 
 
