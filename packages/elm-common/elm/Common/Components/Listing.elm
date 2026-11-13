@@ -2,7 +2,7 @@ module Common.Components.Listing exposing
     ( Model, Msg, initialModel, initialModelWithFilters, init
     , UpdateConfig, SearchFilterSource, Suggestion, update, subscriptions
     , onAfterDelete, reload, reloadBackground, setFilters, closeMenus, updateItems
-    , itemActionsTriggerId
+    , itemActionsTriggerId, filterTriggerId
     , items, pagination, paginationQueryString, filters, searchFilterAvailable
     , ViewConfig, Filter(..), Item, item, view, viewWith, viewWithinPageWith
     , TableViewConfig, viewTable, viewTableWith
@@ -45,7 +45,7 @@ waiting when someone moved on never replaces the URL of where they went.
 ## Messages a page sends
 
 @docs onAfterDelete, reload, reloadBackground, setFilters, closeMenus, updateItems
-@docs itemActionsTriggerId
+@docs itemActionsTriggerId, filterTriggerId
 
 
 ## Reading the state
@@ -345,6 +345,19 @@ closed without removing the row, so focus returns to where the user left it.
 itemActionsTriggerId : String -> String
 itemActionsTriggerId itemId =
     Menu.triggerId (itemMenuPrefix ++ itemId)
+
+
+{-| The id of the button that opens a filter's menu, for the filter with the
+given id.
+
+Focus it when a dialog one of a `CustomFilter`'s items opened is closed: the
+item was in the menu, which closed as the dialog opened, so without it focus
+falls to the page.
+
+-}
+filterTriggerId : String -> String
+filterTriggerId filterId =
+    Menu.triggerId (filterMenuId filterId)
 
 
 {-| Fetch again, showing the loading state.

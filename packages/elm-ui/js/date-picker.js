@@ -296,10 +296,30 @@ function define() {
             calendar.addEventListener('keydown', (event) => this._onCalendarKeyDown(event))
         }
 
+        // Escape closes the calendar, and only the calendar. In a dialog the
+        // key went on to the dialog too, which the browser closes on Escape,
+        // so the first press closed both and the second had nothing to do.
+        // Handled here, the dialog does not hear it (a close request is not
+        // made for a keydown that was prevented); focus goes back to the field
+        // when it was in the calendar. Returns whether it was handled.
+        _closeOnEscape(event) {
+            if (event.key !== 'Escape' || event.defaultPrevented) return false
+
+            const instance = this._instance
+            if (!instance || !instance.isOpen) return false
+
+            event.preventDefault()
+            event.stopPropagation()
+            instance.close()
+            if (instance.calendarContainer.contains(document.activeElement)) this._visibleInput.focus()
+            return true
+        }
+
         // Down or up from the input moves into the picker. flatpickr stops
         // handling the arrows once the input can be typed into, so without this
         // everything past the text field is reachable by pointer only.
         _onInputKeyDown(event) {
+            if (this._closeOnEscape(event)) return
             if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
             if (!this._instance) return
 
@@ -336,6 +356,7 @@ function define() {
         // back to the field, from where the next Tab carries on through the
         // form.
         _onCalendarKeyDown(event) {
+            if (this._closeOnEscape(event)) return
             if (event.key !== 'Tab' || event.shiftKey) return
 
             const instance = this._instance
