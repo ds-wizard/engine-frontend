@@ -1,4 +1,4 @@
-module Common.Components.Questionnaire.Nest exposing (listItem, titleId)
+module Common.Components.Questionnaire.Nest exposing (commentsButtonId, listItem, titleId)
 
 {-| One node of the questionnaire's list: the indentation that draws its nesting,
 and the ARIA that states it.
@@ -63,3 +63,11 @@ item's heading.
 titleId : String -> String
 titleId path =
     Path.toFieldId path ++ "-title"
+
+
+{-| The id of a question's comments button, which focus goes back to when the
+comments panel it opened is closed.
+-}
+commentsButtonId : String -> String
+commentsButtonId path =
+    Path.toFieldId path ++ "-comments"

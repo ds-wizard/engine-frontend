@@ -174,6 +174,10 @@ type alias Model =
 
     -- The workspace.
     , rightPanel : RightPanel
+
+    -- The question whose comments button opened the comments panel, to go back
+    -- to when it is closed; any other change of the panel forgets it.
+    , commentsOpener : Maybe String
     , navOverlayOpen : Bool
     , navResizer : Resizer.Model
     , asideResizer : Resizer.Model
@@ -268,6 +272,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , commentThreads = Dict.empty
             , nav = { chapters = [], activeChapterUuid = chapterUuid, active = Nothing }
             , rightPanel = rightPanel
+            , commentsOpener = Nothing
             , navOverlayOpen = False
             , navResizer = Resizer.init (navResizerConfig appState)
             , asideResizer = Resizer.init (asideResizerConfig appState)
@@ -501,6 +506,7 @@ type Msg
     | VersionDeleted ProjectVersion
     | OpenChapter String
     | OpenCommentsLink String (Maybe Uuid)
+    | OpenQuestionComments String
     | ScrollToPath Bool String
     | ClearHighlightedPath String
     | UpdateCollapsedPaths (Set String)
@@ -616,7 +622,7 @@ update appState cfg msg model =
                         , removeTodoCmd = \path -> dispatch (SetLabels path [])
                         , openFileUploadCmd = \path fileConfig -> dispatch (FileUploadMsg (FileUpload.open path fileConfig))
                         , deleteFileCmd = \fileUuid path fileName -> dispatch (FileDeleteMsg (FileDelete.open fileUuid fileName path))
-                        , openCommentsCmd = \path -> Cmd.batch [ dispatch (SetRightPanel (RightPanel.Comments path)), dispatch (ScrollToPath False path) ]
+                        , openCommentsCmd = dispatch << OpenQuestionComments
                         , closeRightPanelCmd = dispatch (SetRightPanel RightPanel.None)
                         , openPluginQuestionActionModalCmd = \pluginUuid element question path -> dispatch (OpenQuestionActionModal pluginUuid element question path)
                         , openPluginQuestionActionRightPanelCmd = dispatch << SetRightPanel << RightPanel.PluginQuestionAction
@@ -904,8 +910,42 @@ update appState cfg msg model =
                 , LocalStorage.storeViewSettings viewSettings
                 )
 
+        OpenQuestionComments path ->
+            -- From the question's own button: the question is scrolled to, but
+            -- focus goes to the panel, which is where the reader is headed and
+            -- otherwise a long way off. Closing it brings them back.
+            let
+                ( opened, openCmd ) =
+                    setRightPanel appState (RightPanel.Comments path) model
+
+                ( scrolled, scrollCmd ) =
+                    scrollToPathFocusing ("#" ++ Workspace.asideId (workspaceId model)) False path opened
+            in
+            plain
+                ( { scrolled | commentsOpener = maybeWhen (scrolled.rightPanel == RightPanel.Comments path) (Just path) }
+                , Cmd.batch [ openCmd, scrollCmd ]
+                )
+
         SetRightPanel panel ->
-            plain (setRightPanel appState panel model)
+            let
+                -- Escape or the panel's close button: back to the question
+                -- whose button opened it, as the closed panel takes focus away.
+                returnFocus =
+                    case ( panel, model.rightPanel, model.commentsOpener ) of
+                        ( RightPanel.None, RightPanel.Comments _, Just path ) ->
+                            Dom.scrollToAndFocus
+                                { selector = "#" ++ Nest.commentsButtonId path
+                                , focus = "#" ++ Nest.commentsButtonId path
+                                , smooth = True
+                                }
+
+                        _ ->
+                            Cmd.none
+
+                ( newModel, cmd ) =
+                    setRightPanel appState panel model
+            in
+            plain ( newModel, Cmd.batch [ cmd, returnFocus ] )
 
         TogglePanel panel ->
             let
@@ -1235,6 +1275,7 @@ setRightPanel appState requested model =
     ( withViewState
         { model
             | rightPanel = panel
+            , commentsOpener = Nothing
             , unanswered = keepUnanswered panel model
             , commentInfos = keepCommentInfos panel model
         }
@@ -1382,7 +1423,14 @@ updateWithShareData data model =
 moment, scrolled into view and focused.
 -}
 scrollToPath : Bool -> String -> Model -> ( Model, Cmd Msg )
-scrollToPath instant path model =
+scrollToPath instant path =
+    scrollToPathFocusing (focusSelector path) instant path
+
+
+{-| `scrollToPath`, with focus going to `focus` rather than to the node.
+-}
+scrollToPathFocusing : String -> Bool -> String -> Model -> ( Model, Cmd Msg )
+scrollToPathFocusing focus instant path model =
     let
         chapterUuid =
             Path.chapterUuid path
@@ -1407,7 +1455,7 @@ scrollToPath instant path model =
     , Cmd.batch
         [ Dom.scrollToAndFocus
             { selector = focusSelector path
-            , focus = focusSelector path
+            , focus = focus
             , smooth = not instant
             }
         , if collapsedPaths /= model.collapsedPaths then

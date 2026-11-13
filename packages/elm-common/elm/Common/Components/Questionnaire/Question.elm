@@ -1254,7 +1254,7 @@ viewActions props =
                                     |> Button.withTooltipAt Tooltip.End
                                     |> Button.withPressed (Flags.hasCommentsOpen props.flags)
                     in
-                    [ action (Button.withTestId "questionnaire_question-action_comment" button) ]
+                    [ action (button |> Button.withId (Nest.commentsButtonId path) |> Button.withTestId "questionnaire_question-action_comment") ]
 
                 else
                     []
