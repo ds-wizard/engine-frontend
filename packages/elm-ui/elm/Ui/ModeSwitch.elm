@@ -9,6 +9,11 @@ says what the choice is about. A row of toggle buttons would announce two
 unrelated pressed states and leave the relationship between them to be
 guessed.
 
+**One Tab stop.** Only the chosen option is in the tab order, and the arrow keys
+move to the next one and choose it, as in any radio group. Moving focus takes
+the DOM, so the keys are handled by `mode-switch.js`, which the switch marks
+itself for.
+
 The markdown editor's own switch is this, drawn by the custom element rather
 than from here — the same block, so the two stay the same thing. That is the
 whole reason it is a component: it was two copies of one pill before.
@@ -18,7 +23,7 @@ Where it sits is its container's business. This is the pill and what is in it.
 -}
 
 import Html exposing (Html, button, div, text)
-import Html.Attributes exposing (attribute, class, type_)
+import Html.Attributes exposing (attribute, class, tabindex, type_)
 import Html.Events exposing (onClick)
 import Ui.TestId as TestId
 
@@ -62,20 +67,36 @@ toHtmlOnSurface =
 
 view : String -> { label : String, options : List (Option msg) } -> Html msg
 view extraClass config =
+    let
+        -- The chosen option is the tab stop; the first one while none is.
+        noneChosen =
+            List.all (\(Option option_) -> not option_.chosen) config.options
+
+        tabStop index (Option option_) =
+            option_.chosen || (noneChosen && index == 0)
+    in
     div
         [ class ("ui-mode-switch" ++ extraClass)
         , attribute "role" "radiogroup"
         , attribute "aria-label" config.label
+        , attribute "data-ui-mode-switch" ""
         ]
-        (List.map viewOption config.options)
+        (List.indexedMap (\index option_ -> viewOption (tabStop index option_) option_) config.options)
 
 
-viewOption : Option msg -> Html msg
-viewOption (Option config) =
+viewOption : Bool -> Option msg -> Html msg
+viewOption isTabStop (Option config) =
     button
         ([ type_ "button"
          , class "ui-mode-switch__option"
          , attribute "role" "radio"
+         , tabindex
+            (if isTabStop then
+                0
+
+             else
+                -1
+            )
          , attribute "aria-checked"
             (if config.chosen then
                 "true"

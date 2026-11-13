@@ -20,6 +20,7 @@ const registerUiThemePorts = require('../../packages/elm-ui/js/theme')
 require('../../packages/elm-ui/js/ui-dialog')
 require('../../packages/elm-ui/js/tooltip')
 require('../../packages/elm-ui/js/menu-fit')
+require('../../packages/elm-ui/js/mode-switch')
 require('../../packages/elm-ui/js/form-errors')
 
 const program = require('./elm/Registry.elm')
