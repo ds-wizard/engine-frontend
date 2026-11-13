@@ -460,7 +460,9 @@ update appState cfg msg model =
                 )
 
         SetViewPrivate private ->
-            plain { model | viewPrivate = private } Cmd.none
+            -- An arrow key selects the other tab; focus goes with it.
+            plain { model | viewPrivate = private }
+                (Tabs.focusTab (cfg.wrapMsg Noop) tabsId (tabKey private))
 
         SetViewResolved resolved ->
             { seed = appState.seed, model = model, cmd = Cmd.none, event = Nothing, outcome = Just (ViewResolved resolved) }
@@ -614,12 +616,7 @@ viewTabs appState cfg model =
 
         tab private label =
             Tabs.tab
-                { id =
-                    if private then
-                        "private"
-
-                    else
-                        "public"
+                { id = tabKey private
                 , label = label
                 , onSelect = SetViewPrivate private
                 }
@@ -629,12 +626,7 @@ viewTabs appState cfg model =
         [ Tabs.toHtmlWithTabIds identity
             { id = tabsId
             , label = gettext "Comments and editor notes" appState.locale
-            , active =
-                if model.viewPrivate then
-                    "private"
-
-                else
-                    "public"
+            , active = tabKey model.viewPrivate
             , full = True
             , tabs =
                 [ tab False (gettext "Comments" appState.locale)
@@ -907,6 +899,15 @@ viewThreadHeader appState cfg model thread assigned =
 
 {-| The tabs, and the panel under them that they control.
 -}
+tabKey : Bool -> String
+tabKey private =
+    if private then
+        "private"
+
+    else
+        "public"
+
+
 tabsId : String
 tabsId =
     "questionnaire-comments"
