@@ -205,7 +205,7 @@ type alias Model =
     -- opens on. Cleared as soon as it is used: it says why this navigation
     -- happened, not anything lasting about the entity.
     , followingWarning : Maybe String
-    , curlImport : Maybe { uuid : String, curl : String }
+    , curlImport : Maybe { uuid : String, curl : String, submitted : Bool }
 
     -- The last event sent for each entity, so the next one can be squashed onto
     -- it, and the debounce that holds it back while typing continues.
@@ -1087,7 +1087,7 @@ update cfg appState msg model =
             )
 
         OpenCurlImport integrationUuid ->
-            quiet { model | curlImport = Just { uuid = integrationUuid, curl = "" } }
+            quiet { model | curlImport = Just { uuid = integrationUuid, curl = "", submitted = False } }
 
         SetCurlString curl ->
             quiet { model | curlImport = Maybe.map (\state -> { state | curl = curl }) model.curlImport }
@@ -1101,32 +1101,42 @@ update cfg appState msg model =
                     let
                         parsed =
                             CurlUtils.parseCurl state.curl
-
-                        withBody =
-                            if String.isEmpty parsed.body then
-                                identity
-
-                            else
-                                setRequestBody (Just parsed.body)
                     in
-                    update cfg
-                        appState
-                        (EventMsg False
-                            Nothing
-                            (parentOf state.uuid model)
-                            (Just state.uuid)
-                            (EditIntegrationEvent
-                                (EditIntegrationApiEvent
-                                    (EditIntegrationApiEventData.init
-                                        |> setRequestMethod parsed.method
-                                        |> setRequestUrl parsed.url
-                                        |> setRequestHeaders (List.map KeyValuePair.fromTuple parsed.headers)
-                                        |> withBody
+                    if String.isEmpty parsed.url then
+                        -- Nothing to import: an empty command, or one without
+                        -- an address, would clear the request instead.
+                        plain
+                            ( { model | curlImport = Just { state | submitted = True } }
+                            , Dom.focus ("#" ++ curlFieldId)
+                            )
+
+                    else
+                        let
+                            withBody =
+                                if String.isEmpty parsed.body then
+                                    identity
+
+                                else
+                                    setRequestBody (Just parsed.body)
+                        in
+                        update cfg
+                            appState
+                            (EventMsg False
+                                Nothing
+                                (parentOf state.uuid model)
+                                (Just state.uuid)
+                                (EditIntegrationEvent
+                                    (EditIntegrationApiEvent
+                                        (EditIntegrationApiEventData.init
+                                            |> setRequestMethod parsed.method
+                                            |> setRequestUrl parsed.url
+                                            |> setRequestHeaders (List.map KeyValuePair.fromTuple parsed.headers)
+                                            |> withBody
+                                        )
                                     )
                                 )
                             )
-                        )
-                        { model | curlImport = Nothing }
+                            { model | curlImport = Nothing }
 
                 Nothing ->
                     quiet model
@@ -2094,12 +2104,30 @@ viewPublishModal appState model editorContext =
         |> Modal.toHtml
 
 
+curlFieldId : String
+curlFieldId =
+    "km-editor-curl"
+
+
 {-| A request written as a cURL command, which is how an API's own
 documentation usually gives one. What is parsed out of it replaces the method,
 the URL, the headers and — when there is one — the body.
 -}
 viewCurlImportModal : AppState -> Model -> Html Msg
 viewCurlImportModal appState model =
+    let
+        curlError =
+            case model.curlImport of
+                Just state ->
+                    if state.submitted && String.isEmpty (CurlUtils.parseCurl state.curl).url then
+                        Just (gettext "Paste a cURL command with the request's address." appState.locale)
+
+                    else
+                        Nothing
+
+                Nothing ->
+                    Nothing
+    in
     Modal.plain
         { title = gettext "Import from cURL" appState.locale
         , open = Maybe.isJust model.curlImport
@@ -2107,12 +2135,13 @@ viewCurlImportModal appState model =
         , body =
             [ Field.toHtml
                 (Field.textarea
-                    { id = "km-editor-curl"
+                    { id = curlFieldId
                     , label = gettext "cURL command" appState.locale
                     , value = Maybe.unwrap "" .curl model.curlImport
                     , onInput = SetCurlString
                     }
                     |> Field.withHint (gettext "Paste the command here. The method, the address, the headers and the body are read out of it." appState.locale)
+                    |> Field.withError curlError
                 )
             ]
         }
